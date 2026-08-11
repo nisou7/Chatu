@@ -28,7 +28,7 @@
     --wallpaper-tint-2:rgba(47,230,217,0.08);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;}
+  html,body{height:100%;overflow-x:hidden;overscroll-behavior:none;}
   body{
     font-family:'Tajawal',sans-serif;
     background:var(--bg-deep);
@@ -37,6 +37,7 @@
     height:calc(var(--vh, 1vh) * 100);
     height:100dvh;
     overflow:hidden;
+    overscroll-behavior:none;
     position:relative;
     transition:background .25s, color .25s;
   }
@@ -205,7 +206,7 @@
 
   .section-label{padding:4px 18px 8px;font-size:12.5px;color:var(--text-3);font-weight:700;letter-spacing:.3px;flex-shrink:0;}
 
-  .contact-list{flex:1;overflow-y:auto;padding-bottom:12px;}
+  .contact-list{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:12px;}
   .contact-row{display:flex;align-items:center;gap:13px;padding:11px 18px;cursor:pointer;transition:background .15s;position:relative;}
   .contact-row:hover{background:var(--card);}
   .contact-row .avatar-circle{width:52px;height:52px;font-size:18px;}
@@ -225,9 +226,33 @@
   .empty-state svg{width:52px;height:52px;opacity:.4;margin-bottom:6px;}
 
   .bottom-nav{display:flex;flex-shrink:0;border-top:1px solid var(--card-border);background:var(--card);padding-bottom:env(safe-area-inset-bottom);}
-  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 8px;color:var(--text-3);cursor:pointer;transition:color .15s;border:none;background:none;font-family:inherit;font-size:11px;}
+  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 8px;color:var(--text-3);cursor:pointer;transition:color .15s;border:none;background:none;font-family:inherit;font-size:11px;position:relative;}
   .nav-item svg{width:22px;height:22px;}
   .nav-item.active{color:var(--violet-2);}
+  .nav-icon-wrap{position:relative;display:inline-flex;}
+  .nav-badge{position:absolute;top:-6px;left:-10px;background:var(--coral);color:#fff;font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px var(--card);}
+  /* ===== call log message bubble (inside chat) ===== */
+  .call-msg{display:flex;align-items:center;gap:8px;padding:2px 2px;min-width:150px;}
+  .call-msg-ic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .call-msg-ic svg{width:16px;height:16px;}
+  .call-msg-ic.answered{background:rgba(47,217,126,0.18);color:var(--green);}
+  .call-msg-ic.missed{background:rgba(255,107,122,0.18);color:var(--coral);}
+  .call-msg-text{display:flex;flex-direction:column;gap:1px;}
+  .call-msg-text .t1{font-size:13.5px;font-weight:700;}
+  .call-msg-text .t2{font-size:11.5px;color:var(--text-2);}
+  /* ===== calls tab list ===== */
+  .call-row{display:flex;align-items:center;gap:12px;padding:10px 18px;cursor:pointer;}
+  .call-row:active{background:var(--card-2);}
+  .call-info{flex:1;min-width:0;}
+  .call-info .cname{font-family:'Cairo',sans-serif;font-weight:700;font-size:14.5px;}
+  .call-info .cmeta{display:flex;align-items:center;gap:5px;font-size:12.5px;margin-top:2px;}
+  .call-info .cmeta svg{width:13px;height:13px;}
+  .call-info .cmeta.answered{color:var(--text-2);}
+  .call-info .cmeta.missed{color:var(--coral);}
+  .call-time-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  .call-time-col .ctime{font-size:11.5px;color:var(--text-3);}
+  .call-back-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--card-2);color:var(--violet-2);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .call-back-btn svg{width:16px;height:16px;}
 
   /* --- chat view --- */
   #view-chat .app-shell{background:var(--bg-deep);}
@@ -240,7 +265,7 @@
   .chat-header-info p{font-size:12px;color:var(--text-3);margin-top:1px;}
   .chat-header-actions{display:flex;gap:2px;}
 
-  .chat-area{flex:1;overflow-y:auto;padding:16px 14px 10px;display:flex;flex-direction:column;gap:2px;background:
+  .chat-area{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px 14px 10px;display:flex;flex-direction:column;gap:2px;background:
       radial-gradient(120% 60% at 20% 0%, var(--wallpaper-tint-1), transparent 60%),
       radial-gradient(120% 60% at 85% 100%, var(--wallpaper-tint-2), transparent 60%),
       var(--bg-deep);
@@ -677,9 +702,46 @@
     <div class="contact-list" id="contactList"></div>
 
     <div class="bottom-nav">
-      <button class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.3 8L4 21l1.5-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg>الدردشات</button>
+      <button class="nav-item active" id="navChatsBtn" onclick="goTo('chatlist')">
+        <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.3 8L4 21l1.5-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg><span class="nav-badge hidden" id="navMsgBadge">0</span></span>
+        الدردشات</button>
       <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>الحالات</button>
-      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg>المكالمات</button>
+      <button class="nav-item" id="navCallsBtn" onclick="goTo('calls')">
+        <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><span class="nav-badge hidden" id="navCallBadge">0</span></span>
+        المكالمات</button>
+      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>الإعدادات</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     3-B) CALLS VIEW (call history / log)
+========================================================= -->
+<div id="view-calls" class="hidden">
+  <div class="app-shell">
+    <div class="topbar">
+      <h1>المكالمات</h1>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="toggleThemeMode()" title="تبديل الوضع الليلي/النهاري">
+          <svg id="modeIconCalls" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        </button>
+        <button class="avatar-btn" onclick="openAppSettings()" title="الملف الشخصي والإعدادات">
+          <div class="avatar-circle" id="ownAvatarCalls" style="width:100%;height:100%;font-size:14px;"></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="section-label">سجل المكالمات</div>
+    <div class="contact-list" id="callList"></div>
+
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="goTo('chatlist')">
+        <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.3 8L4 21l1.5-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg><span class="nav-badge hidden" id="navMsgBadge2">0</span></span>
+        الدردشات</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>الحالات</button>
+      <button class="nav-item active" onclick="goTo('calls')">
+        <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><span class="nav-badge hidden" id="navCallBadge2">0</span></span>
+        المكالمات</button>
       <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>الإعدادات</button>
     </div>
   </div>
@@ -1021,6 +1083,8 @@ const state = {
   activeChatId: null,
   contacts: [],
   contactMeta: {}, // uid -> {muted,blocked,hideSeen,theme,hidden}
+  callEntries: [],
+  callsLastOpened: 0,
   notifications: []
 };
 
@@ -1101,6 +1165,7 @@ function startUsersListener(){
       })
       .filter(c => !getMeta(c.uid).hidden);
     attachPreviewListeners();
+    attachCallLogListeners();
     renderContactList(window.__currentFilter);
     if(state.activeChatId){
       const c = activeContact();
@@ -1121,9 +1186,10 @@ function attachPreviewListeners(){
         const m = val[key];
         const isNewIncoming = c._notifiedInit && m.from !== state.currentUser.uid &&
           (!c.lastMessage || c.lastMessage.time !== formatTime(m.time) || c.lastMessage.text !== (m.text||m.fileName||''));
-        c.lastMessage = { text: m.type==='image' ? '📷 صورة' : (m.type==='file' ? '📎 '+(m.fileName||'ملف') : m.text), time: formatTime(m.time), from: m.from===state.currentUser.uid ? 'me' : 'them' };
+        c.lastMessage = { text: m.type==='call' ? callLabel({callKind:m.callKind,callStatus:m.callStatus,duration:m.duration}).title : (m.type==='image' ? '📷 صورة' : (m.type==='file' ? '📎 '+(m.fileName||'ملف') : m.text)), time: formatTime(m.time), from: m.from===state.currentUser.uid ? 'me' : 'them' };
         if(isNewIncoming && state.activeChatId !== c.id){
           pushNotification(`رسالة جديدة من ${c.name}`);
+          c.unread = (c.unread||0) + 1;
         }
         c._notifiedInit = true;
       } else {
@@ -1131,9 +1197,112 @@ function attachPreviewListeners(){
         c._notifiedInit = true;
       }
       renderContactList(window.__currentFilter);
+      updateNavBadges();
     });
     previewRefs.push(ref);
   });
+}
+
+function updateNavBadges(){
+  const msgTotal = state.contacts.reduce((sum,c)=> sum + (c.unread||0), 0);
+  ['navMsgBadge','navMsgBadge2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = msgTotal>99 ? '99+' : msgTotal;
+    el.classList.toggle('hidden', msgTotal<=0);
+  });
+  const missedTotal = (state.callEntries||[]).filter(e=>!e.fromMe && (e.status==='missed'||e.status==='declined') && (e.time||0) > (state.callsLastOpened||0)).length;
+  ['navCallBadge','navCallBadge2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = missedTotal>99 ? '99+' : missedTotal;
+    el.classList.toggle('hidden', missedTotal<=0);
+  });
+}
+
+/* ============================================================
+   CALL HISTORY (aggregated from 'call'-type chat messages)
+============================================================ */
+let callLogRefs = [];
+function attachCallLogListeners(){
+  callLogRefs.forEach(r=>r.off());
+  callLogRefs = [];
+  state.contacts.forEach(c=>{
+    const ref = db.ref('chats/'+chatIdFor(c.uid)+'/messages').orderByChild('time').limitToLast(40);
+    ref.on('value', snap=>{
+      const val = snap.val() || {};
+      c._callEntries = Object.values(val)
+        .filter(m=>m.type==='call')
+        .map(m=>({
+          contactId: c.id, contactName: c.name, photoURL: c.photoURL,
+          kind: m.callKind || 'audio', status: m.callStatus || 'missed',
+          duration: m.duration || 0, time: m.time || 0,
+          fromMe: m.from === state.currentUser.uid
+        }));
+      rebuildCallLog();
+    });
+    callLogRefs.push(ref);
+  });
+  if(state.contacts.length === 0) rebuildCallLog();
+}
+
+function rebuildCallLog(){
+  let all = [];
+  state.contacts.forEach(c=>{ if(c._callEntries) all = all.concat(c._callEntries); });
+  all.sort((a,b)=>(b.time||0)-(a.time||0));
+  state.callEntries = all;
+  renderCallList();
+  updateNavBadges();
+}
+
+function openCallsTab(){
+  state.callsLastOpened = Date.now();
+  renderCallList();
+  updateNavBadges();
+}
+
+function renderCallList(){
+  const wrap = document.getElementById('callList');
+  if(!wrap) return;
+  const list = state.callEntries || [];
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><div>لا توجد مكالمات بعد</div></div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(e=>{
+    const c = findContact(e.contactId);
+    const name = c ? c.name : e.contactName;
+    const photoURL = c ? c.photoURL : e.photoURL;
+    const avatarInner = photoURL ? `<img src="${photoURL}" alt="">` : initialOf(name);
+    const answered = e.status === 'answered';
+    const dirLabel = e.fromMe ? 'صادرة' : (answered ? 'واردة' : 'واردة');
+    const kindLabel = e.kind === 'video' ? 'فيديو' : 'صوتية';
+    const metaText = answered ? `${dirLabel} · ${kindLabel} · ${formatDuration(e.duration)}` : `${dirLabel} · ${kindLabel} · ${e.status==='declined' ? 'مرفوضة' : 'لم يتم الرد'}`;
+    const arrowIcon = answered
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M9 7h8v8"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M17 7L7 17M7 9V17H15"/></svg>`;
+    return `
+    <div class="call-row" onclick="openChat('${e.contactId}')">
+      <div class="avatar-circle" style="width:48px;height:48px;font-size:17px;background:${photoURL?'transparent':colorFor(name)};">${avatarInner}</div>
+      <div class="call-info">
+        <div class="cname">${escapeHtml(name)}</div>
+        <div class="cmeta ${answered?'answered':'missed'}">${arrowIcon}<span>${metaText}</span></div>
+      </div>
+      <div class="call-time-col">
+        <span class="ctime">${formatTime(e.time)}</span>
+        <button class="call-back-btn" onclick="event.stopPropagation(); callBack('${e.contactId}','${e.kind}')" title="اتصال">
+          ${e.kind==='video'
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg>'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function callBack(contactId, kind){
+  state.activeChatId = contactId;
+  startCall(kind === 'video' ? 'video' : 'audio');
 }
 
 /* ============================================================
@@ -1144,11 +1313,13 @@ function goTo(view){
   document.getElementById('view-login').classList.add('hidden');
   document.getElementById('view-signup').classList.add('hidden');
   document.getElementById('view-chatlist').classList.add('hidden');
+  document.getElementById('view-calls').classList.add('hidden');
   document.getElementById('view-chat').classList.add('hidden');
   closeAllOverlays();
   if(view==='login') document.getElementById('view-login').classList.remove('hidden');
   if(view==='signup') document.getElementById('view-signup').classList.remove('hidden');
   if(view==='chatlist'){ document.getElementById('view-chatlist').classList.remove('hidden'); renderContactList(); renderOwnAvatar(); }
+  if(view==='calls'){ document.getElementById('view-calls').classList.remove('hidden'); renderOwnAvatar(); openCallsTab(); }
   if(view==='chat') document.getElementById('view-chat').classList.remove('hidden');
 }
 
@@ -1374,7 +1545,9 @@ auth.onAuthStateChanged(user=>{
     if(connectedRef){ connectedRef.off(); connectedRef = null; }
     if(incomingCallsRef){ incomingCallsRef.off(); incomingCallsRef = null; }
     previewRefs.forEach(r=>r.off()); previewRefs = [];
+    callLogRefs.forEach(r=>r.off()); callLogRefs = [];
     state.contacts = [];
+    state.callEntries = [];
     state.notifications = [];
     goTo('login');
   }
@@ -1386,7 +1559,7 @@ auth.onAuthStateChanged(user=>{
 function renderOwnAvatar(){
   const photo = state.currentUser && state.currentUser.photoURL;
   const html = photo ? `<img src="${photo}" alt="">` : `<span>${initialOf(state.ownName)}</span>`;
-  ['ownAvatar','ownAvatarStory','settingsAvatar'].forEach(id=>{
+  ['ownAvatar','ownAvatarStory','settingsAvatar','ownAvatarCalls'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.style.background = photo ? 'transparent' : colorFor(state.ownName);
@@ -1422,6 +1595,7 @@ function renderContactList(filter){
         </div>
         <div class="contact-bottom-line">
           <span class="contact-preview">${c.muted?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M23 9l-6 6M17 9l6 6"/></svg>':''}${escapeHtml(preview)}</span>
+          ${c.unread>0 ? `<span class="unread-badge">${c.unread>99?'99+':c.unread}</span>` : ''}
         </div>
       </div>
     </div>`;
@@ -1439,6 +1613,9 @@ function openChat(id){
   state.activeChatId = id;
   const c = findContact(id);
   if(!c) return;
+  c.unread = 0;
+  updateNavBadges();
+  renderContactList(window.__currentFilter);
 
   const avatarInner = c.photoURL ? `<img src="${c.photoURL}" alt="">` : initialOf(c.name);
   document.getElementById('chatAvatar').style.background = c.photoURL ? 'transparent' : colorFor(c.name);
@@ -1477,6 +1654,9 @@ function openChat(id){
         url: m.url || null,
         fileName: m.fileName || null,
         fileSize: m.fileSize || null,
+        callKind: m.callKind || null,
+        callStatus: m.callStatus || null,
+        duration: m.duration || 0,
         time: formatTime(m.time),
         read: true
       }));
@@ -1522,7 +1702,28 @@ function formatFileSize(bytes){
   return (bytes/(1024*1024)).toFixed(1) + ' MB';
 }
 
+function formatDuration(sec){
+  sec = sec||0;
+  const m = Math.floor(sec/60), s = sec%60;
+  return `${m}:${s<10?'0':''}${s}`;
+}
+function callLabel(m){
+  const kindLabel = m.callKind==='video' ? 'فيديو' : 'صوتية';
+  if(m.callStatus === 'answered') return { title: `مكالمة ${kindLabel}`, sub: `المدة ${formatDuration(m.duration)}`, cls:'answered' };
+  if(m.callStatus === 'declined') return { title: `مكالمة ${kindLabel}`, sub: 'تم رفض المكالمة', cls:'missed' };
+  return { title: `مكالمة ${kindLabel}`, sub: 'لم يتم الرد', cls:'missed' };
+}
 function messageBodyHtml(m){
+  if(m.type === 'call'){
+    const info = callLabel(m);
+    const icon = info.cls === 'answered'
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="position:absolute;width:10px;height:10px;top:9px;left:9px;"><path d="M4 20L20 4M8 4H4v4"/></svg>`;
+    return `<div class="call-msg">
+      <div class="call-msg-ic ${info.cls}" style="position:relative;">${icon}</div>
+      <div class="call-msg-text"><span class="t1">${info.title}</span><span class="t2">${info.sub}</span></div>
+    </div>`;
+  }
   if(m.type === 'image' && m.url){
     return `<img class="msg-img" src="${m.url}" alt="صورة" onclick="openImgViewer('${m.url}')">`;
   }
@@ -1895,6 +2096,23 @@ let callerCandidatesRef = null;
 let calleeCandidatesRef = null;
 let incomingCallsRef = null;
 let isCallCaller = false;
+let callAnswered = false;
+let callStartTs = null;
+let ringTimeoutId = null;
+let callTargetContact = null;
+let callTargetType = null;
+
+function logCallMessage(contact, kind, status, durationSec){
+  if(!contact || !contact.uid) return;
+  db.ref('chats/'+chatIdFor(contact.uid)+'/messages').push({
+    from: state.currentUser.uid,
+    type: 'call',
+    callKind: kind,
+    callStatus: status,
+    duration: durationSec || 0,
+    time: firebase.database.ServerValue.TIMESTAMP
+  });
+}
 
 function listenIncomingCalls(){
   if(incomingCallsRef) incomingCallsRef.off();
@@ -1932,8 +2150,16 @@ function startCall(type){
   if(!c || c.blocked){ showToast('لا يمكن إجراء مكالمة في هذه المحادثة'); return; }
   if(currentCallId){ showToast('لديك مكالمة جارية بالفعل'); return; }
   isCallCaller = true;
+  callAnswered = false;
+  callStartTs = null;
+  callTargetContact = c;
+  callTargetType = type;
   const callId = chatIdFor(c.uid) + '_' + Date.now();
   currentCallId = callId;
+  if(ringTimeoutId) clearTimeout(ringTimeoutId);
+  ringTimeoutId = setTimeout(()=>{
+    if(!callAnswered && currentCallId === callId){ db.ref('calls/'+callId).update({ status:'ended' }); }
+  }, 40000);
 
   document.getElementById('callAvatar').style.background = colorFor(c.name);
   document.getElementById('callAvatar').textContent = initialOf(c.name);
@@ -1970,9 +2196,20 @@ function startCall(type){
         if(v.status==='accepted' && v.answer && pc && !pc.currentRemoteDescription){
           pc.setRemoteDescription(new RTCSessionDescription(v.answer));
           document.getElementById('callStatus').textContent = type==='video' ? 'مكالمة فيديو جارية' : 'مكالمة صوتية جارية';
+          callAnswered = true;
+          callStartTs = Date.now();
+          if(ringTimeoutId){ clearTimeout(ringTimeoutId); ringTimeoutId = null; }
         }
-        if(v.status==='declined'){ showToast('تم رفض المكالمة'); closeCallUi(); }
-        if(v.status==='ended'){ closeCallUi(); }
+        if(v.status==='declined'){
+          showToast('تم رفض المكالمة');
+          logCallMessage(c, type, 'declined', 0);
+          closeCallUi();
+        }
+        if(v.status==='ended'){
+          const dur = callAnswered && callStartTs ? Math.round((Date.now()-callStartTs)/1000) : 0;
+          logCallMessage(c, type, callAnswered ? 'answered' : 'missed', dur);
+          closeCallUi();
+        }
       });
       calleeCandidatesRef = db.ref('calls/'+callId+'/calleeCandidates');
       calleeCandidatesRef.on('child_added', snap=>{
@@ -2029,6 +2266,12 @@ function endCall(){
 }
 
 function closeCallUi(){
+  if(ringTimeoutId){ clearTimeout(ringTimeoutId); ringTimeoutId = null; }
+  isCallCaller = false;
+  callAnswered = false;
+  callStartTs = null;
+  callTargetContact = null;
+  callTargetType = null;
   document.getElementById('callOverlay').classList.remove('show');
   const lv = document.getElementById('localVideo'), rv = document.getElementById('remoteVideo');
   lv.classList.add('hidden'); rv.classList.add('hidden');
