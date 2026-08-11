@@ -405,8 +405,7 @@
           </form>
           <div class="divider">أو تابع عبر</div>
           <div class="socials">
-            <button class="soc-btn"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.7 6.2 2.7 11.5S6.9 21 12 21c6.9 0 9.3-4.8 9.3-7.3 0-.5 0-.9-.1-1.3H12z"/></svg>Google</button>
-            <button class="soc-btn"><svg viewBox="0 0 24 24"><path fill="#1877F2" d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>Facebook</button>
+            <button class="soc-btn" type="button" onclick="loginWithGoogle()"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.7 6.2 2.7 11.5S6.9 21 12 21c6.9 0 9.3-4.8 9.3-7.3 0-.5 0-.9-.1-1.3H12z"/></svg>Google</button>
           </div>
           <p class="switch-link">ليس لديك حساب؟ <a onclick="goTo('signup')">إنشاء حساب جديد</a></p>
         </div>
@@ -450,7 +449,7 @@
             <div class="field">
               <label for="fullname">الاسم الكامل</label>
               <div class="input-wrap">
-                <input type="text" id="fullname" placeholder="سحابة" autocomplete="name">
+                <input type="text" id="fullname" placeholder="مثال: أحمد محمد" autocomplete="name">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
               </div>
             </div>
@@ -489,8 +488,7 @@
           </form>
           <div class="divider">أو تابع عبر</div>
           <div class="socials">
-            <button class="soc-btn"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.7 6.2 2.7 11.5S6.9 21 12 21c6.9 0 9.3-4.8 9.3-7.3 0-.5 0-.9-.1-1.3H12z"/></svg>Google</button>
-            <button class="soc-btn"><svg viewBox="0 0 24 24"><path fill="#1877F2" d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>Facebook</button>
+            <button class="soc-btn" type="button" onclick="loginWithGoogle()"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.7 6.2 2.7 11.5S6.9 21 12 21c6.9 0 9.3-4.8 9.3-7.3 0-.5 0-.9-.1-1.3H12z"/></svg>Google</button>
           </div>
           <p class="switch-link">لديك حساب بالفعل؟ <a onclick="goTo('login')">تسجيل الدخول</a></p>
         </div>
@@ -524,9 +522,6 @@
         <div class="status-ring"><div class="avatar-circle" id="ownAvatarStory" style="width:100%;height:100%;font-size:16px;"></div><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></div></div>
         <span>حالتي</span>
       </div>
-      <div class="status-item"><div class="status-ring"><div class="avatar-circle" style="width:100%;height:100%;background:#ff6b7a;">ر</div></div><span>ريم</span></div>
-      <div class="status-item"><div class="status-ring seen"><div class="avatar-circle" style="width:100%;height:100%;background:#2a7de1;">خ</div></div><span>خالد</span></div>
-      <div class="status-item"><div class="status-ring"><div class="avatar-circle" style="width:100%;height:100%;background:#1fb8ad;">ي</div></div><span>ياسمين</span></div>
     </div>
 
     <div class="section-label">الرسائل</div>
@@ -722,7 +717,46 @@
 
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span id="toastText">تم</span></div>
 
+<!-- Firebase SDK (compat build) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <script>
+/* ============================================================
+   FIREBASE INIT
+============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBgaUZ4sHAkY1mnI3YGQoha-qs3bZKGbSw",
+  authDomain: "new-chat-8b2e5.firebaseapp.com",
+  databaseURL: "https://new-chat-8b2e5-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "new-chat-8b2e5",
+  storageBucket: "new-chat-8b2e5.firebasestorage.app",
+  messagingSenderId: "880806892151",
+  appId: "1:880806892151:web:81fccc064ec280a0dc6c72",
+  measurementId: "G-XJV10ZFSQB"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+/* Arabic messages for common Firebase Auth error codes */
+function authErrorAr(err){
+  const map = {
+    'auth/invalid-email': 'صيغة البريد الإلكتروني غير صحيحة',
+    'auth/user-not-found': 'لا يوجد حساب بهذا البريد الإلكتروني',
+    'auth/wrong-password': 'كلمة المرور غير صحيحة',
+    'auth/invalid-credential': 'بيانات الدخول غير صحيحة',
+    'auth/email-already-in-use': 'هذا البريد الإلكتروني مستخدم بالفعل',
+    'auth/weak-password': 'كلمة المرور ضعيفة جدًا (8 أحرف على الأقل)',
+    'auth/missing-password': 'الرجاء إدخال كلمة المرور',
+    'auth/too-many-requests': 'محاولات كثيرة، حاول لاحقًا',
+    'auth/popup-closed-by-user': 'تم إغلاق نافذة تسجيل الدخول',
+    'auth/network-request-failed': 'تعذر الاتصال بالشبكة'
+  };
+  return map[err.code] || 'حدث خطأ: ' + (err.message || 'غير معروف');
+}
+
 /* ============================================================
    STATE
 ============================================================ */
@@ -731,46 +765,102 @@ function colorFor(seed){ let h=0; for(const c of seed) h=(h*31+c.charCodeAt(0))>
 function initialOf(name){ return (name||'؟').trim().charAt(0) || '؟'; }
 
 const state = {
+  currentUser: null,
   ownName: 'أنت',
   onlineVisible: true,
   activeChatId: null,
-  contacts: [
-    { id:1, name:'سحابة', status:'متصل الآن', online:true, muted:false, blocked:false, hideSeen:false, theme:'default', unread:2,
-      messages:[
-        {from:'them', text:'هلا! كيفك اليوم؟ 😊', time:'10:02 ص'},
-        {from:'me', text:'الحمدلله تمام، وانت؟', time:'10:05 ص', read:true},
-        {from:'them', text:'بخير! شفت الصور اللي بعتها لك؟', time:'10:06 ص'},
-        {from:'them', text:'كانت رائعة جدًا 🔥', time:'10:06 ص'},
-      ]},
-    { id:2, name:'ريم', status:'آخر ظهور قبل 5 دقائق', online:false, muted:false, blocked:false, hideSeen:false, theme:'sunset', unread:0,
-      messages:[
-        {from:'them', text:'تمام، نتكلم بكرة الصبح', time:'أمس'},
-        {from:'me', text:'أوكي تمام 👍', time:'أمس', read:true},
-      ]},
-    { id:3, name:'خالد', status:'آخر ظهور اليوم 9:40 ص', online:false, muted:true, blocked:false, hideSeen:false, theme:'ocean', unread:0,
-      messages:[
-        {from:'them', text:'وصلتك الملفات؟', time:'9:12 ص'},
-        {from:'me', text:'إيوه وصلت، شكرًا', time:'9:40 ص', read:true},
-      ]},
-    { id:4, name:'ياسمين', status:'متصلة الآن', online:true, muted:false, blocked:false, hideSeen:false, theme:'royal', unread:5,
-      messages:[
-        {from:'them', text:'يلا نطلع بكرة؟ 🌤️', time:'8:55 ص'},
-      ]},
-    { id:5, name:'عمر', status:'آخر ظهور أمس 11:20 م', online:false, muted:false, blocked:false, hideSeen:false, theme:'forest', unread:0,
-      messages:[
-        {from:'me', text:'تمام متفقين', time:'أمس', read:true},
-        {from:'them', text:'👍', time:'أمس'},
-      ]},
-  ]
+  contacts: [],
+  contactMeta: {} // uid -> {muted,blocked,hideSeen,theme,hidden}
 };
+
+let usersRef = null;
+let activeMessagesRef = null;
+let previewRefs = [];
+
+function getMeta(uid){
+  if(!state.contactMeta[uid]) state.contactMeta[uid] = {muted:false, blocked:false, hideSeen:false, theme:'default', hidden:false};
+  return state.contactMeta[uid];
+}
 
 function findContact(id){ return state.contacts.find(c=>c.id===id); }
 function activeContact(){ return findContact(state.activeChatId); }
+
+function chatIdFor(otherUid){ return [state.currentUser.uid, otherUid].sort().join('_'); }
+
+function formatTime(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  let h = d.getHours(), m = d.getMinutes();
+  const period = h>=12 ? 'م' : 'ص';
+  h = h%12; if(h===0) h=12;
+  return `${h}:${m<10?'0':''}${m} ${period}`;
+}
+
+/* ============================================================
+   REAL USERS (Firebase Realtime Database) -> CONTACT LIST
+============================================================ */
+function startUsersListener(){
+  if(usersRef) usersRef.off();
+  usersRef = db.ref('users');
+  usersRef.on('value', snap=>{
+    const val = snap.val() || {};
+    const uid = state.currentUser.uid;
+    state.contacts = Object.keys(val)
+      .filter(k => k !== uid)
+      .map(k=>{
+        const u = val[k];
+        const meta = getMeta(k);
+        const existing = findContact(k);
+        return {
+          id: k,
+          uid: k,
+          name: u.name || (u.email ? u.email.split('@')[0] : 'مستخدم'),
+          status: u.online ? 'متصل الآن' : 'غير متصل',
+          online: !!u.online,
+          muted: meta.muted,
+          blocked: meta.blocked,
+          hideSeen: meta.hideSeen,
+          theme: meta.theme,
+          unread: 0,
+          lastMessage: existing ? existing.lastMessage : null,
+          messages: existing ? existing.messages : []
+        };
+      })
+      .filter(c => !getMeta(c.uid).hidden);
+    attachPreviewListeners();
+    renderContactList(window.__currentFilter);
+    if(state.activeChatId){
+      const c = activeContact();
+      if(c) document.getElementById('chatFriendStatus').textContent = c.blocked ? 'محظور' : (c.online ? 'متصل الآن' : c.status);
+    }
+  });
+}
+
+function attachPreviewListeners(){
+  previewRefs.forEach(r=>r.off());
+  previewRefs = [];
+  state.contacts.forEach(c=>{
+    const ref = db.ref('chats/'+chatIdFor(c.uid)+'/messages').orderByChild('time').limitToLast(1);
+    ref.on('value', snap=>{
+      const val = snap.val();
+      if(val){
+        const key = Object.keys(val)[0];
+        const m = val[key];
+        c.lastMessage = { text: m.text, time: formatTime(m.time), from: m.from===state.currentUser.uid ? 'me' : 'them' };
+      } else {
+        c.lastMessage = null;
+      }
+      renderContactList(window.__currentFilter);
+    });
+    previewRefs.push(ref);
+  });
+}
 
 /* ============================================================
    VIEW NAVIGATION
 ============================================================ */
 function goTo(view){
+  if(view !== 'chat' && activeMessagesRef){ activeMessagesRef.off(); activeMessagesRef = null; state.activeChatId = null; }
   document.getElementById('view-login').classList.add('hidden');
   document.getElementById('view-signup').classList.add('hidden');
   document.getElementById('view-chatlist').classList.add('hidden');
@@ -813,30 +903,97 @@ function checkStrength(){
 }
 
 function doLogin(){
-  // demo: any credentials proceed
-  goTo('chatlist');
-  showToast('تم تسجيل الدخول بنجاح');
+  const email = (document.getElementById('email').value || '').trim();
+  const pass = document.getElementById('pass').value;
+  if(!email || !pass){ showToast('الرجاء إدخال البريد الإلكتروني وكلمة المرور'); return; }
+  const btn = document.querySelector('#loginForm .btn-primary');
+  btn.disabled = true;
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(()=>{ showToast('تم تسجيل الدخول بنجاح'); })
+    .catch(err=>{ showToast(authErrorAr(err)); })
+    .finally(()=>{ btn.disabled = false; });
 }
 
 function doSignup(){
   const nameInput = document.getElementById('fullname');
-  const name = (nameInput.value || '').trim() || 'سحابة';
+  const name = (nameInput.value || '').trim();
+  const email = (document.getElementById('semail').value || '').trim();
   const pass = document.getElementById('spass').value;
   const pass2 = document.getElementById('spass2').value;
-  if(pass && pass2 && pass !== pass2){
-    showToast('كلمتا المرور غير متطابقتين');
-    return;
-  }
-  state.ownName = 'أنت';
-  // The friend that demonstrates the app is named after what was entered at signup
-  const demoFriend = findContact(1);
-  demoFriend.name = name;
-  demoFriend.status = 'متصل الآن';
-  demoFriend.online = true;
-  renderOwnAvatar();
-  openChat(1);
-  showToast('تم إنشاء الحساب بنجاح، أهلاً بك!');
+  const agreed = document.getElementById('agreeTerms').checked;
+
+  if(!name){ showToast('الرجاء إدخال اسمك'); return; }
+  if(!email){ showToast('الرجاء إدخال البريد الإلكتروني'); return; }
+  if(pass !== pass2){ showToast('كلمتا المرور غير متطابقتين'); return; }
+  if(!agreed){ showToast('يجب الموافقة على شروط الاستخدام'); return; }
+
+  const btn = document.querySelector('#signupForm .btn-primary');
+  btn.disabled = true;
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(cred=>{
+      return cred.user.updateProfile({displayName:name}).then(()=>
+        db.ref('users/'+cred.user.uid).set({
+          name, email, online:true,
+          createdAt: firebase.database.ServerValue.TIMESTAMP
+        })
+      );
+    })
+    .then(()=>{ showToast('تم إنشاء الحساب بنجاح، أهلاً بك!'); })
+    .catch(err=>{ showToast(authErrorAr(err)); })
+    .finally(()=>{ btn.disabled = false; });
 }
+
+function loginWithGoogle(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(result=>{
+      const user = result.user;
+      return db.ref('users/'+user.uid).once('value').then(snap=>{
+        if(!snap.exists()){
+          return db.ref('users/'+user.uid).set({
+            name: user.displayName || (user.email||'').split('@')[0] || 'مستخدم',
+            email: user.email || '', online:true,
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+          });
+        } else {
+          return db.ref('users/'+user.uid).update({online:true});
+        }
+      });
+    })
+    .then(()=>{ showToast('تم تسجيل الدخول بنجاح'); })
+    .catch(err=>{ showToast(authErrorAr(err)); });
+}
+
+let connectedRef = null;
+/* Auth state: keeps chat list bound to the real signed-in user */
+auth.onAuthStateChanged(user=>{
+  if(user){
+    state.currentUser = user;
+    state.ownName = user.displayName || (user.email||'').split('@')[0] || 'أنت';
+    const userStatusRef = db.ref('users/'+user.uid);
+    userStatusRef.update({ name: state.ownName, email: user.email || '' });
+
+    if(connectedRef) connectedRef.off();
+    connectedRef = db.ref('.info/connected');
+    connectedRef.on('value', snap=>{
+      if(snap.val() === false) return;
+      userStatusRef.onDisconnect().update({online:false}).then(()=>{
+        if(state.onlineVisible) userStatusRef.update({online:true});
+      });
+    });
+
+    startUsersListener();
+    renderOwnAvatar();
+    goTo('chatlist');
+  } else {
+    state.currentUser = null;
+    if(usersRef){ usersRef.off(); usersRef = null; }
+    if(connectedRef){ connectedRef.off(); connectedRef = null; }
+    previewRefs.forEach(r=>r.off()); previewRefs = [];
+    state.contacts = [];
+    goTo('login');
+  }
+});
 
 /* ============================================================
    CHAT LIST
@@ -852,17 +1009,19 @@ function renderOwnAvatar(){
 }
 
 function renderContactList(filter){
+  window.__currentFilter = filter;
   const wrap = document.getElementById('contactList');
   const list = state.contacts.filter(c => !filter || c.name.includes(filter));
   if(list.length === 0){
-    wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><div>لا توجد نتائج مطابقة</div></div>`;
+    const msg = filter ? 'لا توجد نتائج مطابقة' : 'لا يوجد مشتركون آخرون في التطبيق بعد';
+    wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><div>${msg}</div></div>`;
     return;
   }
   wrap.innerHTML = list.map(c=>{
-    const last = c.messages[c.messages.length-1];
+    const last = c.lastMessage;
     const preview = c.blocked ? 'تم حظر جهة الاتصال هذه' : (last ? (last.from==='me' ? 'أنت: '+last.text : last.text) : 'ابدأ المحادثة');
     return `
-    <div class="contact-row ${c.blocked?'blocked':''}" onclick="openChat(${c.id})">
+    <div class="contact-row ${c.blocked?'blocked':''}" onclick="openChat('${c.id}')">
       <div style="position:relative;">
         <div class="avatar-circle" style="width:52px;height:52px;font-size:18px;background:${colorFor(c.name)};">${initialOf(c.name)}</div>
         ${c.online && !c.blocked ? '<div class="online-dot"></div>' : ''}
@@ -874,7 +1033,6 @@ function renderContactList(filter){
         </div>
         <div class="contact-bottom-line">
           <span class="contact-preview">${c.muted?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M23 9l-6 6M17 9l6 6"/></svg>':''}${escapeHtml(preview)}</span>
-          ${c.unread>0 ? `<span class="unread-badge">${c.unread}</span>` : ''}
         </div>
       </div>
     </div>`;
@@ -891,7 +1049,7 @@ function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<
 function openChat(id){
   state.activeChatId = id;
   const c = findContact(id);
-  c.unread = 0;
+  if(!c) return;
 
   document.getElementById('chatAvatar').style.background = colorFor(c.name);
   document.getElementById('chatAvatar').textContent = initialOf(c.name);
@@ -910,7 +1068,21 @@ function openChat(id){
   updateBlockUi();
   markThemeActive(c.theme);
 
-  renderMessages();
+  if(activeMessagesRef) activeMessagesRef.off();
+  activeMessagesRef = db.ref('chats/'+chatIdFor(c.uid)+'/messages').orderByChild('time');
+  activeMessagesRef.on('value', snap=>{
+    const val = snap.val() || {};
+    c.messages = Object.values(val)
+      .sort((a,b)=>(a.time||0)-(b.time||0))
+      .map(m=>({
+        from: m.from === state.currentUser.uid ? 'me' : 'them',
+        text: m.text,
+        time: formatTime(m.time),
+        read: true
+      }));
+    if(state.activeChatId === id) renderMessages();
+  });
+
   goTo('chat');
 }
 
@@ -957,27 +1129,12 @@ function sendMessage(){
   const input = document.getElementById('msgInput');
   const text = input.value.trim();
   if(!text) return;
-  const readOn = document.getElementById('readReceiptsSwitch').checked;
-  c.messages.push({from:'me', text, time:nowTime(), read:false});
   input.value=''; autoGrow(input);
-  renderMessages();
-
-  // simulate friend typing + reply for a lively demo
-  setTimeout(()=>{
-    if(state.activeChatId !== c.id) return;
-    if(readOn){
-      const last = c.messages[c.messages.length-1];
-      if(last && last.from==='me') last.read = true;
-    }
-    showTyping();
-  }, 500);
-  setTimeout(()=>{
-    if(state.activeChatId !== c.id) return;
-    hideTyping();
-    const replies = ['تمام 👍','هه صح كلامك 😄','خبرني لما توصل','أوكي فهمت عليك','يا سلام! 🔥','تمام إن شاء الله'];
-    c.messages.push({from:'them', text: replies[Math.floor(Math.random()*replies.length)], time:nowTime()});
-    renderMessages();
-  }, 1900);
+  db.ref('chats/'+chatIdFor(c.uid)+'/messages').push({
+    from: state.currentUser.uid,
+    text,
+    time: firebase.database.ServerValue.TIMESTAMP
+  });
 }
 
 function showTyping(){
@@ -1022,6 +1179,7 @@ function toggleMute(fromSwitch){
   const c = activeContact(); if(!c) return;
   if(fromSwitch){ c.muted = document.getElementById('muteSwitch').checked; }
   else { c.muted = !c.muted; document.getElementById('muteSwitch').checked = c.muted; }
+  getMeta(c.uid).muted = c.muted;
   updateMuteQaLabel();
   showToast(c.muted ? `تم كتم إشعارات ${c.name}` : `تم إلغاء كتم ${c.name}`);
 }
@@ -1033,6 +1191,7 @@ function updateMuteQaLabel(){
 function setTheme(theme, el){
   const c = activeContact(); if(!c) return;
   c.theme = theme;
+  getMeta(c.uid).theme = theme;
   document.getElementById('chatShell').dataset.theme = theme;
   markThemeActive(theme);
   showToast('تم تغيير ثيم المحادثة');
@@ -1053,6 +1212,7 @@ function updateBlockUi(){
 function toggleBlock(){
   const c = activeContact(); if(!c) return;
   c.blocked = !c.blocked;
+  getMeta(c.uid).blocked = c.blocked;
   document.getElementById('chatFriendStatus').textContent = c.blocked ? 'محظور' : (c.online ? 'متصل الآن' : c.status);
   updateBlockUi();
   renderMessages();
@@ -1079,9 +1239,11 @@ function confirmAction(type){
   }
   if(type==='delete'){
     titleEl.textContent = 'حذف المحادثة';
-    textEl.textContent = `سيتم حذف جميع الرسائل مع ${c.name} نهائيًا. لا يمكن التراجع عن هذا الإجراء.`;
+    textEl.textContent = `سيتم حذف جميع الرسائل مع ${c.name} نهائيًا وإخفاء المحادثة من قائمتك. لا يمكن التراجع عن هذا الإجراء.`;
     okBtn.textContent = 'حذف';
     okBtn.onclick = ()=>{
+      db.ref('chats/'+chatIdFor(c.uid)).remove();
+      getMeta(c.uid).hidden = true;
       state.contacts = state.contacts.filter(x=>x.id!==c.id);
       closeConfirm(); closeAllOverlays();
       showToast('تم حذف المحادثة');
@@ -1093,8 +1255,8 @@ function confirmAction(type){
     textEl.textContent = `سيتم مسح جميع الرسائل مع ${c.name} مع الإبقاء على المحادثة في قائمتك.`;
     okBtn.textContent = 'مسح';
     okBtn.onclick = ()=>{
-      c.messages = [];
-      renderMessages(); closeConfirm();
+      db.ref('chats/'+chatIdFor(c.uid)+'/messages').remove();
+      closeConfirm();
       showToast('تم مسح المحادثة');
     };
   }
@@ -1119,13 +1281,13 @@ function updateOwnName(val){
 
 function toggleOnlineVisibility(checked){
   state.onlineVisible = checked;
+  if(state.currentUser){ db.ref('users/'+state.currentUser.uid).update({online: checked}); }
   showToast(checked ? 'يمكن لأصدقائك رؤية حالتك متصل الآن' : 'تم إخفاء حالة الاتصال الخاصة بك');
 }
 
 function renderBlockedList(){
   const blocked = state.contacts.filter(c=>c.blocked);
   const wrap = document.getElementById('blockedListWrap');
-  const hint = document.getElementById('noBlockedHint');
   if(blocked.length===0){
     wrap.innerHTML = `<p class="hint" id="noBlockedHint" style="padding:6px 2px 14px;">لا توجد جهات اتصال محظورة حاليًا.</p>`;
     return;
@@ -1136,19 +1298,22 @@ function renderBlockedList(){
         <div class="avatar-circle" style="width:34px;height:34px;font-size:13px;background:${colorFor(c.name)};">${initialOf(c.name)}</div>
         <div class="label">${escapeHtml(c.name)}</div>
       </div>
-      <button class="plain-btn" style="width:auto;padding:8px 16px;margin:0;font-size:12.5px;" onclick="unblockFromSettings(${c.id})">إلغاء الحظر</button>
+      <button class="plain-btn" style="width:auto;padding:8px 16px;margin:0;font-size:12.5px;" onclick="unblockFromSettings('${c.id}')">إلغاء الحظر</button>
     </div>`).join('');
 }
 function unblockFromSettings(id){
   const c = findContact(id);
+  if(!c) return;
   c.blocked = false;
+  getMeta(c.uid).blocked = false;
   renderBlockedList();
   showToast(`تم إلغاء حظر ${c.name}`);
 }
 
 function logout(){
+  if(state.currentUser){ db.ref('users/'+state.currentUser.uid).update({online:false}); }
   closeAllOverlays();
-  goTo('login');
+  auth.signOut();
   showToast('تم تسجيل الخروج');
 }
 
