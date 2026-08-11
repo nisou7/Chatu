@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>AN chat v4.0 — دردشة آمنة</title>
+<title>AN chat — دردشة آمنة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -514,64 +514,6 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
 }
 
 </style>
-
-<style id="an-v4-responsive-style">
-/* AN chat v4.0 — mobile-first polish */
-@media (max-width:900px){
-  html,body{width:100%;max-width:100%;margin:0;padding:0;}
-  body{display:block!important;background:var(--bg-panel)!important;}
-  #view-chatlist,#view-chat,#view-calls,#view-login,#view-signup{width:100vw!important;max-width:none!important;}
-  .app-shell{width:100vw!important;max-width:none!important;margin:0!important;border-radius:0!important;box-shadow:none!important;}
-  .topbar{padding:12px 14px 10px;}
-  .topbar-actions{gap:5px;overflow-x:auto;scrollbar-width:none;}
-  .topbar-actions::-webkit-scrollbar{display:none;}
-  .icon-btn,.avatar-btn{width:38px;height:38px;min-width:38px;}
-  .searchbar{margin:4px 12px 10px;}
-  .status-strip{padding-inline:12px;}
-  .v3-quick-bar{padding-inline:12px;overflow-x:auto;scrollbar-width:none;}
-  .contact-row{padding-inline:14px;}
-  .bottom-nav{width:100%;}
-  .side-panel{width:100vw!important;max-width:none!important;right:0!important;left:auto!important;border-radius:0!important;}
-  .overlay-bg{width:100vw!important;}
-  .chat-header{padding-inline:10px!important;}
-  .chat-header-actions{gap:3px!important;}
-  .chat-header-actions .icon-btn{width:34px;height:34px;min-width:34px;}
-  .chat-input-bar{padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;gap:5px!important;}
-  .chat-input-bar textarea{min-width:0!important;}
-}
-@media (min-width:901px){
-  .app-shell{max-width:620px;}
-}
-.v4-ai-row{background:linear-gradient(135deg,rgba(124,92,255,.13),rgba(47,230,217,.08));border:1px solid rgba(124,92,255,.16);margin:4px 10px;border-radius:16px;}
-.v4-ai-row .avatar-circle{background:linear-gradient(135deg,#7c5cff,#2fe6d9)!important;box-shadow:0 6px 22px rgba(124,92,255,.22);}
-.v4-ai-badge{font-size:10px;color:var(--cyan);font-weight:800;background:rgba(47,230,217,.10);padding:2px 7px;border-radius:99px;}
-.v4-ai-header{background:linear-gradient(135deg,rgba(124,92,255,.16),rgba(47,230,217,.08));}
-.v4-ai-header .avatar-circle{box-shadow:0 0 0 2px rgba(124,92,255,.2),0 8px 25px rgba(124,92,255,.22);}
-.v4-ai-bubble{max-width:min(86%,520px)!important;background:linear-gradient(135deg,rgba(124,92,255,.13),rgba(47,230,217,.08))!important;border:1px solid rgba(124,92,255,.12);}
-.v4-ai-bubble .ai-name{font-size:11px;color:var(--violet-2);font-weight:800;margin-bottom:4px;}
-.v4-ai-typing{display:inline-flex;gap:4px;align-items:center;padding:10px 14px!important;}
-.v4-ai-typing i{width:6px;height:6px;border-radius:50%;background:var(--violet-2);animation:v4dot 1s infinite;}
-.v4-ai-typing i:nth-child(2){animation-delay:.15s}.v4-ai-typing i:nth-child(3){animation-delay:.3s}
-@keyframes v4dot{0%,70%,100%{transform:translateY(0);opacity:.45}35%{transform:translateY(-4px);opacity:1}}
-.v4-ai-composer{display:flex;gap:6px;align-items:center;padding:7px 9px;background:var(--card);border-top:1px solid var(--card-border);}
-.v4-ai-composer .v4-ai-suggest{border:0;background:var(--card-2);color:var(--text-2);border-radius:10px;padding:7px 9px;white-space:nowrap;font-size:11px;cursor:pointer;}
-.v4-ai-composer .v4-ai-suggest:hover{color:var(--text-1);}
-.v4-settings-card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:13px 14px;margin:10px 0;}
-.v4-settings-card h4{font-family:'Cairo',sans-serif;font-size:14px;margin-bottom:11px;}
-.v4-select{width:100%;background:var(--card-2);border:1px solid var(--card-border);color:var(--text-1);padding:10px 12px;border-radius:11px;font-family:inherit;outline:none;}
-.v4-range{width:100%;accent-color:var(--violet);}
-.v4-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.v4-choice{border:1px solid var(--card-border);background:var(--card-2);color:var(--text-1);padding:10px;border-radius:11px;cursor:pointer;text-align:center;font-family:inherit;}
-.v4-choice.active{border-color:var(--violet);box-shadow:0 0 0 2px rgba(124,92,255,.12);}
-.v4-ai-note{font-size:11.5px;color:var(--text-2);line-height:1.7;margin-top:8px;}
-.v4-setting-status{font-size:11px;color:var(--green);margin-top:7px;min-height:16px;}
-body[data-v4-font="small"]{font-size:14px} body[data-v4-font="large"]{font-size:17px}
-body[data-v4-font="large"] .contact-name{font-size:16px} body[data-v4-font="large"] .contact-preview{font-size:14.5px}
-body[data-v4-wallpaper="minimal"] #chatArea{background:none!important;}
-body[data-v4-wallpaper="gradient"] #chatArea{background:radial-gradient(circle at 15% 10%,rgba(124,92,255,.10),transparent 35%),radial-gradient(circle at 85% 80%,rgba(47,230,217,.08),transparent 40%);}
-body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,body[data-v4-reduced-motion="1"] *::after{animation:none!important;transition:none!important;}
-</style>
-
 </head>
 <body>
 
@@ -807,26 +749,19 @@ body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,bo
 ========================================================= -->
 <div id="view-chatlist" class="hidden">
   <div class="app-shell">
-    <div class="topbar">
-      <h1>الدردشات</h1>
-      <div class="topbar-actions">
-        <button class="icon-btn" onclick="toggleThemeMode()" title="تبديل الوضع الليلي/النهاري">
+    <div class="topbar modern-topbar">
+      <h1 id="chatListTitle">الدردشات</h1>
+      <div class="topbar-actions modern-topbar-actions">
+        <button class="icon-btn" onclick="toggleThemeMode()" title="الوضع الليلي / النهاري" aria-label="الوضع الليلي / النهاري">
           <svg id="modeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
         </button>
-        <button class="icon-btn" onclick="openNotifPanel()" title="الإشعارات" style="position:relative;">
+        <button class="icon-btn" onclick="openNotifPanel()" title="الإشعارات" aria-label="الإشعارات" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
           <span class="notif-dot hidden" id="notifDot"></span>
         </button>
-        <button class="icon-btn" onclick="openNewChatPanel()" title="محادثة جديدة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
-        <button class="icon-btn v3-feature-btn" onclick="openAIChat()" title="محادثة AN AI" aria-label="AN AI">🤖</button>
-        <button class="icon-btn group-add-btn" onclick="openGroupPanel('create')" title="إنشاء مجموعة">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.8 3.1-6 7-6s7 2.2 7 6"/>
-            <path d="M17 11h5M19.5 8.5v5"/>
-          </svg>
-        </button>
-        <button class="icon-btn" onclick="openFriendReqPanel()" title="طلبات الصداقة" style="position:relative;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+        <button class="icon-btn" onclick="openNewChatPanel()" title="إضافة صديق" aria-label="إضافة صديق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button>
+        <button class="icon-btn" onclick="openFriendReqPanel()" title="طلبات الصداقة" aria-label="طلبات الصداقة" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2.5 20c0-3.8 2.8-6 6.5-6s6.5 2.2 6.5 6"/><circle cx="17.5" cy="8.5" r="3"/><path d="M18 8.5h6M21 5.5v6"/></svg>
           <span class="nav-badge hidden" id="friendReqBadge" style="top:-4px;left:-4px;">0</span>
         </button>
         <button class="avatar-btn" onclick="openAppSettings()" title="الملف الشخصي والإعدادات">
@@ -851,27 +786,18 @@ body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,bo
       </div>
       <div id="statusStripFriends" style="display:flex;gap:14px;"></div>
     </div>
-    <div class="v3-quick-bar">
-      <button class="v3-chip v4-ai-chip" onclick="openAIChat()">🤖 AN AI</button>
-      <button class="v3-chip" onclick="openV3Panel('v3FeaturePanel')">✦ كل الميزات</button>
-      <button class="v3-chip" onclick="openV3StickerPanel()">😀 ملصقات</button>
-      <button class="v3-chip" onclick="openV3Poll()">📊 استطلاع</button>
-      <button class="v3-chip" onclick="openV3Channels()">📢 قنوات</button>
-      <button class="v3-chip" onclick="openV3VoiceRoom()">🎙️ غرف صوتية</button>
-    </div>
-
     <div class="section-label">الرسائل</div>
     <div class="contact-list" id="contactList"></div>
 
     <div class="bottom-nav">
       <button class="nav-item active" id="navChatsBtn" onclick="goTo('chatlist')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.3 8L4 21l1.5-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg><span class="nav-badge hidden" id="navMsgBadge">0</span></span>
-        الدردشات</button>
-      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>الحالات</button>
+        <span class="nav-label">الدردشات</span></button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="nav-label">الحالات</span></button>
       <button class="nav-item" id="navCallsBtn" onclick="goTo('calls')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><span class="nav-badge hidden" id="navCallBadge">0</span></span>
-        المكالمات</button>
-      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>الإعدادات</button>
+        <span class="nav-label">المكالمات</span></button>
+      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nav-label">الإعدادات</span></button>
     </div>
   </div>
 </div>
@@ -884,7 +810,7 @@ body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,bo
     <div class="topbar">
       <h1>المكالمات</h1>
       <div class="topbar-actions">
-        <button class="icon-btn" onclick="toggleThemeMode()" title="تبديل الوضع الليلي/النهاري">
+        <button class="icon-btn" onclick="toggleThemeMode()" title="الوضع الليلي / النهاري" aria-label="الوضع الليلي / النهاري">
           <svg id="modeIconCalls" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
         </button>
         <button class="avatar-btn" onclick="openAppSettings()" title="الملف الشخصي والإعدادات">
@@ -899,12 +825,12 @@ body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,bo
     <div class="bottom-nav">
       <button class="nav-item" onclick="goTo('chatlist')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.3 8L4 21l1.5-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg><span class="nav-badge hidden" id="navMsgBadge2">0</span></span>
-        الدردشات</button>
-      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>الحالات</button>
+        <span class="nav-label">الدردشات</span></button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="nav-label">الحالات</span></button>
       <button class="nav-item active" onclick="goTo('calls')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><span class="nav-badge hidden" id="navCallBadge2">0</span></span>
-        المكالمات</button>
-      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>الإعدادات</button>
+        <span class="nav-label">المكالمات</span></button>
+      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nav-label">الإعدادات</span></button>
     </div>
   </div>
 </div>
@@ -964,12 +890,8 @@ body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,bo
     <div class="chat-area" id="chatArea"></div>
 
     <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(this.files[0]); this.value='';">
-    <div class="v3-reply-bar" id="v3ReplyBar"><span>↩️</span><div class="reply-text" id="v3ReplyText"></div><button onclick="v3CancelReply()">×</button></div>
-
     <div class="chat-input-bar" id="chatInputBar">
-      <button class="round-btn" title="تسجيل رسالة صوتية" id="v3VoiceBtn" onclick="toggleV3Recording()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
       <button class="round-btn" title="مرفقات" onclick="document.getElementById('fileInput').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.1l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg></button>
-      <div class="v3-recording" id="v3Recording"><span class="pulse"></span><span id="v3RecordingTime">0:00</span><button class="v3-mini-btn" style="margin-inline-start:auto;padding:5px 8px;" onclick="stopV3Recording(true)">إلغاء</button></div>
       <textarea id="msgInput" rows="1" placeholder="اكتب رسالة..." oninput="autoGrow(this)" onkeydown="handleKey(event)"></textarea>
       <button class="round-btn" title="ملصق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></button>
       <button class="round-btn send-btn" onclick="sendMessage()" title="إرسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
@@ -1102,6 +1024,19 @@ body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,bo
       <div class="input-wrap"><textarea id="bioInput" rows="2" placeholder="اكتب نبذة قصيرة عنك..." onchange="updateOwnBio(this.value)"></textarea></div>
     </div>
 
+    <div class="panel-section-title">اللغة</div>
+    <div class="language-row">
+      <div class="setting-row-text">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2c2.5 2.8 3.8 6.1 3.8 10S14.5 19.2 12 22c-2.5-2.8-3.8-6.1-3.8-10S9.5 4.8 12 2z"/></svg>
+        <div><div class="label">لغة التطبيق</div><div class="sub">تتغير واجهة التطبيق فورًا</div></div>
+      </div>
+      <select id="appLanguageSelect" class="language-select" onchange="applyAppLanguage(this.value)">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+      </select>
+    </div>
+
     <div class="panel-section-title">الخصوصية</div>
     <div class="setting-row">
       <div class="setting-row-text">
@@ -1127,86 +1062,7 @@ body[data-v4-reduced-motion="1"] *,body[data-v4-reduced-motion="1"] *::before,bo
       <label class="switch"><input type="checkbox" id="soundSwitch" checked><span class="track"></span></label>
     </div>
 
-    
-    <div class="v4-settings-card">
-      <h4>⚙️ تخصيص التطبيق</h4>
-      <div class="field">
-        <label for="v4Language">لغة الواجهة</label>
-        <select id="v4Language" class="v4-select" onchange="v4SetLanguage(this.value)">
-          <option value="ar">العربية</option>
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="v4Theme">المظهر</label>
-        <select id="v4Theme" class="v4-select" onchange="v4SetTheme(this.value)">
-          <option value="dark">داكن</option>
-          <option value="light">فاتح</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="v4Font">حجم النص</label>
-        <select id="v4Font" class="v4-select" onchange="v4SetFont(this.value)">
-          <option value="small">صغير</option>
-          <option value="medium">متوسط</option>
-          <option value="large">كبير</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="v4Wallpaper">خلفية الدردشة</label>
-        <select id="v4Wallpaper" class="v4-select" onchange="v4SetWallpaper(this.value)">
-          <option value="default">AN chat</option>
-          <option value="minimal">بسيطة</option>
-          <option value="gradient">متدرجة</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="v4-settings-card">
-      <h4>🤖 AN AI</h4>
-      <div class="setting-row">
-        <div class="setting-row-text">
-          <div><div class="label">إظهار AN AI</div><div class="sub">إضافة مساعد افتراضي إلى قائمة الدردشات</div></div>
-        </div>
-        <label class="switch"><input type="checkbox" id="v4AiEnabled" checked onchange="v4SetAiEnabled(this.checked)"><span class="track"></span></label>
-      </div>
-      <div class="field">
-        <label for="v4AiStyle">أسلوب الرد</label>
-        <select id="v4AiStyle" class="v4-select" onchange="v4SetAiStyle(this.value)">
-          <option value="friendly">ودود</option>
-          <option value="professional">احترافي</option>
-          <option value="short">مختصر</option>
-          <option value="creative">إبداعي</option>
-        </select>
-      </div>
-      <div class="v4-ai-note">محادثة AN AI في v4.0 تعمل كتجربة محلية داخل المتصفح. لا تحتاج إلى مفتاح API، ولا يتم إرسال رسائلك إلى خدمة خارجية. للحصول على نموذج حقيقي بمستوى ChatGPT يلزم خادم آمن للـAI.</div>
-      <button class="plain-btn" onclick="openAIChat();closeAllOverlays();">🤖 فتح محادثة AN AI</button>
-    </div>
-
-    <div class="v4-settings-card">
-      <h4>💬 الدردشة</h4>
-      <div class="setting-row">
-        <div class="setting-row-text"><div><div class="label">الإرسال بزر Enter</div><div class="sub">اضغط Enter لإرسال الرسالة</div></div></div>
-        <label class="switch"><input type="checkbox" id="v4EnterSend" checked onchange="v4SetBool('enterSend',this.checked)"><span class="track"></span></label>
-      </div>
-      <div class="setting-row">
-        <div class="setting-row-text"><div><div class="label">تشغيل الحركة</div><div class="sub">تأثيرات بسيطة في الواجهة</div></div></div>
-        <label class="switch"><input type="checkbox" id="v4Motion" checked onchange="v4SetMotion(this.checked)"><span class="track"></span></label>
-      </div>
-      <button class="plain-btn" onclick="v4ClearAIMemory()">مسح ذاكرة AN AI على هذا الجهاز</button>
-    </div>
-
-    <div class="v4-settings-card">
-      <h4>🛡️ الأمان</h4>
-      <div class="setting-row">
-        <div class="setting-row-text"><div><div class="label">قفل التطبيق</div><div class="sub">استخدم PIN من 6 أرقام لحماية التطبيق</div></div></div>
-        <label class="switch"><input type="checkbox" id="v4AppLockMirror" onchange="toggleV3AppLock(this.checked)"><span class="track"></span></label>
-      </div>
-      <div class="v4-ai-note">تشفير المحادثات الفردية بـPIN يبقى منفصلًا عن قفل التطبيق.</div>
-    </div>
-
-<div class="panel-section-title">جهات الاتصال المحظورة</div>
+    <div class="panel-section-title">جهات الاتصال المحظورة</div>
     <div id="blockedListWrap"><p class="hint" id="noBlockedHint" style="padding:6px 2px 14px;">لا توجد جهات اتصال محظورة حاليًا.</p></div>
 
     <div style="margin-top:10px;">
@@ -3397,7 +3253,7 @@ body[data-mode="light"] .contact-list{background:#fff;}
 .v3-status-action{display:flex;flex-direction:column;align-items:center;gap:6px;width:56px;flex-shrink:0;cursor:pointer;}
 .v3-status-action .v3-group-icon{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#7c5cff,#2fe6d9);color:#fff;box-shadow:0 8px 18px rgba(124,92,255,.18);}
 .v3-status-action span{font-size:11px;color:var(--text-2);white-space:nowrap;}
-.v3-feature-btn{background:linear-gradient(135deg,#f4efff,#e9fbfa)!important;color:#5c4bd8!important;}
+
 .v3-quick-bar{display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto;scrollbar-width:none;}
 .v3-quick-bar::-webkit-scrollbar{display:none;}
 .v3-chip{border:1px solid var(--card-border);background:var(--card-2);color:var(--text-1);border-radius:999px;padding:7px 11px;font-size:11.5px;white-space:nowrap;cursor:pointer;}
@@ -3463,6 +3319,33 @@ body[data-mode="light"] .contact-list{background:#fff;}
 .v3-room .room-head{display:flex;align-items:center;justify-content:space-between;}
 .v3-room .live{color:var(--coral);font-size:11px;font-weight:800;}
 @media(max-width:420px){.v3-feature-grid{grid-template-columns:1fr 1fr;gap:8px}.v3-feature-card{padding:11px}.v3-feature-card small{font-size:10px}.v3-audio-msg audio{width:190px}}
+
+  /* ===== AN chat v4.1 recovery UI ===== */
+  .modern-topbar{padding:14px 16px 10px;min-height:66px;}
+  .modern-topbar h1{font-size:24px;letter-spacing:-.3px;}
+  .modern-topbar-actions{gap:9px;}
+  .modern-topbar .icon-btn{width:42px;height:42px;border:1px solid var(--card-border);background:linear-gradient(145deg,var(--card),var(--card-2));box-shadow:0 6px 18px rgba(0,0,0,.08);}
+  .modern-topbar .icon-btn svg{width:20px;height:20px;}
+  .modern-topbar .icon-btn:active{transform:scale(.96);}
+  .modern-topbar .avatar-btn{width:42px;height:42px;border:2px solid var(--violet-2);box-shadow:0 6px 18px rgba(124,92,255,.18);}
+  .status-strip{padding-top:4px;padding-bottom:18px;gap:16px;}
+  .v3-status-action .v3-group-icon{width:54px;height:54px;background:linear-gradient(135deg,var(--violet),var(--cyan));box-shadow:0 8px 20px rgba(124,92,255,.20);}
+  .searchbar{margin:2px 16px 16px;}
+  .searchbar input{padding-top:12px;padding-bottom:12px;border-radius:16px;}
+  .contact-list{padding-top:2px;}
+  .bottom-nav{height:68px;}
+  .nav-item{padding-top:8px;font-size:11px;}
+  .nav-item svg{width:21px;height:21px;}
+  .language-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px 18px;}
+  .language-row .setting-row-text{flex:1;}
+  .language-select{min-width:118px;border:1px solid var(--card-border);background:var(--card-2);color:var(--text-1);border-radius:12px;padding:9px 11px;font-family:inherit;font-size:13px;outline:none;}
+  body[data-mode="light"] .modern-topbar .icon-btn{box-shadow:0 5px 15px rgba(20,24,50,.08);}
+  @media(max-width:639px){
+    body{display:block!important;width:100vw;min-width:100vw;background:var(--bg-panel);}
+    #view-chatlist,#view-chat,#view-calls{width:100vw!important;max-width:none!important;height:100%!important;}
+    .app-shell{width:100vw!important;max-width:none!important;margin:0!important;border-radius:0!important;box-shadow:none!important;}
+  }
+
 </style>
 
 <script id="an-v3-js">
@@ -3606,7 +3489,7 @@ body[data-mode="light"] .contact-list{background:#fff;}
         for(let i=0;i<list.length;i++){
           const m=list[i],sent=m.from==='me',body=v3MessageBody(m,m.key)||await Promise.resolve(messageBodyHtml(m));
           const sender=!sent?`<div class="msg-sender">${safe(m.senderName||'عضو')}</div>`:'';
-          html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${sender}${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div><div class="v3-msg-actions"><button onclick="openV3MessageActions(${i},'${safe(m.key||'')}',true)">⋯ خيارات الرسالة</button></div></div></div>`;
+          html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${sender}${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div></div></div>`;
         }
       }else html+='<div class="empty-state" style="padding:70px 20px;"><div>ابدأ أول رسالة في هذه المجموعة ✨</div></div>';
       area.innerHTML=html;area.scrollTop=area.scrollHeight;return;
@@ -3620,7 +3503,7 @@ body[data-mode="light"] .contact-list{background:#fff;}
     for(let i=0;i<list.length;i++){
       const m=list[i],sent=m.from==='me';
       const body=await messageBodyHtmlAsync(m,c);
-      html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div><div class="v3-msg-actions"><button onclick="openV3MessageActions(${i},'${safe(m.key||'')}',false)">⋯ خيارات الرسالة</button></div></div></div>`;
+      html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div></div></div>`;
     }
     area.innerHTML=html;area.scrollTop=area.scrollHeight;
   };
@@ -3895,230 +3778,55 @@ body[data-mode="light"] .contact-list{background:#fff;}
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.currentUser)checkV3Lock();});
   setTimeout(v3Boot,500);
 
-  /* Initial UI refinements */
-  setTimeout(()=>{
-    const appSettings=q('appSettingsPanel');
-    if(appSettings){
-      const body=appSettings.querySelector('.app-settings-body');
-      if(body&&!q('v3SettingsShortcut')){
-        const d=document.createElement('div');d.id='v3SettingsShortcut';d.innerHTML='<div class="panel-section-title">AN chat v3.0</div><button class="plain-btn" onclick="openV3Panel(\'v3FeaturePanel\')">✦ فتح مركز الميزات الجديدة</button>';
-        body.prepend(d);
-      }
-    }
-  },700);
 })();
 </script>
 
-<script id="an-v4-script">
+<script id="an-language-js">
 (function(){
-  'use strict';
-  const V4KEY='an_chat_v4_settings';
-  const AIKEY='an_chat_v4_ai_messages';
-  const AI_ID='__an_ai__';
-
-  function q4(id){return document.getElementById(id);}
-  function esc4(x){return typeof escapeHtml==='function'?escapeHtml(String(x??'')):String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-  function loadSettings(){
-    try{return Object.assign({language:'ar',theme:'dark',font:'medium',wallpaper:'default',aiEnabled:true,aiStyle:'friendly',enterSend:true,motion:true},JSON.parse(localStorage.getItem(V4KEY)||'{}'));}catch(e){return {language:'ar',theme:'dark',font:'medium',wallpaper:'default',aiEnabled:true,aiStyle:'friendly',enterSend:true,motion:true};}
+  const LANGS={
+    ar:{title:'الدردشات',search:'بحث في الدردشات...',myStatus:'حالتي',group:'مجموعة',messages:'الرسائل',chats:'الدردشات',statuses:'الحالات',calls:'المكالمات',settings:'الإعدادات',profile:'الملف الشخصي',bio:'نبذة عني (بايو)',bioPh:'اكتب نبذة قصيرة عنك...',privacy:'الخصوصية',online:'إظهار حالة الاتصال',onlineSub:'يسمح لأصدقائك برؤية أنك متصل الآن',read:'إيصالات القراءة',readSub:'إظهار علامة ✓✓ عند قراءة رسائلك',notifications:'الإشعارات',sound:'صوت الإشعارات',soundSub:'تشغيل صوت عند وصول رسالة',blocked:'جهات الاتصال المحظورة',noBlocked:'لا توجد جهات اتصال محظورة حاليًا.',logout:'تسجيل الخروج',language:'اللغة',languageSub:'تتغير واجهة التطبيق فورًا',addFriend:'إضافة صديق',friendRequests:'طلبات الصداقة',newChat:'محادثة جديدة'},
+    en:{title:'Chats',search:'Search chats...',myStatus:'My status',group:'Group',messages:'Messages',chats:'Chats',statuses:'Status',calls:'Calls',settings:'Settings',profile:'Profile',bio:'About me',bioPh:'Write a short bio...',privacy:'Privacy',online:'Show online status',onlineSub:'Let your friends see when you are online',read:'Read receipts',readSub:'Show ✓✓ when your messages are read',notifications:'Notifications',sound:'Notification sound',soundSub:'Play a sound when a message arrives',blocked:'Blocked contacts',noBlocked:'No blocked contacts.',logout:'Log out',language:'Language',languageSub:'The interface changes instantly',addFriend:'Add friend',friendRequests:'Friend requests',newChat:'New chat'},
+    fr:{title:'Discussions',search:'Rechercher dans les discussions...',myStatus:'Mon statut',group:'Groupe',messages:'Messages',chats:'Discussions',statuses:'Statut',calls:'Appels',settings:'Paramètres',profile:'Profil',bio:'À propos de moi',bioPh:'Écrivez une courte bio...',privacy:'Confidentialité',online:'Afficher le statut en ligne',onlineSub:'Permet à vos amis de voir quand vous êtes en ligne',read:'Accusés de lecture',readSub:'Afficher ✓✓ lorsque vos messages sont lus',notifications:'Notifications',sound:'Son des notifications',soundSub:'Jouer un son à la réception d’un message',blocked:'Contacts bloqués',noBlocked:'Aucun contact bloqué.',logout:'Se déconnecter',language:'Langue',languageSub:'L’interface change instantanément',addFriend:'Ajouter un ami',friendRequests:'Demandes d’amitié',newChat:'Nouvelle discussion'}
+  };
+  const t=(k)=>LANGS[localStorage.getItem('an_chat_language')||'ar'][k]||LANGS.ar[k]||k;
+  function setTxt(sel,key){const el=document.querySelector(sel);if(el)el.textContent=t(key);}
+  function setTitleAndSearch(){
+    setTxt('#chatListTitle','title');
+    const s=document.querySelector('#view-chatlist .searchbar input');if(s)s.placeholder=t('search');
+    const sec=document.querySelector('#view-chatlist .section-label');if(sec)sec.textContent=t('messages');
+    const statuses=document.querySelectorAll('#view-chatlist .status-strip .status-item.own span');if(statuses[0])statuses[0].textContent=t('myStatus');
+    const group=document.querySelector('#view-chatlist .v3-status-action span');if(group)group.textContent=t('group');
+    const nav=document.querySelectorAll('#view-chatlist .bottom-nav .nav-item');
+    const keys=['chats','statuses','calls','settings']; nav.forEach((b,i)=>{const s=b.querySelector('span.nav-label');if(s)s.textContent=t(keys[i]);});
   }
-  let S=loadSettings();
-  function save(){try{localStorage.setItem(V4KEY,JSON.stringify(S));}catch(e){}}
-
-  window.v4SetLanguage=function(v){
-    S.language=v;save();
-    document.documentElement.lang=v;
-    document.documentElement.dir=v==='ar'?'rtl':'ltr';
-    const names={
-      ar:{title:'الدردشات',search:'بحث في الدردشات...',chat:'الدردشات',calls:'المكالمات',status:'الحالات',settings:'الإعدادات',ai:'AN AI',send:'اكتب رسالة...'},
-      en:{title:'Chats',search:'Search chats...',chat:'Chats',calls:'Calls',status:'Stories',settings:'Settings',ai:'AN AI',send:'Write a message...'},
-      fr:{title:'Discussions',search:'Rechercher...',chat:'Discussions',calls:'Appels',status:'Statuts',settings:'Réglages',ai:'AN AI',send:'Écrire un message...'}
-    }[v]||{};
-    const h=document.querySelector('#view-chatlist .topbar h1');if(h)h.textContent=names.title||'الدردشات';
-    const search=document.querySelector('#view-chatlist .searchbar input');if(search)search.placeholder=names.search||'بحث في الدردشات...';
-    const bottom=document.querySelectorAll('#view-chatlist .bottom-nav .nav-item');
-    if(bottom[0])bottom[0].childNodes[bottom[0].childNodes.length-1].textContent=' '+names.chat;
-    if(bottom[1])bottom[1].childNodes[bottom[1].childNodes.length-1].textContent=' '+names.status;
-    if(bottom[2])bottom[2].childNodes[bottom[2].childNodes.length-1].textContent=' '+names.calls;
-    if(bottom[3])bottom[3].childNodes[bottom[3].childNodes.length-1].textContent=' '+names.settings;
-    const inp=q4('msgInput');if(inp)inp.placeholder=names.send||'اكتب رسالة...';
-    showToast(v==='ar'?'تم اختيار العربية':v==='en'?'English selected':'Français sélectionné');
-  };
-
-  window.v4SetTheme=function(v){S.theme=v;save();applyThemeMode(v);if(q4('v4Theme'))q4('v4Theme').value=v;};
-  window.v4SetFont=function(v){S.font=v;save();document.body.dataset.v4Font=v;};
-  window.v4SetWallpaper=function(v){S.wallpaper=v;save();document.body.dataset.v4Wallpaper=v;};
-  window.v4SetAiEnabled=function(v){S.aiEnabled=!!v;save();renderContactList(window.__currentFilter||'');};
-  window.v4SetAiStyle=function(v){S.aiStyle=v;save();};
-  window.v4SetBool=function(k,v){S[k]=!!v;save();};
-  window.v4SetMotion=function(v){S.motion=!!v;save();document.body.dataset.v4ReducedMotion=v?'0':'1';};
-  window.v4ClearAIMemory=function(){try{localStorage.removeItem(AIKEY);}catch(e){};showToast('تم مسح ذاكرة AN AI');};
-
-  function aiLoad(){
-    try{return JSON.parse(localStorage.getItem(AIKEY)||'[]');}catch(e){return [];}
+  function setSettings(){
+    setTxt('#appSettingsPanel .panel-head h3','settings');
+    const titles=document.querySelectorAll('#appSettingsPanel .panel-section-title');
+    const keys=['profile','language','privacy','notifications','blocked'];
+    titles.forEach((el,i)=>{if(keys[i])el.textContent=t(keys[i]);});
+    const bioLabel=document.querySelector('#bioInput')?.closest('.field')?.querySelector('label');if(bioLabel)bioLabel.textContent=t('bio');
+    const bio=document.getElementById('bioInput');if(bio)bio.placeholder=t('bioPh');
+    const rows=document.querySelectorAll('#appSettingsPanel .setting-row');
+    if(rows[0]){rows[0].querySelector('.label').textContent=t('online');rows[0].querySelector('.sub').textContent=t('onlineSub');}
+    if(rows[1]){rows[1].querySelector('.label').textContent=t('read');rows[1].querySelector('.sub').textContent=t('readSub');}
+    if(rows[2]){rows[2].querySelector('.label').textContent=t('sound');rows[2].querySelector('.sub').textContent=t('soundSub');}
+    const no=document.getElementById('noBlockedHint');if(no)no.textContent=t('noBlocked');
+    const out=document.querySelector('#appSettingsPanel .danger-btn');if(out){const txt=[...out.childNodes].find(n=>n.nodeType===3 && n.textContent.trim());if(txt)txt.textContent=' '+t('logout');}
+    const sel=document.getElementById('appLanguageSelect');if(sel)sel.value=localStorage.getItem('an_chat_language')||'ar';
+    const langLabel=document.querySelector('#appSettingsPanel .language-row .label');if(langLabel)langLabel.textContent=t('language');
+    const langSub=document.querySelector('#appSettingsPanel .language-row .sub');if(langSub)langSub.textContent=t('languageSub');
   }
-  function aiSave(m){try{localStorage.setItem(AIKEY,JSON.stringify(m.slice(-80)));}catch(e){}}
-  function aiName(){
-    try{const u=state.currentUser;return u?.displayName||state.ownName||'صديقي';}catch(e){return 'صديقي';}
-  }
-  function aiReply(text,history){
-    const t=(text||'').trim();
-    const low=t.toLowerCase();
-    const style=S.aiStyle;
-    const name=aiName();
-    if(/^(مرحبا|اهلا|أهلا|السلام عليكم|سلام|hello|hi|hey)\b/i.test(t))
-      return style==='professional'?`مرحبًا ${name}. أنا AN AI. كيف يمكنني مساعدتك اليوم؟`:`أهلًا ${name}! 🤖✨ سعيد بالدردشة معك. ماذا تريد أن نفعل؟`;
-    if(/من أنت|من انت|who are you|ما اسمك/i.test(t))
-      return 'أنا AN AI، المساعد التجريبي داخل AN chat. أستطيع الدردشة معك، مساعدتك في كتابة الرسائل، تنظيم الأفكار، واقتراح حلول. هذه النسخة تعمل محليًا داخل التطبيق.';
-    if(/اسم[يى]|اسمي|my name/i.test(t)&&/ما|what|تذكر|remember/i.test(t))
-      return `اسمك ${name} 😊`;
-    if(/حزين|زعلان|متضايق|sad|depressed|upset/i.test(t))
-      return 'أنا معك. خذ نفسًا هادئًا واحكِ لي ما الذي أزعجك، وسأستمع لك بدون حكم. 💜';
-    if(/مساعدة|ساعدني|help/i.test(t))
-      return 'أكيد. اكتب لي ما تريد بالتفصيل، ويمكنني أن أساعدك في الدراسة، البرمجة، كتابة الرسائل، ترتيب الأفكار أو التخطيط.';
-    if(/كود|برمج|html|javascript|firebase|app|تطبيق/i.test(t))
-      return 'أستطيع مساعدتك في تطوير AN chat. أخبرني بالميزة التي تريدها أو أرسل الخطأ، وسأقترح عليك طريقة تنفيذها خطوة بخطوة.';
-    if(/رد|reply|رسالة|message/i.test(t)){
-      if(/رسمي|formal/i.test(t)) return 'يمكنك إرسال: «شكرًا لتواصلك. يسعدني متابعة الموضوع معك، وأتمنى أن ننسّق التفاصيل في أقرب وقت.»';
-      if(/لطيف|cute|friendly/i.test(t)) return 'يمكنك إرسال: «أكيد 😊 يسعدني ذلك! خلينا نتفق على التفاصيل.»';
-      return 'اقتراح رد: «تمام، فهمتك 👍 خلينا نكمل ونتفق على التفاصيل.»';
-    }
-    if(/ترجم|translate/i.test(t)) return 'اكتب النص الذي تريد ترجمته واذكر اللغة المطلوبة، مثل: «ترجم هذا إلى الإنجليزية».';
-    if(/فكرة|idea|اقتراح/i.test(t)) return 'فكرة جميلة: اجعل AN chat يحتوي على AI داخل كل محادثة، مع اقتراحات للردود، تلخيص المحادثة، ترجمة، وتحويل الصوت إلى نص.';
-    if(/شكرا|شكرًا|thanks|thank you/i.test(t)) return 'العفو! 🤍 أنا هنا متى احتجتني.';
-    if(/[?؟]/.test(t)){
-      return style==='short'?'نعم، أستطيع مساعدتك. أعطني تفاصيل أكثر قليلًا وسأحاول إعطاءك جوابًا واضحًا.':`سؤال ممتاز. حتى أعطيك جوابًا أفضل، أخبرني قليلًا عن السياق أو ما النتيجة التي تريد الوصول إليها.`;
-    }
-    if(style==='professional') return 'فهمت طلبك. أعطني مزيدًا من التفاصيل وسأرتب لك إجابة عملية وواضحة.';
-    if(style==='creative') return 'فكرة تستحق التجربة ✨ دعنا نحولها إلى شيء عملي خطوة بخطوة. ما الجزء الذي تريد أن نبدأ به؟';
-    if(style==='short') return 'فهمت 👍 أخبرني بالمزيد وسأساعدك.';
-    return `فهمتك يا ${name} 😊. أستطيع متابعة الحديث معك. احكِ لي أكثر عن فكرتك أو ما الذي تريد أن نفعله الآن.`;
-  }
-
-  function renderAIChat(){
-    const area=q4('chatArea');if(!area)return;
-    const msgs=aiLoad();
-    let h='<div class="date-divider">AN AI • الآن</div>';
-    if(!msgs.length){
-      h+='<div class="empty-state" style="padding:35px 24px 20px;"><div style="font-size:46px;">🤖</div><strong style="color:var(--text-1);font-family:Cairo;">أهلًا بك في AN AI</strong><div>تحدث معي كما تتحدث مع صديق. جرّب: «ساعدني في فكرة لتطبيقي» أو «اقترح لي ردًا لطيفًا».</div></div>';
-    }
-    h+=msgs.map(m=>{
-      const sent=m.role==='user';
-      return `<div class="msg-row ${sent?'sent':'received'}"><div class="msg-bubble ${!sent?'v4-ai-bubble':''}">${!sent?'<div class="ai-name">🤖 AN AI</div>':''}${esc4(m.text)}<div class="msg-meta"><span>${esc4(m.time||'الآن')}</span></div></div></div>`;
-    }).join('');
-    area.innerHTML=h;
-    area.scrollTop=area.scrollHeight;
-  }
-
-  window.openAIChat=function(){
-    if(!S.aiEnabled){showToast('AN AI متوقف من الإعدادات');return;}
-    closeAllOverlays();
-    if(typeof activeMessagesRef!=='undefined'&&activeMessagesRef){activeMessagesRef.off();activeMessagesRef=null;}
-    if(typeof activeGroupMessagesRef!=='undefined'&&activeGroupMessagesRef){activeGroupMessagesRef.off();activeGroupMessagesRef=null;}
-    state.activeChatType='ai';state.activeChatId=AI_ID;
-    const av=q4('chatAvatar');if(av){av.style.background='linear-gradient(135deg,#7c5cff,#2fe6d9)';av.innerHTML='🤖';}
-    q4('chatFriendName').textContent='AN AI';
-    q4('chatFriendStatus').textContent='مساعد ذكي • تجربة محلية';
-    q4('pinChatBtn')?.classList.add('hidden');
-    q4('groupManageBtn')?.classList.add('hidden');
-    const acts=document.querySelectorAll('.chat-header-actions .icon-btn');
-    acts.forEach((b,i)=>{if(i<2||i===3)b.classList.add('hidden');});
-    renderAIChat();
-    goTo('chat');
+  window.applyAppLanguage=function(lang){
+    if(!LANGS[lang])lang='ar';
+    localStorage.setItem('an_chat_language',lang);
+    document.documentElement.lang=lang;
+    document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+    document.body.classList.toggle('lang-ltr',lang!=='ar');
+    setTitleAndSearch();setSettings();
+    const labels=document.querySelectorAll('[data-lang-key]');labels.forEach(el=>{el.textContent=t(el.dataset.langKey);});
   };
-
-  // Restore normal chat header buttons whenever leaving AI chat.
-  const oldGoTo=window.goTo;
-  window.goTo=function(view){
-    if(view!=='chat' && state.activeChatType==='ai') state.activeChatType=null;
-    oldGoTo(view);
-    if(view!=='chat') return;
-    if(state.activeChatType!=='ai'){
-      const acts=document.querySelectorAll('.chat-header-actions .icon-btn');
-      acts.forEach(b=>b.classList.remove('hidden'));
-    }
-  };
-
-  // Always show AI at top of the chat list.
-  const oldRender=window.renderContactList;
-  window.renderContactList=function(filter){
-    oldRender(filter);
-    if(!S.aiEnabled)return;
-    const wrap=q4('contactList');if(!wrap)return;
-    const f=(filter||'').trim().toLowerCase();
-    if(f && !'an ai مساعد ذكي الذكاء الاصطناعي'.includes(f))return;
-    wrap.querySelector('.empty-state')?.remove();
-    const row=document.createElement('div');
-    row.className='contact-row v4-ai-row';
-    row.onclick=window.openAIChat;
-    row.innerHTML='<div class="avatar-circle" style="width:52px;height:52px;font-size:22px;">🤖</div><div class="contact-main"><div class="contact-top-line"><span class="contact-name">AN AI</span><span class="v4-ai-badge">AI</span></div><div class="contact-bottom-line"><span class="contact-preview">مساعدك الذكي — اضغط لبدء الدردشة</span></div></div>';
-    wrap.prepend(row);
-  };
-
-  // Intercept the existing v3 sendMessage so AI uses local chat storage.
-  const oldSend=window.sendMessage;
-  window.sendMessage=async function(){
-    if(state.activeChatType!=='ai') return oldSend();
-    const input=q4('msgInput'),text=(input?.value||'').trim();if(!text)return;
-    input.value='';if(typeof autoGrow==='function')autoGrow(input);
-    const msgs=aiLoad();
-    msgs.push({role:'user',text,time:new Date().toLocaleTimeString(document.documentElement.lang||'ar',{hour:'2-digit',minute:'2-digit'})});
-    aiSave(msgs);renderAIChat();
-    const area=q4('chatArea');
-    const typing=document.createElement('div');typing.className='msg-row received';typing.id='v4AITyping';typing.innerHTML='<div class="msg-bubble v4-ai-bubble v4-ai-typing"><i></i><i></i><i></i></div>';
-    area.appendChild(typing);area.scrollTop=area.scrollHeight;
-    await new Promise(r=>setTimeout(r,650+Math.min(text.length*15,900)));
-    const answer=aiReply(text,msgs);
-    const now=new Date().toLocaleTimeString(document.documentElement.lang||'ar',{hour:'2-digit',minute:'2-digit'});
-    msgs.push({role:'assistant',text:answer,time:now});aiSave(msgs);
-    q4('v4AITyping')?.remove();renderAIChat();
-  };
-
-  // Render AI messages through the same chat renderer.
-  const oldRenderMessages=window.renderMessages;
-  window.renderMessages=async function(){
-    if(state.activeChatType==='ai'){renderAIChat();return;}
-    return oldRenderMessages();
-  };
-
-  // AI feature panel becomes a shortcut to the full AI chat.
-  window.openV3AI=function(){closeAllOverlays();openAIChat();};
-
-  // Enter-to-send behavior respects settings.
-  const oldHandleKey=window.handleKey;
-  window.handleKey=function(e){
-    if(e.key==='Enter'&&!e.shiftKey&&S.enterSend){e.preventDefault();sendMessage();return;}
-    if(typeof oldHandleKey==='function')return oldHandleKey(e);
-  };
-
-  // Make app settings more useful and persist controls.
-  const oldOpenSettings=window.openAppSettings;
-  window.openAppSettings=function(){
-    oldOpenSettings();
-    setTimeout(()=>{
-      if(q4('v4Language'))q4('v4Language').value=S.language;
-      if(q4('v4Theme'))q4('v4Theme').value=document.body.dataset.mode||S.theme;
-      if(q4('v4Font'))q4('v4Font').value=S.font;
-      if(q4('v4Wallpaper'))q4('v4Wallpaper').value=S.wallpaper;
-      if(q4('v4AiEnabled'))q4('v4AiEnabled').checked=S.aiEnabled;
-      if(q4('v4AiStyle'))q4('v4AiStyle').value=S.aiStyle;
-      if(q4('v4EnterSend'))q4('v4EnterSend').checked=S.enterSend;
-      if(q4('v4Motion'))q4('v4Motion').checked=S.motion;
-      if(q4('v4AppLockMirror'))q4('v4AppLockMirror').checked=localStorage.getItem('an_v3_lock_enabled')==='1';
-    },50);
-  };
-
-  // Apply settings on startup.
-  function bootV4(){
-    document.body.dataset.v4Font=S.font;
-    document.body.dataset.v4Wallpaper=S.wallpaper;
-    document.body.dataset.v4ReducedMotion=S.motion?'0':'1';
-    try{applyThemeMode(S.theme);}catch(e){}
-    document.documentElement.lang=S.language;
-    document.documentElement.dir=S.language==='ar'?'rtl':'ltr';
-    if(typeof renderContactList==='function')setTimeout(()=>renderContactList(window.__currentFilter||''),250);
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootV4);else bootV4();
-
+  window.initAppLanguage=function(){applyAppLanguage(localStorage.getItem('an_chat_language')||'ar');};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(initAppLanguage,0));
 })();
 </script>
 
