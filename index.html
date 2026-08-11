@@ -396,7 +396,7 @@
             </div>
             <div class="row-between">
               <label class="remember"><input type="checkbox"> تذكرني</label>
-              <a href="#" class="forgot">نسيت كلمة المرور؟</a>
+              <a href="#" class="forgot" onclick="showForgotCard();return false;">نسيت كلمة المرور؟</a>
             </div>
             <button class="btn-primary" type="submit" onclick="doLogin()">
               دخول
@@ -408,6 +408,54 @@
             <button class="soc-btn" type="button" onclick="loginWithGoogle()"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.7 6.2 2.7 11.5S6.9 21 12 21c6.9 0 9.3-4.8 9.3-7.3 0-.5 0-.9-.1-1.3H12z"/></svg>Google</button>
           </div>
           <p class="switch-link">ليس لديك حساب؟ <a onclick="goTo('signup')">إنشاء حساب جديد</a></p>
+        </div>
+
+        <!-- FORGOT PASSWORD: ask for email -->
+        <div class="card hidden" id="forgotCard">
+          <div class="card-head"><h2>استعادة كلمة المرور</h2><p>أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين</p></div>
+          <form id="forgotForm" onsubmit="return false;">
+            <div class="field">
+              <label for="forgotEmail">البريد الإلكتروني</label>
+              <div class="input-wrap">
+                <input type="text" id="forgotEmail" placeholder="example@email.com" autocomplete="username">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6.5l9 6 9-6"/><rect x="3" y="4.5" width="18" height="15" rx="2.5"/></svg>
+              </div>
+            </div>
+            <button class="btn-primary" type="submit" onclick="sendResetEmail()">
+              إرسال رابط الاستعادة
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </form>
+          <p class="switch-link"><a onclick="backToLoginCard()">العودة لتسجيل الدخول</a></p>
+        </div>
+
+        <!-- RESET PASSWORD: opened from the email link (?mode=resetPassword&oobCode=...) -->
+        <div class="card hidden" id="resetCard">
+          <div class="card-head"><h2>تعيين كلمة مرور جديدة</h2><p id="resetEmailLabel">—</p></div>
+          <form id="resetForm" onsubmit="return false;">
+            <div class="field">
+              <label for="resetPass">كلمة المرور الجديدة</label>
+              <div class="input-wrap">
+                <input type="password" id="resetPass" placeholder="••••••••" autocomplete="new-password">
+                <button type="button" class="toggle-pass" onclick="togglePass('resetPass','eyeIconR1')">
+                  <svg id="eyeIconR1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="resetPass2">تأكيد كلمة المرور</label>
+              <div class="input-wrap">
+                <input type="password" id="resetPass2" placeholder="••••••••" autocomplete="new-password">
+                <button type="button" class="toggle-pass" onclick="togglePass('resetPass2','eyeIconR2')">
+                  <svg id="eyeIconR2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <button class="btn-primary" type="submit" onclick="submitNewPassword()">
+              حفظ كلمة المرور
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -752,7 +800,9 @@ function authErrorAr(err){
     'auth/missing-password': 'الرجاء إدخال كلمة المرور',
     'auth/too-many-requests': 'محاولات كثيرة، حاول لاحقًا',
     'auth/popup-closed-by-user': 'تم إغلاق نافذة تسجيل الدخول',
-    'auth/network-request-failed': 'تعذر الاتصال بالشبكة'
+    'auth/network-request-failed': 'تعذر الاتصال بالشبكة',
+    'auth/invalid-action-code': 'رابط إعادة التعيين غير صالح أو استُخدم من قبل',
+    'auth/expired-action-code': 'انتهت صلاحية رابط إعادة التعيين، اطلب رابطًا جديدًا'
   };
   return map[err.code] || 'حدث خطأ: ' + (err.message || 'غير معروف');
 }
@@ -965,7 +1015,75 @@ function loginWithGoogle(){
 }
 
 let connectedRef = null;
-/* Auth state: keeps chat list bound to the real signed-in user */
+/* ============================================================
+   FORGOT / RESET PASSWORD
+   Firebase (بدون خادم خاص) لا يدعم إرسال رمز رقمي فعلي إلا عبر
+   خدمة خلفية منفصلة، لذا نستخدم رابط إعادة تعيين آمن عبر البريد
+   يفتح مباشرة داخل هذه الصفحة لإدخال كلمة مرور جديدة.
+============================================================ */
+function showForgotCard(){
+  document.getElementById('loginCard').classList.add('hidden');
+  document.getElementById('resetCard').classList.add('hidden');
+  document.getElementById('forgotCard').classList.remove('hidden');
+}
+function backToLoginCard(){
+  document.getElementById('forgotCard').classList.add('hidden');
+  document.getElementById('resetCard').classList.add('hidden');
+  document.getElementById('loginCard').classList.remove('hidden');
+}
+
+function sendResetEmail(){
+  const email = (document.getElementById('forgotEmail').value || '').trim();
+  if(!email){ showToast('الرجاء إدخال البريد الإلكتروني'); return; }
+  const btn = document.querySelector('#forgotCard .btn-primary');
+  btn.disabled = true;
+  const actionCodeSettings = { url: window.location.origin + window.location.pathname };
+  auth.sendPasswordResetEmail(email, actionCodeSettings)
+    .then(()=>{ showToast('تم إرسال رابط الاستعادة إلى بريدك الإلكتروني'); })
+    .catch(err=>{ showToast(authErrorAr(err)); })
+    .finally(()=>{ btn.disabled = false; });
+}
+
+let resetOobCode = null;
+function checkResetPasswordLink(){
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  const oobCode = params.get('oobCode');
+  if(mode !== 'resetPassword' || !oobCode) return;
+  auth.verifyPasswordResetCode(oobCode)
+    .then(email=>{
+      resetOobCode = oobCode;
+      document.getElementById('resetEmailLabel').textContent = email;
+      document.getElementById('view-login').classList.remove('hidden');
+      document.getElementById('view-signup').classList.add('hidden');
+      document.getElementById('view-chatlist').classList.add('hidden');
+      document.getElementById('view-chat').classList.add('hidden');
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('forgotCard').classList.add('hidden');
+      document.getElementById('resetCard').classList.remove('hidden');
+    })
+    .catch(err=>{ showToast(authErrorAr(err)); });
+}
+
+function submitNewPassword(){
+  if(!resetOobCode){ showToast('الرابط غير صالح'); return; }
+  const p1 = document.getElementById('resetPass').value;
+  const p2 = document.getElementById('resetPass2').value;
+  if(!p1 || p1.length < 8){ showToast('كلمة المرور يجب ألا تقل عن 8 أحرف'); return; }
+  if(p1 !== p2){ showToast('كلمتا المرور غير متطابقتين'); return; }
+  const btn = document.querySelector('#resetCard .btn-primary');
+  btn.disabled = true;
+  auth.confirmPasswordReset(resetOobCode, p1)
+    .then(()=>{
+      showToast('تم تغيير كلمة المرور بنجاح، سجّل الدخول الآن');
+      resetOobCode = null;
+      history.replaceState({}, '', window.location.pathname);
+      backToLoginCard();
+    })
+    .catch(err=>{ showToast(authErrorAr(err)); })
+    .finally(()=>{ btn.disabled = false; });
+}
+checkResetPasswordLink();
 auth.onAuthStateChanged(user=>{
   if(user){
     state.currentUser = user;
