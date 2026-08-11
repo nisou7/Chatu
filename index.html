@@ -166,7 +166,21 @@
   .strength i{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,0.08);transition:background .2s;}
   .strength-label{font-size:11.5px;color:var(--text-3);margin-top:6px;display:block;}
 
-  @media (max-width:900px){.hero{display:none;}.panel{padding:24px 18px;}}
+  @media (max-width:900px){
+    #view-login,#view-signup{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .auth-view{flex-direction:column;height:auto;min-height:100%;}
+    .hero{flex:none;padding:26px 22px 64px;min-height:auto;}
+    .hero-mid{max-width:100%;}
+    .hero-mid h1{font-size:clamp(24px,7vw,30px);margin-bottom:10px;}
+    .hero-mid p{font-size:13.5px;max-width:100%;line-height:1.75;}
+    .bubble-stack{height:150px;margin-top:18px;}
+    .bub{font-size:12px;padding:9px 14px;white-space:normal;max-width:230px;}
+    .hero-bottom{gap:20px;flex-wrap:wrap;}
+    .hero-bottom b{font-size:16px;}
+    .panel{flex:none;padding:0 16px 28px;margin-top:-38px;position:relative;z-index:3;overflow-y:visible;}
+    .card-stack{max-width:100%;}
+    .card{padding:28px 20px 24px;border-radius:22px 22px var(--radius) var(--radius);}
+  }
   @media (prefers-reduced-motion: reduce){.blob,.bub,.card{animation:none;}}
 
   /* ============================================================
@@ -915,22 +929,19 @@
     </div>
     <p class="hint" id="nameChangeHint" style="margin:-10px 0 16px 2px;"></p>
 
-    <div style="margin:-6px 0 16px;padding:12px 14px;background:var(--card-2);border-radius:12px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="margin:-6px 0 16px;padding:12px 14px;background:var(--card-2);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
       <span class="hint" style="margin:0;">معرّفك (ID) — شاركه مع أصدقائك</span>
-      <strong id="settingsCodeValue2" style="letter-spacing:2px;font-family:'Cairo',sans-serif;color:var(--violet-2);">------</strong>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <strong id="settingsCodeValue2" style="letter-spacing:2px;font-family:'Cairo',sans-serif;color:var(--violet-2);">------</strong>
+        <button type="button" onclick="copyOwnCode()" title="نسخ المعرّف" style="background:none;border:none;color:var(--text-2);cursor:pointer;padding:4px;display:flex;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
     </div>
 
     <div class="field">
       <label for="bioInput">نبذة عني (بايو)</label>
       <div class="input-wrap"><textarea id="bioInput" rows="2" placeholder="اكتب نبذة قصيرة عنك..." onchange="updateOwnBio(this.value)"></textarea></div>
-    </div>
-    <div class="field">
-      <label for="ageInput">السن</label>
-      <div class="input-wrap"><input type="number" id="ageInput" min="13" max="120" placeholder="مثال: 25" onchange="updateOwnAge(this.value)"></div>
-    </div>
-    <div class="field">
-      <label for="locationInput">مكان الإقامة</label>
-      <div class="input-wrap"><input type="text" id="locationInput" placeholder="مثال: الجزائر العاصمة" onchange="updateOwnLocation(this.value)"></div>
     </div>
 
     <div class="panel-section-title">الخصوصية</div>
@@ -998,9 +1009,14 @@
     <button class="panel-close" onclick="closeAllOverlays()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button>
     <h3>إضافة صديق</h3>
   </div>
-  <div style="margin:4px 18px 14px;padding:12px 14px;background:var(--card-2);border-radius:12px;display:flex;align-items:center;justify-content:space-between;">
+  <div style="margin:4px 18px 14px;padding:12px 14px;background:var(--card-2);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
     <span class="hint" style="margin:0;">معرّفك (ID) الخاص بك</span>
-    <strong id="settingsCodeValue" style="letter-spacing:2px;font-family:'Cairo',sans-serif;color:var(--violet-2);">------</strong>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <strong id="settingsCodeValue" style="letter-spacing:2px;font-family:'Cairo',sans-serif;color:var(--violet-2);">------</strong>
+      <button type="button" onclick="copyOwnCode()" title="نسخ المعرّف" style="background:none;border:none;color:var(--text-2);cursor:pointer;padding:4px;display:flex;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
   </div>
   <div class="searchbar" style="margin:4px 18px 10px;">
     <input type="text" id="findUserInput" placeholder="ابحث بالمعرّف (ID) أو البريد الإلكتروني" oninput="if(event.key!=='Enter'){}" onkeydown="if(event.key==='Enter') findUserToAdd();">
@@ -2044,8 +2060,6 @@ function openAppSettings(){
     db.ref('users/'+state.currentUser.uid).once('value').then(snap=>{
       const u = snap.val() || {};
       document.getElementById('bioInput').value = u.bio || '';
-      document.getElementById('ageInput').value = u.age || '';
-      document.getElementById('locationInput').value = u.location || '';
     });
   }
   document.getElementById('overlayBg').classList.add('show');
@@ -2272,14 +2286,25 @@ function updateOwnBio(val){
   db.ref('users/'+state.currentUser.uid).update({ bio: (val||'').trim() });
   showToast('تم حفظ النبذة');
 }
-function updateOwnAge(val){
-  if(!state.currentUser) return;
-  const n = parseInt(val, 10);
-  db.ref('users/'+state.currentUser.uid).update({ age: isNaN(n) ? null : n });
+function copyOwnCode(){
+  const code = state.ownCode;
+  if(!code){ showToast('المعرّف غير متاح بعد'); return; }
+  const done = ()=> showToast('تم نسخ المعرّف');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(done).catch(()=>fallbackCopy(code, done));
+  } else {
+    fallbackCopy(code, done);
+  }
 }
-function updateOwnLocation(val){
-  if(!state.currentUser) return;
-  db.ref('users/'+state.currentUser.uid).update({ location: (val||'').trim() });
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); done(); }catch(e){ showToast('تعذر نسخ المعرّف'); }
+  document.body.removeChild(ta);
 }
 
 function handleAvatarSelected(file){
@@ -2288,6 +2313,21 @@ function handleAvatarSelected(file){
   if(!storage){ showToast('خدمة التخزين غير متاحة حاليًا'); return; }
   if(file.size > 5*1024*1024){ showToast('الحجم الأقصى لصورة الملف الشخصي 5 ميغابايت'); return; }
   const uid = state.currentUser.uid;
+
+  // Show an instant local preview so the picture updates everywhere right away,
+  // even before the upload to Firebase Storage finishes.
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const dataUrl = e.target.result;
+    ['ownAvatar','ownAvatarStory','settingsAvatar','ownAvatarCalls'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.style.background = 'transparent';
+      el.innerHTML = `<img src="${dataUrl}" alt="">`;
+    });
+  };
+  reader.readAsDataURL(file);
+
   const ref = storage.ref('avatars/'+uid+'/'+Date.now()+'_'+file.name);
   showToast('جاري رفع الصورة...');
   ref.put(file).then(snap=>snap.ref.getDownloadURL()).then(url=>{
@@ -2296,9 +2336,14 @@ function handleAvatarSelected(file){
       db.ref('users/'+uid).update({ photoURL: url })
     ]);
   }).then(()=>{
+    // Refresh the local user object so state.currentUser.photoURL reflects
+    // the newly saved photo, then re-render it in every spot in the app.
+    return state.currentUser.reload();
+  }).then(()=>{
+    state.currentUser = auth.currentUser;
     renderOwnAvatar();
     showToast('تم تحديث صورة الملف الشخصي');
-  }).catch(()=>{ showToast('تعذر رفع الصورة'); });
+  }).catch(()=>{ showToast('تعذر رفع الصورة، تحقق من اتصالك بالإنترنت'); });
 }
 
 function toggleOnlineVisibility(checked){
