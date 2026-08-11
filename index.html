@@ -43,7 +43,7 @@
   }
   /* ===== LIGHT MODE ===== */
   body[data-mode="light"]{
-    --bg-deep:#ffffff;
+    --bg-deep:#f3f4fb;
     --bg-panel:#ffffff;
     --card:#ffffff;
     --card-2:#eef0fb;
@@ -187,15 +187,11 @@
      APP SHELL (chat list + chat view)
   ============================================================ */
   #view-chatlist, #view-chat{height:100%;}
-  .app-shell{height:100%;display:flex;flex-direction:column;max-width:520px;width:100%;margin:0 auto;background:var(--bg-panel);position:relative;overflow:hidden;box-shadow:none;}
-  @media (min-width:900px){ .app-shell{max-width:520px;} body{display:flex;align-items:center;justify-content:center;} #view-chatlist .app-shell, #view-chat .app-shell{height:100vh;max-height:900px;border-radius:18px;overflow:hidden;margin-top:0;} }
-  @media (max-width:899px){ body{display:block;background:var(--bg-panel);} .app-shell{max-width:none;width:100vw;height:100dvh;border-radius:0;box-shadow:none;} #view-chatlist .app-shell,#view-chat .app-shell{max-width:none;width:100vw;height:100dvh;border-radius:0;} }
+  .app-shell{height:100%;display:flex;flex-direction:column;max-width:520px;width:100%;margin:0 auto;background:var(--bg-panel);position:relative;overflow:hidden;}
+  @media (min-width:640px){ .app-shell{max-width:520px;box-shadow:0 0 60px rgba(0,0,0,0.5);} body[data-mode="light"] .app-shell{ box-shadow:0 0 60px rgba(20,24,50,0.12); } body{display:flex;align-items:center;justify-content:center;} #view-chatlist .app-shell, #view-chat .app-shell{height:100vh;max-height:900px;border-radius:18px;overflow:hidden;margin-top:0;} }
 
   /* --- top bar (chat list) --- */
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 10px;flex-shrink:0;gap:8px;background:var(--bg-panel);}
-  .topbar-actions{min-width:0;flex-wrap:nowrap;}
-  .topbar-actions .icon-btn,.topbar-actions .avatar-btn{width:36px;height:36px;}
-  @media(max-width:420px){.topbar{padding-inline:9px;gap:5px}.topbar-actions{gap:4px}.topbar-actions .icon-btn,.topbar-actions .avatar-btn{width:34px;height:34px}.topbar h1{font-size:19px}.topbar-actions .icon-btn svg{width:17px;height:17px}}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;flex-shrink:0;}
   .topbar h1{font-family:'Cairo',sans-serif;font-weight:800;font-size:21px;}
   .topbar-actions{display:flex;align-items:center;gap:8px;}
   .icon-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--card);color:var(--text-1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;flex-shrink:0;}
@@ -218,12 +214,6 @@
   .status-item.own .status-ring{background:var(--card-2);position:relative;}
   .status-item.own .plus{position:absolute;bottom:-2px;left:-2px;width:20px;height:20px;border-radius:50%;background:var(--violet);border:2.5px solid var(--bg-panel);display:flex;align-items:center;justify-content:center;}
   .status-item.own .plus svg{width:10px;height:10px;}
-
-  .group-status-item{position:relative;}
-  .group-status-ring{width:54px;height:54px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;}
-  .group-status-ring-inner{width:100%;height:100%;border-radius:50%;background:var(--bg-panel);display:flex;align-items:center;justify-content:center;color:var(--violet-2);border:2px solid var(--bg-panel);}
-  .group-status-ring-inner svg{width:22px;height:22px;}
-  .group-status-item:active .group-status-ring{transform:scale(.95);}
 
   .avatar-circle{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;font-weight:800;color:#fff;flex-shrink:0;position:relative;}
 
@@ -327,7 +317,7 @@
   /* ============================================================
      OVERLAYS: info panel / settings modal / confirm modal
   ============================================================ */
-  .overlay-bg{position:fixed;inset:0;background:rgba(4,6,15,0.48);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .overlay-bg{position:fixed;inset:0;background:rgba(4,6,15,0.6);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;}
   .overlay-bg.show{opacity:1;pointer-events:auto;}
 
   .side-panel{position:fixed;top:0;bottom:0;right:0;width:100%;max-width:400px;background:var(--bg-panel);z-index:50;transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;box-shadow:-20px 0 50px rgba(0,0,0,0.4);}
@@ -477,7 +467,7 @@
 .auth-view .panel{flex:1;width:100%;padding:24px 18px;background:transparent;overflow-y:auto;}
 .auth-view .card-stack{max-width:430px;margin:auto;}
 .auth-view .card{background:rgba(17,22,43,.88);backdrop-filter:blur(18px);border:1px solid rgba(167,139,250,.16);box-shadow:0 28px 90px rgba(0,0,0,.38);padding:30px 28px 26px;}
-body[data-mode="light"] .auth-view .card{background:#ffffff;}
+body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
 .auth-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 24px;text-align:right;}
 .auth-logo{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:1px;background:linear-gradient(135deg,#7c5cff,#2fe6d9);box-shadow:0 12px 35px rgba(124,92,255,.28);color:#fff;font-family:'Cairo',sans-serif;font-weight:900;letter-spacing:-1px;}
 .auth-logo span{font-size:20px;line-height:1;}
@@ -770,6 +760,13 @@ body[data-mode="light"] .auth-view .card{background:#ffffff;}
           <span class="notif-dot hidden" id="notifDot"></span>
         </button>
         <button class="icon-btn" onclick="openNewChatPanel()" title="محادثة جديدة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="icon-btn v3-feature-btn" onclick="openV3Panel('v3FeaturePanel')" title="ميزات AN chat v3.0">✦</button>
+        <button class="icon-btn group-add-btn" onclick="openGroupPanel('create')" title="إنشاء مجموعة">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.8 3.1-6 7-6s7 2.2 7 6"/>
+            <path d="M17 11h5M19.5 8.5v5"/>
+          </svg>
+        </button>
         <button class="icon-btn" onclick="openFriendReqPanel()" title="طلبات الصداقة" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
           <span class="nav-badge hidden" id="friendReqBadge" style="top:-4px;left:-4px;">0</span>
@@ -790,16 +787,18 @@ body[data-mode="light"] .auth-view .card{background:#ffffff;}
         <div class="status-ring"><div class="avatar-circle" id="ownAvatarStory" style="width:100%;height:100%;font-size:16px;"></div><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></div></div>
         <span>حالتي</span>
       </div>
-      <div class="status-item group-status-item" onclick="openGroupPanel('create')" title="إنشاء مجموعة">
-        <div class="group-status-ring"><div class="group-status-ring-inner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.8 3.1-6 7-6 2.1 0 3.9.7 5.2 1.8"/>
-            <path d="M17 11h5M19.5 8.5v5"/>
-          </svg>
-        </div></div>
+      <div class="v3-status-action" onclick="openGroupPanel('create')" title="إنشاء مجموعة">
+        <div class="v3-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" width="24" height="24"><circle cx="9" cy="8" r="3"/><path d="M2.5 20c0-3.6 2.8-5.8 6.5-5.8s6.5 2.2 6.5 5.8"/><path d="M18 8v6M21 11h-6"/></svg></div>
         <span>مجموعة</span>
       </div>
       <div id="statusStripFriends" style="display:flex;gap:14px;"></div>
+    </div>
+    <div class="v3-quick-bar">
+      <button class="v3-chip" onclick="openV3Panel('v3FeaturePanel')">✦ كل الميزات</button>
+      <button class="v3-chip" onclick="openV3StickerPanel()">😀 ملصقات</button>
+      <button class="v3-chip" onclick="openV3Poll()">📊 استطلاع</button>
+      <button class="v3-chip" onclick="openV3Channels()">📢 قنوات</button>
+      <button class="v3-chip" onclick="openV3VoiceRoom()">🎙️ غرف صوتية</button>
     </div>
 
     <div class="section-label">الرسائل</div>
@@ -906,9 +905,12 @@ body[data-mode="light"] .auth-view .card{background:#ffffff;}
     <div class="chat-area" id="chatArea"></div>
 
     <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(this.files[0]); this.value='';">
+    <div class="v3-reply-bar" id="v3ReplyBar"><span>↩️</span><div class="reply-text" id="v3ReplyText"></div><button onclick="v3CancelReply()">×</button></div>
 
     <div class="chat-input-bar" id="chatInputBar">
+      <button class="round-btn" title="تسجيل رسالة صوتية" id="v3VoiceBtn" onclick="toggleV3Recording()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
       <button class="round-btn" title="مرفقات" onclick="document.getElementById('fileInput').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.1l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg></button>
+      <div class="v3-recording" id="v3Recording"><span class="pulse"></span><span id="v3RecordingTime">0:00</span><button class="v3-mini-btn" style="margin-inline-start:auto;padding:5px 8px;" onclick="stopV3Recording(true)">إلغاء</button></div>
       <textarea id="msgInput" rows="1" placeholder="اكتب رسالة..." oninput="autoGrow(this)" onkeydown="handleKey(event)"></textarea>
       <button class="round-btn" title="ملصق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></button>
       <button class="round-btn send-btn" onclick="sendMessage()" title="إرسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
@@ -1198,6 +1200,140 @@ body[data-mode="light"] .auth-view .card{background:#ffffff;}
     <button class="call-round-btn" id="muteCallBtn" onclick="toggleCallMute()" title="كتم الميكروفون"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
     <button class="call-round-btn end" onclick="endCall()" title="إنهاء المكالمة"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" transform="rotate(135)"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg></button>
     <button class="call-round-btn" id="cameraCallBtn" onclick="toggleCallCamera()" title="تشغيل/إيقاف الكاميرا"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
+  </div>
+</div>
+
+
+<!-- ================= AN chat v3.0 FEATURES ================= -->
+<div class="side-panel" id="v3FeaturePanel">
+  <div class="panel-head">
+    <button class="panel-close" onclick="closeV3Panel('v3FeaturePanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button>
+    <h3>AN chat v3.0</h3>
+  </div>
+  <div class="v3-feature-grid">
+    <div class="v3-feature-card" onclick="openV3StickerPanel()"><div class="ic">😊</div><strong>ملصقات وهدايا</strong><small>إيموجي وهدية داخل المحادثة</small></div>
+    <div class="v3-feature-card" onclick="openV3Poll()"><div class="ic">📊</div><strong>استطلاع رأي</strong><small>أنشئ تصويتًا داخل المجموعة أو الدردشة</small></div>
+    <div class="v3-feature-card" onclick="openV3AI()"><div class="ic">🤖</div><strong>مساعد AN AI</strong><small>اقتراح ردود ومساعدة سريعة</small></div>
+    <div class="v3-feature-card" onclick="openV3Channels()"><div class="ic">📢</div><strong>القنوات</strong><small>أنشئ قناة وانشر تحديثات</small></div>
+    <div class="v3-feature-card" onclick="openV3VoiceRoom()"><div class="ic">🎙️</div><strong>غرفة صوتية</strong><small>واجهة غرفة جماعية للمجموعة</small></div>
+    <div class="v3-feature-card" onclick="openV3Privacy()"><div class="ic">🔐</div><strong>الخصوصية والأمان</strong><small>قفل التطبيق والخصوصية</small></div>
+    <div class="v3-feature-card" onclick="openV3Themes()"><div class="ic">🎨</div><strong>الثيمات</strong><small>ألوان AN chat ومظهر المحادثة</small></div>
+    <div class="v3-feature-card" onclick="openV3Archive()"><div class="ic">🗂️</div><strong>الأرشيف والتثبيت</strong><small>إدارة المحادثات المهمة</small></div>
+  </div>
+  <div class="v3-section">
+    <h4>ميزات سريعة</h4>
+    <div class="v3-form-row">
+      <button class="v3-mini-btn" onclick="startV3SpeechToText()">🎤 تحويل الصوت إلى نص</button>
+      <button class="v3-mini-btn" onclick="v3SuggestReplies()">✨ اقتراح رد</button>
+    </div>
+    <div class="v3-form-row">
+      <button class="v3-mini-btn" onclick="v3TranslateCurrent()">🌍 ترجمة</button>
+      <button class="v3-mini-btn" onclick="openV3StickerPanel()">😀 ملصق</button>
+    </div>
+  </div>
+</div>
+
+<div class="side-panel" id="v3StickerPanel">
+  <div class="panel-head">
+    <button class="panel-close" onclick="closeV3Panel('v3StickerPanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button>
+    <h3>الملصقات والهدايا</h3>
+  </div>
+  <div class="v3-section"><h4>ملصقات</h4><div class="v3-sticker-grid" id="v3StickerGrid"></div></div>
+  <div class="v3-section"><h4>هدايا</h4><div class="v3-sticker-grid" id="v3GiftGrid"></div></div>
+</div>
+
+<div class="side-panel" id="v3PollPanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3PollPanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button><h3>إنشاء استطلاع</h3></div>
+  <div style="padding:18px;">
+    <div class="field"><label>السؤال</label><div class="input-wrap"><input id="v3PollQuestion" placeholder="ما رأيكم؟"></div></div>
+    <div class="field"><label>الخيارات</label><div class="input-wrap"><input id="v3PollOptions" placeholder="نعم | لا | ربما"></div><div class="hint">افصل الخيارات بعلامة |</div></div>
+    <button class="btn-primary" onclick="sendV3Poll()">نشر الاستطلاع</button>
+  </div>
+</div>
+
+<div class="side-panel" id="v3AIPanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3AIPanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button><h3>مساعد AN AI</h3></div>
+  <div style="padding:18px;">
+    <p class="hint" style="margin-bottom:10px;">المساعد المحلي يقترح ردودًا سريعة دون إرسال محادثتك إلى خدمة خارجية.</p>
+    <div id="v3AIReplies" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div class="field" style="margin-top:14px;"><label>اسأل المساعد</label><div class="input-wrap"><input id="v3AIInput" placeholder="مثال: اقترح ردًا لطيفًا"></div></div>
+    <button class="btn-primary" onclick="v3AskAI()">اسأل</button>
+  </div>
+</div>
+
+<div class="side-panel" id="v3ChannelPanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3ChannelPanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button><h3>القنوات</h3></div>
+  <div style="padding:12px 18px;">
+    <button class="btn-primary" onclick="v3CreateChannel()">+ إنشاء قناة</button>
+  </div>
+  <div id="v3ChannelList"></div>
+</div>
+
+<div class="side-panel" id="v3PrivacyPanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3PrivacyPanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button><h3>الخصوصية والأمان</h3></div>
+  <div class="v3-section">
+    <div class="setting-row"><div class="setting-row-text"><div><div class="label">قفل AN chat</div><div class="sub">اطلب PIN عند فتح التطبيق</div></div></div><label class="switch"><input type="checkbox" id="v3AppLockSwitch" onchange="toggleV3AppLock(this.checked)"><span class="track"></span></label></div>
+    <div class="setting-row"><div class="setting-row-text"><div><div class="label">إخفاء آخر ظهور</div><div class="sub">حفظ الإعداد محليًا</div></div></div><label class="switch"><input type="checkbox" id="v3HideLastSeen"><span class="track"></span></label></div>
+    <div class="setting-row"><div class="setting-row-text"><div><div class="label">إيصالات القراءة</div><div class="sub">يمكن تعطيلها للمحادثات الجديدة</div></div></div><label class="switch"><input type="checkbox" id="v3ReadReceipts" checked><span class="track"></span></label></div>
+  </div>
+</div>
+
+<div class="side-panel" id="v3ThemePanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3ThemePanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button><h3>تخصيص AN chat</h3></div>
+  <div class="v3-section">
+    <h4>لون التطبيق</h4>
+    <div class="v3-theme-row" id="v3GlobalThemes"></div>
+  </div>
+  <div class="v3-section">
+    <h4>ثيم المحادثة الحالية</h4>
+    <div class="v3-theme-row" id="v3ChatThemes"></div>
+  </div>
+</div>
+
+<div class="side-panel" id="v3ArchivePanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3ArchivePanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button><h3>الأرشيف والتثبيت</h3></div>
+  <div class="v3-section">
+    <h4>المحادثة الحالية</h4>
+    <div class="v3-form-row"><button class="v3-mini-btn" onclick="v3ArchiveCurrent()">🗂️ أرشفة</button><button class="v3-mini-btn" onclick="v3PinCurrentChat()">📌 تثبيت</button></div>
+  </div>
+  <div id="v3ArchivedList" style="padding-bottom:20px;"></div>
+</div>
+
+<div class="side-panel" id="v3RoomPanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3RoomPanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l6 6 6"/></svg></button><h3>غرفة صوتية</h3></div>
+  <div class="v3-room">
+    <div class="room-head"><strong>غرفة AN chat</strong><span class="live">● LIVE</span></div>
+    <p class="hint" id="v3RoomStatus" style="margin-top:8px;">يمكنك فتح غرفة للمجموعة الحالية.</p>
+    <button class="btn-primary" style="margin-top:12px;" onclick="v3JoinVoiceRoom()">🎙️ انضمام</button>
+  </div>
+  <p class="hint" style="padding:0 18px;">هذه نسخة واجهة الغرف؛ الصوت الجماعي متعدد الأطراف يحتاج خادم WebRTC/Signaling مخصص للإنتاج.</p>
+</div>
+
+<div class="side-panel" id="v3MessagePanel">
+  <div class="panel-head"><button class="panel-close" onclick="closeV3Panel('v3MessagePanel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 6l-6 6 6 6"/></svg></button><h3>خيارات الرسالة</h3></div>
+  <div id="v3MessagePreview" style="padding:12px 18px;color:var(--text-2);font-size:13px;"></div>
+  <div class="v3-section">
+    <div class="v3-form-row"><button class="v3-mini-btn" onclick="v3ReplyMessage()">↩️ رد</button><button class="v3-mini-btn" onclick="v3ForwardMessage()">↗️ إعادة توجيه</button></div>
+    <div class="v3-form-row"><button class="v3-mini-btn" onclick="v3EditMessage()">✏️ تعديل</button><button class="v3-mini-btn" onclick="v3TogglePinMessage()">📌 تثبيت</button></div>
+    <div class="v3-form-row"><button class="v3-mini-btn" onclick="v3TranslateMessage()">🌍 ترجمة</button><button class="v3-mini-btn" onclick="v3DeleteMessage()">🗑️ حذف</button></div>
+  </div>
+</div>
+
+<div class="v3-status-viewer" id="v3StatusViewer">
+  <div class="v3-status-top"><button class="panel-close" style="background:rgba(255,255,255,.1);color:#fff;" onclick="closeV3StatusViewer()">×</button><div class="avatar-circle" id="v3StatusAvatar"></div><div style="flex:1"><strong id="v3StatusName">حالة</strong><div id="v3StatusTime" style="font-size:11px;opacity:.7;"></div></div></div>
+  <div class="v3-status-image-wrap"><img id="v3StatusImage" src="" alt=""></div>
+  <div class="v3-status-caption" id="v3StatusCaption"></div>
+  <div class="v3-status-actions"><input id="v3StatusComment" placeholder="أضف تعليقًا..."><button onclick="v3LikeStatus()">♥</button><button onclick="v3CommentStatus()">➤</button></div>
+</div>
+
+<div class="v3-lock-screen hidden" id="v3LockScreen">
+  <div class="v3-lock-card">
+    <div class="lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+    <h2 style="font-family:Cairo;margin-bottom:5px;">AN chat مقفل</h2>
+    <p class="hint">أدخل PIN لفتح التطبيق</p>
+    <input id="v3LockPin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••">
+    <button class="btn-primary" onclick="unlockV3App()">فتح التطبيق</button>
+    <button class="v3-mini-btn" style="width:100%;margin-top:8px;" onclick="v3DisableLockFromScreen()">نسيت الرمز؟ تسجيل الخروج</button>
   </div>
 </div>
 
@@ -2017,13 +2153,6 @@ auth.onAuthStateChanged(user=>{
     userStatusRef.update({ name: state.ownName, email: user.email || '' });
     userStatusRef.once('value').then(snap=>{
       const v = snap.val() || {};
-      if(v.photoURL){
-        try{ localStorage.setItem('anchat_avatar_'+user.uid, v.photoURL); }catch(e){}
-        if(!user.photoURL){ user.updateProfile({photoURL:v.photoURL}).catch(()=>{}); }
-      } else if(user.photoURL){
-        userStatusRef.update({photoURL:user.photoURL});
-        try{ localStorage.setItem('anchat_avatar_'+user.uid, user.photoURL); }catch(e){}
-      }
       if(!v.code){
         const code = genFriendCode();
         userStatusRef.update({ code });
@@ -2035,7 +2164,6 @@ auth.onAuthStateChanged(user=>{
       const codeEl2 = document.getElementById('settingsCodeValue2');
       if(codeEl) codeEl.textContent = state.ownCode;
       if(codeEl2) codeEl2.textContent = state.ownCode;
-      renderOwnAvatar();
     });
 
     if(connectedRef) connectedRef.off();
@@ -2082,11 +2210,8 @@ auth.onAuthStateChanged(user=>{
    CHAT LIST
 ============================================================ */
 function renderOwnAvatar(){
-  const uid = state.currentUser && state.currentUser.uid;
-  let cachedPhoto = null;
-  try{ cachedPhoto = uid ? localStorage.getItem('anchat_avatar_'+uid) : null; }catch(e){}
-  const photo = (state.currentUser && state.currentUser.photoURL) || cachedPhoto || null;
-  const html = photo ? `<img src="${photo}" alt="صورة الملف الشخصي">` : `<span>${initialOf(state.ownName)}</span>`;
+  const photo = state.currentUser && state.currentUser.photoURL;
+  const html = photo ? `<img src="${photo}" alt="">` : `<span>${initialOf(state.ownName)}</span>`;
   ['ownAvatar','ownAvatarStory','settingsAvatar','ownAvatarCalls'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -2771,13 +2896,13 @@ function handleAvatarSelected(file){
       db.ref('users/'+uid).update({ photoURL: url })
     ]);
   }).then(()=>{
-    try{ localStorage.setItem('anchat_avatar_'+uid, url); }catch(e){}
-    // Keep the URL in both Firebase Auth and the user profile so it survives logout/login.
+    // Refresh the local user object so state.currentUser.photoURL reflects
+    // the newly saved photo, then re-render it in every spot in the app.
     return state.currentUser.reload();
   }).then(()=>{
     state.currentUser = auth.currentUser;
     renderOwnAvatar();
-    showToast('تم تحديث صورة الملف الشخصي وحفظها');
+    showToast('تم تحديث صورة الملف الشخصي');
   }).catch(()=>{ showToast('تعذر رفع الصورة، تحقق من اتصالك بالإنترنت'); });
 }
 
@@ -3104,5 +3229,546 @@ renderOwnAvatar();
   #chatShell[data-theme="royal"]{ --sent-a:#a78bfa; --sent-b:#ff6b9a; --wallpaper-tint-1:rgba(167,139,250,0.12); --wallpaper-tint-2:rgba(255,107,154,0.10); }
   #chatShell[data-theme="mono"]{ --sent-a:#8890b5; --sent-b:#5f6790; --wallpaper-tint-1:rgba(136,144,181,0.10); --wallpaper-tint-2:rgba(95,103,144,0.08); }
 </style>
+
+<style id="an-v3-css">
+/* ================= AN chat v3.0 — mobile-first visual layer ================= */
+html,body{width:100%;max-width:100%;margin:0;padding:0;}
+body{background:#fff!important;}
+body[data-mode="light"]{--bg-deep:#fff;--bg-panel:#fff;--card:#fff;--card-2:#f4f5fb;--card-border:rgba(25,30,60,.10);}
+.app-shell{width:100%!important;max-width:680px!important;margin:0 auto!important;border-radius:0!important;box-shadow:none!important;background:#fff;}
+@media (min-width:680px){
+  .app-shell{max-width:680px!important;}
+}
+@media (max-width:679px){
+  .app-shell{max-width:100%!important;min-width:0!important;}
+  .topbar{padding:10px 10px 8px!important;}
+  .topbar h1{font-size:19px!important;}
+  .topbar-actions{gap:4px!important;overflow:hidden;}
+  .topbar-actions .icon-btn,.topbar-actions .avatar-btn{width:34px!important;height:34px!important;}
+  .status-strip{padding:2px 10px 10px!important;gap:10px!important;}
+  .status-item{width:56px!important;}
+  .status-ring{width:50px!important;height:50px!important;}
+  .searchbar{margin:2px 10px 10px!important;}
+  .bottom-nav{padding-bottom:max(6px,env(safe-area-inset-bottom))!important;}
+}
+body[data-mode="light"] .topbar,
+body[data-mode="light"] .status-strip,
+body[data-mode="light"] .section-label,
+body[data-mode="light"] .contact-list{background:#fff;}
+.group-add-btn{display:none!important;}
+.v3-status-action{display:flex;flex-direction:column;align-items:center;gap:6px;width:56px;flex-shrink:0;cursor:pointer;}
+.v3-status-action .v3-group-icon{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#7c5cff,#2fe6d9);color:#fff;box-shadow:0 8px 18px rgba(124,92,255,.18);}
+.v3-status-action span{font-size:11px;color:var(--text-2);white-space:nowrap;}
+.v3-feature-btn{background:linear-gradient(135deg,#f4efff,#e9fbfa)!important;color:#5c4bd8!important;}
+.v3-quick-bar{display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto;scrollbar-width:none;}
+.v3-quick-bar::-webkit-scrollbar{display:none;}
+.v3-chip{border:1px solid var(--card-border);background:var(--card-2);color:var(--text-1);border-radius:999px;padding:7px 11px;font-size:11.5px;white-space:nowrap;cursor:pointer;}
+.v3-chip:active{transform:scale(.97);}
+.v3-badge{display:inline-flex;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;background:var(--violet);color:#fff;font-size:10px;margin-inline-start:4px;}
+.v3-feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 18px 24px;}
+.v3-feature-card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:14px;text-align:right;cursor:pointer;}
+.v3-feature-card .ic{width:38px;height:38px;border-radius:12px;background:var(--card-2);display:flex;align-items:center;justify-content:center;color:var(--violet);margin-bottom:9px;}
+.v3-feature-card strong{font-size:13px;display:block;}
+.v3-feature-card small{font-size:10.5px;color:var(--text-3);line-height:1.5;}
+.v3-section{padding:10px 18px;}
+.v3-section h4{font-family:'Cairo',sans-serif;font-size:14px;margin-bottom:10px;}
+.v3-theme-row{display:flex;gap:8px;overflow:auto;padding-bottom:4px;}
+.v3-theme-dot{width:38px;height:38px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;}
+.v3-theme-dot.active{border-color:var(--text-1);box-shadow:0 0 0 3px var(--card);}
+.v3-form-row{display:flex;gap:8px;margin:8px 0;}
+.v3-form-row>*{flex:1;}
+.v3-mini-btn{border:0;border-radius:11px;padding:10px 12px;background:var(--card-2);color:var(--text-1);cursor:pointer;font-family:inherit;}
+.v3-mini-btn.primary{background:var(--violet);color:#fff;}
+.v3-lock-screen{position:fixed;inset:0;background:rgba(255,255,255,.98);z-index:200;display:flex;align-items:center;justify-content:center;padding:22px;}
+.v3-lock-card{width:min(360px,100%);background:#fff;border:1px solid rgba(20,25,60,.1);border-radius:24px;padding:26px;box-shadow:0 20px 70px rgba(20,25,60,.15);text-align:center;}
+.v3-lock-card .lock-icon{width:64px;height:64px;margin:0 auto 12px;border-radius:20px;background:linear-gradient(135deg,#7c5cff,#2fe6d9);color:#fff;display:flex;align-items:center;justify-content:center;}
+.v3-lock-card input{width:100%;border:1px solid #ddd;border-radius:12px;padding:13px;text-align:center;letter-spacing:5px;font-size:20px;outline:none;margin:14px 0;}
+.v3-reply-bar{display:none;align-items:center;gap:8px;padding:8px 10px;background:var(--card-2);border-top:1px solid var(--card-border);}
+.v3-reply-bar.show{display:flex;}
+.v3-reply-bar .reply-text{flex:1;font-size:11px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.v3-reply-bar button{border:0;background:none;color:var(--text-2);font-size:18px;cursor:pointer;}
+.v3-recording{display:none;align-items:center;gap:8px;flex:1;background:rgba(255,107,122,.10);border:1px solid rgba(255,107,122,.2);border-radius:14px;padding:8px 10px;color:var(--coral);font-size:12px;}
+.v3-recording.show{display:flex;}
+.v3-recording .pulse{width:8px;height:8px;border-radius:50%;background:currentColor;animation:v3pulse 1s infinite;}
+@keyframes v3pulse{50%{opacity:.25;transform:scale(.7)}}
+.v3-msg-actions{display:flex;gap:4px;margin-top:5px;opacity:.75;}
+.v3-msg-actions button{border:0;background:transparent;color:var(--text-3);padding:2px 4px;font-size:10px;cursor:pointer;}
+.v3-msg-actions button:hover{color:var(--violet);}
+.v3-pinned{border-inline-start:3px solid var(--violet);padding-inline-start:7px;}
+.v3-poll{min-width:220px;}
+.v3-poll h4{font-family:'Cairo',sans-serif;font-size:13px;margin-bottom:9px;}
+.v3-poll-opt{width:100%;text-align:right;border:1px solid var(--card-border);background:var(--card-2);border-radius:10px;padding:8px 10px;margin:5px 0;color:var(--text-1);cursor:pointer;font-family:inherit;}
+.v3-poll-opt .bar{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--violet),var(--cyan));margin-top:5px;width:var(--pct,0%);}
+.v3-audio-msg audio{width:220px;max-width:100%;height:38px;}
+.v3-sticker{font-size:44px;line-height:1;}
+.v3-gift{font-size:42px;text-align:center;padding:4px;}
+.v3-sticker-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;padding:14px 18px;}
+.v3-sticker-grid button{font-size:27px;border:0;background:var(--card-2);border-radius:12px;padding:8px;cursor:pointer;}
+.v3-status-viewer{position:fixed;inset:0;background:#05060d;z-index:210;color:#fff;display:none;flex-direction:column;}
+.v3-status-viewer.show{display:flex;}
+.v3-status-top{display:flex;align-items:center;gap:10px;padding:14px;}
+.v3-status-top .avatar-circle{width:42px;height:42px;}
+.v3-status-image-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;}
+.v3-status-image-wrap img{max-width:100%;max-height:72vh;object-fit:contain;border-radius:14px;}
+.v3-status-caption{padding:10px 16px;text-align:center;}
+.v3-status-actions{display:flex;gap:8px;padding:10px 14px 24px;}
+.v3-status-actions input{flex:1;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:11px 14px;outline:none;}
+.v3-status-actions button{border:0;border-radius:50%;width:42px;height:42px;background:#fff;color:#111;cursor:pointer;}
+.v3-channel-item{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--card-border);cursor:pointer;}
+.v3-channel-item .channel-icon{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#7c5cff,#2fe6d9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;}
+.v3-channel-item .meta{flex:1;min-width:0;}
+.v3-channel-item .meta strong{display:block;font-size:13px;}
+.v3-channel-item .meta small{display:block;color:var(--text-3);font-size:11px;margin-top:2px;}
+.v3-channel-post{padding:14px 18px;border-bottom:1px solid var(--card-border);}
+.v3-channel-post p{font-size:13px;line-height:1.7;}
+.v3-room{padding:14px 18px;background:var(--card-2);border-radius:16px;margin:10px 18px;}
+.v3-room .room-head{display:flex;align-items:center;justify-content:space-between;}
+.v3-room .live{color:var(--coral);font-size:11px;font-weight:800;}
+@media(max-width:420px){.v3-feature-grid{grid-template-columns:1fr 1fr;gap:8px}.v3-feature-card{padding:11px}.v3-feature-card small{font-size:10px}.v3-audio-msg audio{width:190px}}
+</style>
+
+<script id="an-v3-js">
+/* ================= AN chat v3.0 functional layer ================= */
+(function(){
+  const V3 = window.AN_V3 = {
+    ctx:null, reply:null, editing:null, recorder:null, chunks:[], recordTimer:null, recordSeconds:0,
+    status:null, currentTheme:null
+  };
+
+  function q(id){return document.getElementById(id);}
+  function safe(s){return typeof escapeHtml==='function'?escapeHtml(s||''):String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function activeMsg(){ if(!V3.ctx) return null; const list=V3.ctx.group?(activeGroup()?.messages||[]):(activeContact()?.messages||[]); return list[V3.ctx.index]||null; }
+  function keyForCtx(){return V3.ctx&&V3.ctx.key;}
+
+  window.openV3Panel=function(id){
+    closeAllOverlays();
+    q('overlayBg').classList.add('show');
+    q(id).classList.add('show');
+  };
+  window.closeV3Panel=function(id){
+    q(id)?.classList.remove('show');
+    const any=['v3FeaturePanel','v3StickerPanel','v3PollPanel','v3AIPanel','v3ChannelPanel','v3PrivacyPanel','v3ThemePanel','v3ArchivePanel','v3RoomPanel','v3MessagePanel'].some(x=>q(x)?.classList.contains('show'));
+    if(!any) q('overlayBg')?.classList.remove('show');
+  };
+
+  function ensureStickerGrid(){
+    const stickers=['😀','😂','🥰','😍','😎','🤩','🥳','😇','🤝','👏','🔥','❤️','💜','💙','💚','✨','🎉','🙌','💯','🤣','😅','😴','🤔','😱'];
+    const gifts=['🎁','🌹','💎','🍫','☕','🧸','🌟','🎈','🏆','💐','🍰','👑'];
+    q('v3StickerGrid').innerHTML=stickers.map(x=>`<button onclick="sendV3Sticker('${x}')">${x}</button>`).join('');
+    q('v3GiftGrid').innerHTML=gifts.map(x=>`<button onclick="sendV3Gift('${x}')">${x}</button>`).join('');
+  }
+  window.openV3StickerPanel=function(){ensureStickerGrid();openV3Panel('v3StickerPanel');};
+
+  async function pushV3Message(data){
+    if(!state.currentUser || !state.activeChatId) return;
+    if(state.activeChatType==='group'){
+      const g=activeGroup(); if(!g)return;
+      await db.ref('groups/'+g.id+'/messages').push({...data,from:state.currentUser.uid,fromName:state.ownName,time:firebase.database.ServerValue.TIMESTAMP});
+    }else{
+      const c=activeContact(); if(!c||c.blocked)return;
+      await db.ref('chats/'+chatIdFor(c.uid)+'/messages').push({...data,from:state.currentUser.uid,fromName:state.ownName,time:firebase.database.ServerValue.TIMESTAMP});
+    }
+  }
+
+  window.sendV3Sticker=async function(x){await pushV3Message({type:'sticker',sticker:x});closeV3Panel('v3StickerPanel');};
+  window.sendV3Gift=async function(x){await pushV3Message({type:'gift',gift:x});closeV3Panel('v3StickerPanel');};
+
+  window.openV3Poll=function(){
+    if(!state.activeChatId){showToast('افتح محادثة أو مجموعة أولًا');return;}
+    q('v3PollQuestion').value='';q('v3PollOptions').value='';
+    openV3Panel('v3PollPanel');
+  };
+  window.sendV3Poll=async function(){
+    const question=(q('v3PollQuestion').value||'').trim();
+    const options=(q('v3PollOptions').value||'').split('|').map(x=>x.trim()).filter(Boolean).slice(0,8);
+    if(!question||options.length<2){showToast('اكتب السؤال وخيارين على الأقل');return;}
+    await pushV3Message({type:'poll',question,options,votes:{}});
+    closeV3Panel('v3PollPanel');showToast('تم نشر الاستطلاع');
+  };
+  window.voteV3Poll=async function(key,option){
+    if(!V3.ctx)return;
+    const path=V3.ctx.group?`groups/${state.activeChatId}/messages/${key}/votes/${state.currentUser.uid}`:`chats/${chatIdFor(activeContact().uid)}/messages/${key}/votes/${state.currentUser.uid}`;
+    await db.ref(path).set(option);showToast('تم تسجيل تصويتك');
+  };
+
+  function v3MessageBody(m,key){
+    if(m.type==='sticker')return `<div class="v3-sticker">${safe(m.sticker||'😊')}</div>`;
+    if(m.type==='gift')return `<div class="v3-gift">${safe(m.gift||'🎁')}</div>`;
+    if(m.type==='audio'&&m.url)return `<div class="v3-audio-msg"><audio controls preload="metadata" src="${safe(m.url)}"></audio></div>`;
+    if(m.type==='poll'){
+      const opts=m.options||[]; const votes=m.votes||{}; const total=Object.keys(votes).length;
+      return `<div class="v3-poll"><h4>📊 ${safe(m.question||'استطلاع')}</h4>${opts.map((o,i)=>{const n=Object.values(votes).filter(v=>v===o).length;const pct=total?Math.round(n/total*100):0;return `<button class="v3-poll-opt" onclick="voteV3Poll('${safe(key)}','${safe(o)}')">${safe(o)} <span style="float:left">${n}</span><div class="bar" style="--pct:${pct}%"></div></button>`}).join('')}</div>`;
+    }
+    if(m.type==='channelPost')return `<div><strong>📢 ${safe(m.channelName||'قناة')}</strong><div style="margin-top:5px">${safe(m.text)}</div></div>`;
+    return null;
+  }
+
+  function v3Quote(m){
+    if(!m.replyTo)return '';
+    return `<div class="v3-pinned" style="font-size:10.5px;color:var(--text-3);margin-bottom:5px;">↩️ ${safe(m.replyTo.sender||'')} · ${safe(m.replyTo.text||'رسالة')}</div>`;
+  }
+
+  /* Preserve Firebase message keys so v3 actions target the exact message. */
+  window.openChat=function(id){
+    if(activeMessagesRef) activeMessagesRef.off();
+    if(activeGroupMessagesRef) activeGroupMessagesRef.off();
+    activeMessagesRef=null;activeGroupMessagesRef=null;
+    state.activeChatType='user';state.activeChatId=id;
+    const c=findContact(id);if(!c)return;
+    c.unread=0;updateNavBadges();renderContactList(window.__currentFilter);setupChatHeader(c);
+    db.ref('chats/'+chatIdFor(c.uid)+'/security').once('value').then(s=>{
+      c.chatPinRequired=!!(s.val()&&s.val().pinEnabled);
+      if(state.activeChatId===id)renderMessages();
+    });
+    q('pinChatBtn').classList.remove('hidden');q('groupManageBtn').classList.add('hidden');
+    activeMessagesRef=db.ref('chats/'+chatIdFor(c.uid)+'/messages').orderByChild('time');
+    activeMessagesRef.on('value',snap=>{
+      const val=snap.val()||{};
+      c.messages=Object.entries(val).sort((a,b)=>(a[1].time||0)-(b[1].time||0)).map(([key,m])=>({
+        key,from:m.from===state.currentUser.uid?'me':'them',senderUid:m.from||'',senderName:m.fromName||'',
+        text:m.text||'',encrypted:!!m.encrypted,ciphertext:m.ciphertext||null,iv:m.iv||null,salt:m.salt||null,
+        type:m.type||'text',url:m.url||null,fileName:m.fileName||null,fileSize:m.fileSize||null,
+        callKind:m.callKind||null,callStatus:m.callStatus||null,duration:m.duration||0,
+        sticker:m.sticker||null,gift:m.gift||null,question:m.question||null,options:m.options||[],votes:m.votes||{},
+        replyTo:m.replyTo||null,pinned:!!m.pinned,edited:!!m.edited,time:formatTime(m.time),rawTime:m.time||0,read:true
+      }));
+      if(state.activeChatId===id)renderMessages();
+    });
+    goTo('chat');
+  };
+
+  window.openGroup=function(id){
+    if(activeMessagesRef)activeMessagesRef.off();if(activeGroupMessagesRef)activeGroupMessagesRef.off();
+    activeMessagesRef=null;activeGroupMessagesRef=null;
+    const g=state.groups.find(x=>x.id===id);if(!g)return;
+    state.activeChatType='group';state.activeChatId=id;updateGroupHeader(g);
+    q('pinChatBtn').classList.add('hidden');q('groupManageBtn').classList.remove('hidden');
+    activeGroupMessagesRef=db.ref('groups/'+id+'/messages').orderByChild('time');
+    activeGroupMessagesRef.on('value',snap=>{
+      const val=snap.val()||{};
+      g.messages=Object.entries(val).sort((a,b)=>(a[1].time||0)-(b[1].time||0)).map(([key,m])=>({
+        key,from:m.from===state.currentUser.uid?'me':'them',senderUid:m.from||'',senderName:m.fromName||'عضو',
+        text:m.text||'',encrypted:false,type:m.type||'text',url:m.url||null,fileName:m.fileName||null,fileSize:m.fileSize||null,
+        sticker:m.sticker||null,gift:m.gift||null,question:m.question||null,options:m.options||[],votes:m.votes||{},
+        replyTo:m.replyTo||null,pinned:!!m.pinned,edited:!!m.edited,time:formatTime(m.time),rawTime:m.time||0,read:true
+      }));
+      if(state.activeChatId===id)renderMessages();
+    });
+    goTo('chat');
+  };
+
+  window.renderMessages=async function(){
+    const area=q('chatArea'),bar=q('chatInputBar'),banner=q('blockedBanner');
+    if(!area)return;
+    if(state.activeChatType==='group'){
+      bar.classList.remove('hidden');banner.classList.add('hidden');
+      const g=activeGroup();let html='<div class="date-divider">مجموعة • اليوم</div>';
+      const list=g?.messages||[];
+      if(list.length){
+        for(let i=0;i<list.length;i++){
+          const m=list[i],sent=m.from==='me',body=v3MessageBody(m,m.key)||await Promise.resolve(messageBodyHtml(m));
+          const sender=!sent?`<div class="msg-sender">${safe(m.senderName||'عضو')}</div>`:'';
+          html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${sender}${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div><div class="v3-msg-actions"><button onclick="openV3MessageActions(${i},'${safe(m.key||'')}',true)">⋯ خيارات الرسالة</button></div></div></div>`;
+        }
+      }else html+='<div class="empty-state" style="padding:70px 20px;"><div>ابدأ أول رسالة في هذه المجموعة ✨</div></div>';
+      area.innerHTML=html;area.scrollTop=area.scrollHeight;return;
+    }
+    const c=activeContact();if(!c)return;
+    if(c.blocked){bar.classList.add('hidden');banner.classList.remove('hidden');q('blockedName').textContent=c.name;}
+    else{bar.classList.remove('hidden');banner.classList.add('hidden');}
+    let html='<div class="date-divider">اليوم</div>';
+    if(c.chatPinRequired&&!state.chatPins[c.uid])html+='<div class="encrypted-note">🔒 المحادثة محمية بتشفير PIN — اضغط القفل لإدخال الرمز</div>';
+    const list=c.messages||[];
+    for(let i=0;i<list.length;i++){
+      const m=list[i],sent=m.from==='me';
+      const body=await messageBodyHtmlAsync(m,c);
+      html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div><div class="v3-msg-actions"><button onclick="openV3MessageActions(${i},'${safe(m.key||'')}',false)">⋯ خيارات الرسالة</button></div></div></div>`;
+    }
+    area.innerHTML=html;area.scrollTop=area.scrollHeight;
+  };
+
+  window.openV3MessageActions=function(index,key,group){
+    V3.ctx={index,key,group};
+    const m=activeMsg();if(!m)return;
+    q('v3MessagePreview').textContent=(m.text||m.sticker||m.gift||m.question||'رسالة').slice(0,160);
+    openV3Panel('v3MessagePanel');
+  };
+  window.v3ReplyMessage=function(){
+    const m=activeMsg();if(!m)return;
+    V3.reply={text:m.text||m.sticker||m.gift||m.question||'رسالة',sender:m.senderName||'أنت'};
+    q('v3ReplyText').textContent=`${V3.reply.sender}: ${V3.reply.text}`;
+    q('v3ReplyBar').classList.add('show');q('msgInput').focus();closeV3Panel('v3MessagePanel');
+  };
+  window.v3CancelReply=function(){V3.reply=null;q('v3ReplyBar').classList.remove('show');q('v3ReplyText').textContent='';};
+  window.v3EditMessage=async function(){
+    const m=activeMsg();if(!m||m.from!=='me'||m.type!=='text'){showToast('يمكن تعديل رسائلك النصية فقط');return;}
+    const val=prompt('عدّل الرسالة:',m.text||'');if(val===null||!val.trim())return;
+    const path=V3.ctx.group?`groups/${state.activeChatId}/messages/${keyForCtx()}`:`chats/${chatIdFor(activeContact().uid)}/messages/${keyForCtx()}`;
+    let data={edited:true,text:val.trim()};
+    if(!V3.ctx.group&&activeContact().chatPinRequired&&state.chatPins[activeContact().uid]){
+      const enc=await encryptWithPin(val.trim(),state.chatPins[activeContact().uid]);data={edited:true,...enc,encrypted:true};
+    }
+    await db.ref(path).update(data);closeV3Panel('v3MessagePanel');showToast('تم تعديل الرسالة');
+  };
+  window.v3DeleteMessage=async function(){
+    const m=activeMsg();if(!m||m.from!=='me'){showToast('يمكنك حذف رسائلك فقط في هذه النسخة');return;}
+    const ok=confirm('حذف هذه الرسالة للجميع؟');if(!ok)return;
+    const path=V3.ctx.group?`groups/${state.activeChatId}/messages/${keyForCtx()}`:`chats/${chatIdFor(activeContact().uid)}/messages/${keyForCtx()}`;
+    await db.ref(path).remove();closeV3Panel('v3MessagePanel');showToast('تم حذف الرسالة');
+  };
+  window.v3TogglePinMessage=async function(){
+    const m=activeMsg();if(!m)return;
+    const path=V3.ctx.group?`groups/${state.activeChatId}/messages/${keyForCtx()}`:`chats/${chatIdFor(activeContact().uid)}/messages/${keyForCtx()}`;
+    await db.ref(path+'/pinned').set(!m.pinned);closeV3Panel('v3MessagePanel');showToast(m.pinned?'تم إلغاء التثبيت':'تم تثبيت الرسالة');
+  };
+  window.v3ForwardMessage=async function(){
+    const m=activeMsg();if(!m)return;
+    const target=prompt('أدخل معرّف الصديق لإعادة التوجيه:');if(!target)return;
+    const c=state.contacts.find(x=>x.uid===target||x.code===target||x.email===target);
+    if(!c){showToast('لم يتم العثور على الصديق');return;}
+    let text=m.text||m.sticker||m.gift||m.question||'رسالة';
+    if(m.encrypted&&activeContact()&&state.chatPins[activeContact().uid]){
+      try{text=await decryptWithPin(m.ciphertext,m.iv,m.salt,state.chatPins[activeContact().uid]);}catch(e){}
+    }
+    await db.ref('chats/'+chatIdFor(c.uid)+'/messages').push({from:state.currentUser.uid,fromName:state.ownName,type:m.type==='text'?'text':'text',text:`↗️ ${text}`,time:firebase.database.ServerValue.TIMESTAMP});
+    closeV3Panel('v3MessagePanel');showToast('تمت إعادة التوجيه');
+  };
+
+  window.v3TranslateMessage=async function(){
+    const m=activeMsg();if(!m)return;
+    let text=m.text||'';
+    if(!text&&m.encrypted&&V3.ctx&&!V3.ctx.group&&activeContact()&&state.chatPins[activeContact().uid]){try{text=await decryptWithPin(m.ciphertext,m.iv,m.salt,state.chatPins[activeContact().uid]);}catch(e){}}
+    if(!text){showToast('لا يوجد نص لترجمته');return;}
+    const target=prompt('إلى أي لغة؟ مثال: English أو French','English');if(!target)return;
+    /* Free translation endpoint: use only when the user explicitly asks for translation. */
+    try{
+      const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=ar|'+(target.toLowerCase().startsWith('fr')?'fr':'en'));
+      const j=await r.json();const translated=j?.responseData?.translatedText;
+      if(translated)showToast('الترجمة: '+translated);else showToast('تعذر الحصول على الترجمة');
+    }catch(e){showToast('الترجمة تحتاج اتصالًا بالإنترنت');}
+  };
+  window.v3TranslateCurrent=function(){if(V3.ctx) v3TranslateMessage();else showToast('افتح خيارات رسالة أولًا');};
+
+  /* Replace sendMessage with v3 reply/edit support while keeping PIN encryption. */
+  window.sendMessage=async function(){
+    const input=q('msgInput'),text=input.value.trim();if(!text)return;
+    if(state.activeChatType==='group'){
+      const g=activeGroup();if(!g)return;
+      input.value='';autoGrow(input);
+      await db.ref('groups/'+g.id+'/messages').push({from:state.currentUser.uid,fromName:state.ownName,type:'text',text,replyTo:V3.reply||null,time:firebase.database.ServerValue.TIMESTAMP});
+      v3CancelReply();return;
+    }
+    const c=activeContact();if(!c||c.blocked)return;
+    if(!state.chatPins[c.uid]){showToast('فعّل تشفير PIN أولًا من زر القفل');openPinModal();return;}
+    input.value='';autoGrow(input);
+    try{
+      const enc=await encryptWithPin(text,state.chatPins[c.uid]);
+      await db.ref('chats/'+chatIdFor(c.uid)+'/messages').push({from:state.currentUser.uid,fromName:state.ownName,type:'text',encrypted:true,...enc,replyTo:V3.reply||null,time:firebase.database.ServerValue.TIMESTAMP});
+      v3CancelReply();
+    }catch(e){showToast('تعذر تشفير الرسالة');input.value=text;}
+  };
+
+  /* Voice messages */
+  window.toggleV3Recording=async function(){
+    if(V3.recorder&&V3.recorder.state==='recording'){stopV3Recording(false);return;}
+    if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined'){showToast('تسجيل الصوت غير مدعوم في هذا المتصفح');return;}
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      V3.chunks=[];V3.recordSeconds=0;
+      V3.recorder=new MediaRecorder(stream);
+      V3.recorder.ondataavailable=e=>{if(e.data.size)V3.chunks.push(e.data);};
+      V3.recorder.onstop=async()=>{
+        stream.getTracks().forEach(t=>t.stop());
+        q('v3Recording').classList.remove('show');
+        if(V3._cancelled){V3._cancelled=false;V3.chunks=[];return;}
+        const blob=new Blob(V3.chunks,{type:V3.recorder.mimeType||'audio/webm'});
+        await uploadV3Audio(blob);
+        V3.chunks=[];
+      };
+      V3.recorder.start();q('v3Recording').classList.add('show');q('msgInput').classList.add('hidden');
+      V3.recordTimer=setInterval(()=>{V3.recordSeconds++;q('v3RecordingTime').textContent=formatDuration(V3.recordSeconds);},1000);
+      showToast('جاري تسجيل الرسالة الصوتية');
+    }catch(e){showToast('اسمح للمتصفح باستخدام الميكروفون');}
+  };
+  window.stopV3Recording=function(cancel){
+    if(!V3.recorder)return;
+    V3._cancelled=!!cancel;
+    clearInterval(V3.recordTimer);V3.recordTimer=null;
+    if(V3.recorder.state==='recording')V3.recorder.stop();
+    q('msgInput').classList.remove('hidden');
+    if(cancel)showToast('تم إلغاء التسجيل');
+  };
+  async function uploadV3Audio(blob){
+    if(!storage){showToast('Firebase Storage غير متاح');return;}
+    const ext=(blob.type||'').includes('mp4')?'mp4':'webm';
+    const path=state.activeChatType==='group'?`groupAudio/${state.activeChatId}/${Date.now()}.${ext}`:`chatAudio/${chatIdFor(activeContact().uid)}/${Date.now()}.${ext}`;
+    try{
+      const ref=storage.ref(path);const snap=await ref.put(blob);const url=await snap.ref.getDownloadURL();
+      await pushV3Message({type:'audio',url,duration:V3.recordSeconds});
+      showToast('تم إرسال الرسالة الصوتية');
+    }catch(e){showToast('تعذر رفع الرسالة الصوتية');}
+  }
+
+  /* Speech-to-text */
+  window.startV3SpeechToText=function(){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){showToast('تحويل الصوت إلى نص غير مدعوم في متصفحك');return;}
+    const rec=new SR();rec.lang='ar-SA';rec.interimResults=false;rec.maxAlternatives=1;
+    rec.onresult=e=>{q('msgInput').value=(q('msgInput').value+' '+e.results[0][0].transcript).trim();autoGrow(q('msgInput'));};
+    rec.onerror=()=>showToast('تعذر التعرف على الصوت');rec.start();showToast('تحدث الآن...');
+  };
+
+  /* Local AI assistant / smart replies */
+  function replySet(last){
+    const t=(last||'').toLowerCase();
+    if(/شكرا|thanks/.test(t))return ['العفو ❤️','على الرحب والسعة 😊','دائمًا بالخدمة ✨'];
+    if(/سلام|مرحبا|اهلا|hello|hi/.test(t))return ['أهلًا وسهلًا 👋','مرحبًا! كيف حالك؟','يا هلا 😊'];
+    if(/كيف حال|اخبار/.test(t))return ['بخير الحمد لله، وأنت؟ 😊','تمام جدًا! ماذا عنك؟','الحمد لله بخير ❤️'];
+    return ['أكيد 👍','تمام، أتفق معك','إن شاء الله 😊','فكرة جميلة! ✨'];
+  }
+  window.v3SuggestReplies=function(){
+    const c=activeContact();const last=c?.messages?.filter(m=>m.from==='them').slice(-1)[0];
+    const replies=replySet(last?.text);
+    q('v3AIReplies').innerHTML=replies.map(x=>`<button class="v3-mini-btn" onclick="useV3SuggestedReply(this.textContent)">${safe(x)}</button>`).join('');
+    openV3Panel('v3AIPanel');
+  };
+  window.useV3SuggestedReply=function(text){q('msgInput').value=text;autoGrow(q('msgInput'));closeV3Panel('v3AIPanel');q('msgInput').focus();};
+  window.openV3AI=function(){q('v3AIInput').value='';q('v3AIReplies').innerHTML='';openV3Panel('v3AIPanel');};
+  window.v3AskAI=function(){
+    const input=(q('v3AIInput').value||'').trim();if(!input)return;
+    let ans='أستطيع مساعدتك بصياغة رد مختصر، لطيف، أو رسمي. جرّب: "اقترح ردًا على..."';
+    if(/رد|reply/.test(input))ans='اقتراح: "يسعدني ذلك، شكرًا لك! دعنا نتفق على التفاصيل 😊"';
+    else if(/رسمي|formal/.test(input))ans='صياغة رسمية: "شكرًا لتواصلك. يسعدني متابعة الموضوع معك."';
+    else if(/ترجمة|translate/.test(input))ans='يمكنك استخدام زر الترجمة من خيارات الرسالة للحصول على ترجمة مباشرة.';
+    q('v3AIReplies').innerHTML+=`<div class="v3-mini-btn" style="white-space:normal;line-height:1.6;">🤖 ${safe(ans)}</div>`;
+  };
+
+  /* App lock — local device feature */
+  async function hashV3(pin){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pin));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+  window.toggleV3AppLock=async function(on){
+    if(on){
+      const pin=prompt('ضع PIN من 6 أرقام لقفل AN chat:')||'';
+      if(!/^\d{6}$/.test(pin)){q('v3AppLockSwitch').checked=false;showToast('استخدم 6 أرقام');return;}
+      localStorage.setItem('an_v3_lock_hash',await hashV3(pin));localStorage.setItem('an_v3_lock_enabled','1');showToast('تم تفعيل قفل التطبيق');
+    }else{localStorage.removeItem('an_v3_lock_hash');localStorage.removeItem('an_v3_lock_enabled');showToast('تم إيقاف قفل التطبيق');}
+  };
+  window.unlockV3App=async function(){
+    const pin=(q('v3LockPin').value||'').trim();if(!/^\d{6}$/.test(pin)){showToast('أدخل 6 أرقام');return;}
+    const h=await hashV3(pin);
+    if(h===localStorage.getItem('an_v3_lock_hash')){q('v3LockScreen').classList.add('hidden');q('v3LockPin').value='';sessionStorage.setItem('an_v3_unlocked','1');}
+    else showToast('PIN غير صحيح');
+  };
+  window.v3DisableLockFromScreen=function(){localStorage.removeItem('an_v3_lock_enabled');localStorage.removeItem('an_v3_lock_hash');q('v3LockScreen').classList.add('hidden');if(typeof logout==='function')logout();};
+  function checkV3Lock(){
+    if(localStorage.getItem('an_v3_lock_enabled')==='1'&&sessionStorage.getItem('an_v3_unlocked')!=='1'&&state.currentUser)q('v3LockScreen').classList.remove('hidden');
+    const sw=q('v3AppLockSwitch');if(sw)sw.checked=localStorage.getItem('an_v3_lock_enabled')==='1';
+  }
+
+  /* Themes */
+  const themes=[
+    ['violet','#7c5cff'],['cyan','#2fe6d9'],['rose','#ff6b7a'],['green','#2fd97e'],['blue','#2a7de1'],['gold','#e6b84a']
+  ];
+  function renderV3Themes(){
+    const wrap=q('v3GlobalThemes');if(wrap)wrap.innerHTML=themes.map(([n,c])=>`<button class="v3-theme-dot ${V3.currentTheme===n?'active':''}" title="${n}" style="background:${c}" onclick="setV3GlobalTheme('${n}','${c}')"></button>`).join('');
+    const cw=q('v3ChatThemes');if(cw)cw.innerHTML=['default','sunset','ocean','forest','royal','mono'].map((n,i)=>`<button class="v3-theme-dot" style="background:${['#7c5cff','#ff6b7a','#2fe6d9','#2fd97e','#a78bfa','#8890b5'][i]}" onclick="setV3ChatTheme('${n}')"></button>`).join('');
+  }
+  window.openV3Themes=function(){renderV3Themes();openV3Panel('v3ThemePanel');};
+  window.setV3GlobalTheme=function(name,color){V3.currentTheme=name;document.documentElement.style.setProperty('--violet',color);localStorage.setItem('an_v3_accent',color);renderV3Themes();showToast('تم تغيير لون AN chat');};
+  window.setV3ChatTheme=function(name){if(state.activeChatType==='group'){showToast('ثيم المجموعة سيضاف في إعدادات المجموعة');return;}const c=activeContact();if(!c)return;setTheme(name);showToast('تم تغيير ثيم المحادثة');renderV3Themes();};
+  function loadV3Theme(){const c=localStorage.getItem('an_v3_accent');if(c)document.documentElement.style.setProperty('--violet',c);V3.currentTheme=themes.find(x=>x[1]===c)?.[0]||'violet';}
+
+  /* Archive/pin chats */
+  function getList(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return[];}}
+  function saveList(k,a){localStorage.setItem(k,JSON.stringify([...new Set(a)]));}
+  window.v3ArchiveCurrent=function(){if(!state.activeChatId){showToast('افتح محادثة أولًا');return;}const a=getList('an_v3_archived');if(!a.includes(state.activeChatId))a.push(state.activeChatId);saveList('an_v3_archived',a);showToast('تمت أرشفة المحادثة');goTo('chatlist');};
+  window.v3PinCurrentChat=function(){if(!state.activeChatId){showToast('افتح محادثة أولًا');return;}const a=getList('an_v3_pinned');if(!a.includes(state.activeChatId))a.push(state.activeChatId);saveList('an_v3_pinned',a);showToast('تم تثبيت المحادثة');};
+  window.openV3Archive=function(){renderV3Archived();openV3Panel('v3ArchivePanel');};
+  function renderV3Archived(){const a=getList('an_v3_archived');q('v3ArchivedList').innerHTML=a.length?a.map(id=>{const c=findContact(id);return `<div class="contact-row"><div class="contact-main"><strong>${safe(c?.name||'محادثة')}</strong><div class="contact-preview">مؤرشفة</div></div><button class="v3-mini-btn" onclick="v3Unarchive('${safe(id)}')">إرجاع</button></div>`}).join(''):'<p class="hint" style="padding:18px;">لا توجد محادثات مؤرشفة.</p>';}
+  window.v3Unarchive=function(id){saveList('an_v3_archived',getList('an_v3_archived').filter(x=>x!==id));renderV3Archived();showToast('تم إرجاع المحادثة');};
+
+  /* Channels */
+  window.openV3Channels=function(){v3LoadChannels();openV3Panel('v3ChannelPanel');};
+  async function v3LoadChannels(){
+    if(!state.currentUser){return;}
+    const snap=await db.ref('channels').once('value');const val=snap.val()||{};
+    const items=Object.entries(val).slice(-30).reverse();
+    q('v3ChannelList').innerHTML=items.length?items.map(([id,c])=>`<div class="v3-channel-item" onclick="v3OpenChannel('${safe(id)}')"><div class="channel-icon">📢</div><div class="meta"><strong>${safe(c.name||'قناة AN')}</strong><small>${safe(c.description||'قناة عامة')}</small></div></div>`).join(''):'<p class="hint" style="padding:18px;">لا توجد قنوات بعد. أنشئ أول قناة.</p>';
+  }
+  window.v3CreateChannel=async function(){
+    if(!state.currentUser)return;
+    const name=prompt('اسم القناة:');if(!name)return;
+    const desc=prompt('وصف القناة:')||'';
+    const ref=db.ref('channels').push();await ref.set({name,description:desc,owner:state.currentUser.uid,createdAt:firebase.database.ServerValue.TIMESTAMP});
+    showToast('تم إنشاء القناة');v3LoadChannels();
+  };
+  window.v3OpenChannel=async function(id){
+    const snap=await db.ref('channels/'+id).once('value');const c=snap.val();if(!c)return;
+    const post=prompt('اكتب منشور القناة (للمالك):');if(post&&c.owner===state.currentUser.uid){
+      await db.ref('channels/'+id+'/posts').push({text:post,from:state.currentUser.uid,fromName:state.ownName,time:firebase.database.ServerValue.TIMESTAMP});
+      showToast('تم نشر التحديث');
+    }else if(c.owner!==state.currentUser.uid)showToast('أنت مشترك في القناة؛ نشر المحتوى للمالك');
+  };
+
+  /* Voice rooms — presence layer */
+  window.openV3VoiceRoom=function(){
+    if(state.activeChatType!=='group'){showToast('افتح مجموعة أولًا لإنشاء غرفة صوتية');return;}
+    q('v3RoomStatus').textContent=`غرفة للمجموعة: ${activeGroup()?.name||'AN chat'}`;
+    openV3Panel('v3RoomPanel');
+  };
+  window.v3JoinVoiceRoom=async function(){
+    if(state.activeChatType!=='group')return;
+    const path='voiceRooms/'+state.activeChatId+'/members/'+state.currentUser.uid;
+    await db.ref(path).set({name:state.ownName,joinedAt:firebase.database.ServerValue.TIMESTAMP});
+    db.ref(path).onDisconnect().remove();q('v3RoomStatus').textContent='أنت داخل الغرفة الآن 🎙️';showToast('تم الانضمام إلى الغرفة');
+  };
+
+  /* Status viewer with like/comment persistence */
+  window.v3OpenStatus=async function(uid,name){
+    const snap=await db.ref('statusUpdates/'+uid).orderByChild('time').limitToLast(1).once('value');
+    const val=snap.val()||{};const entries=Object.entries(val);if(!entries.length){showToast('لا توجد حالة منشورة');return;}
+    const [key,s]=entries[entries.length-1];V3.status={uid,key};
+    q('v3StatusName').textContent=name||'حالة';q('v3StatusTime').textContent=s.time?formatTime(s.time):'';
+    q('v3StatusAvatar').style.background=colorFor(name||'حالة');q('v3StatusAvatar').textContent=initialOf(name||'حالة');
+    q('v3StatusImage').src=s.url||'';q('v3StatusCaption').textContent=s.caption||'';
+    q('v3StatusViewer').classList.add('show');
+  };
+  window.closeV3StatusViewer=function(){q('v3StatusViewer').classList.remove('show');};
+  window.v3LikeStatus=async function(){if(!V3.status)return;await db.ref(`statusUpdates/${V3.status.uid}/${V3.status.key}/likes/${state.currentUser.uid}`).set(true);showToast('❤️ أعجبتك الحالة');};
+  window.v3CommentStatus=async function(){if(!V3.status)return;const text=(q('v3StatusComment').value||'').trim();if(!text)return;await db.ref(`statusUpdates/${V3.status.uid}/${V3.status.key}/comments`).push({uid:state.currentUser.uid,name:state.ownName,text,time:firebase.database.ServerValue.TIMESTAMP});q('v3StatusComment').value='';showToast('تم إرسال التعليق');};
+
+  /* Override status strip so friends' stories open the new viewer. */
+  window.renderStatusStrip=function(){
+    const wrap=q('statusStripFriends');if(!wrap)return;
+    const friends=(state.contacts||[]).filter(c=>!c.blocked);
+    wrap.innerHTML=friends.slice(0,12).map(c=>{
+      const avatarInner=c.photoURL?`<img src="${safe(c.photoURL)}" alt="">`:safe(initialOf(c.name));
+      return `<div class="status-item" onclick="v3OpenStatus('${safe(c.uid)}','${safe(c.name)}')"><div class="status-ring"><div class="avatar-circle" style="width:100%;height:100%;font-size:16px;background:${c.photoURL?'transparent':colorFor(c.name)};">${avatarInner}</div></div><span>${safe(c.name)}</span></div>`;
+    }).join('');
+  };
+
+  function v3Boot(){
+    loadV3Theme();ensureStickerGrid();checkV3Lock();
+    renderV3Themes();
+    q('v3HideLastSeen')?.addEventListener('change',e=>localStorage.setItem('an_v3_hide_last_seen',e.target.checked?'1':'0'));
+    const h=q('v3HideLastSeen');if(h)h.checked=localStorage.getItem('an_v3_hide_last_seen')==='1';
+  }
+  window.openV3Privacy=function(){checkV3Lock();openV3Panel('v3PrivacyPanel');};
+  auth.onAuthStateChanged(u=>{if(u)setTimeout(v3Boot,250);});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.currentUser)checkV3Lock();});
+  setTimeout(v3Boot,500);
+
+  /* Initial UI refinements */
+  setTimeout(()=>{
+    const appSettings=q('appSettingsPanel');
+    if(appSettings){
+      const body=appSettings.querySelector('.app-settings-body');
+      if(body&&!q('v3SettingsShortcut')){
+        const d=document.createElement('div');d.id='v3SettingsShortcut';d.innerHTML='<div class="panel-section-title">AN chat v3.0</div><button class="plain-btn" onclick="openV3Panel(\'v3FeaturePanel\')">✦ فتح مركز الميزات الجديدة</button>';
+        body.prepend(d);
+      }
+    }
+  },700);
+})();
+</script>
 </body>
 </html>
