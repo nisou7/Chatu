@@ -43,7 +43,7 @@
   }
   /* ===== LIGHT MODE ===== */
   body[data-mode="light"]{
-    --bg-deep:#f3f4fb;
+    --bg-deep:#ffffff;
     --bg-panel:#ffffff;
     --card:#ffffff;
     --card-2:#eef0fb;
@@ -187,11 +187,15 @@
      APP SHELL (chat list + chat view)
   ============================================================ */
   #view-chatlist, #view-chat{height:100%;}
-  .app-shell{height:100%;display:flex;flex-direction:column;max-width:520px;width:100%;margin:0 auto;background:var(--bg-panel);position:relative;overflow:hidden;}
-  @media (min-width:640px){ .app-shell{max-width:520px;box-shadow:0 0 60px rgba(0,0,0,0.5);} body[data-mode="light"] .app-shell{ box-shadow:0 0 60px rgba(20,24,50,0.12); } body{display:flex;align-items:center;justify-content:center;} #view-chatlist .app-shell, #view-chat .app-shell{height:100vh;max-height:900px;border-radius:18px;overflow:hidden;margin-top:0;} }
+  .app-shell{height:100%;display:flex;flex-direction:column;max-width:520px;width:100%;margin:0 auto;background:var(--bg-panel);position:relative;overflow:hidden;box-shadow:none;}
+  @media (min-width:900px){ .app-shell{max-width:520px;} body{display:flex;align-items:center;justify-content:center;} #view-chatlist .app-shell, #view-chat .app-shell{height:100vh;max-height:900px;border-radius:18px;overflow:hidden;margin-top:0;} }
+  @media (max-width:899px){ body{display:block;background:var(--bg-panel);} .app-shell{max-width:none;width:100vw;height:100dvh;border-radius:0;box-shadow:none;} #view-chatlist .app-shell,#view-chat .app-shell{max-width:none;width:100vw;height:100dvh;border-radius:0;} }
 
   /* --- top bar (chat list) --- */
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;flex-shrink:0;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 10px;flex-shrink:0;gap:8px;background:var(--bg-panel);}
+  .topbar-actions{min-width:0;flex-wrap:nowrap;}
+  .topbar-actions .icon-btn,.topbar-actions .avatar-btn{width:36px;height:36px;}
+  @media(max-width:420px){.topbar{padding-inline:9px;gap:5px}.topbar-actions{gap:4px}.topbar-actions .icon-btn,.topbar-actions .avatar-btn{width:34px;height:34px}.topbar h1{font-size:19px}.topbar-actions .icon-btn svg{width:17px;height:17px}}
   .topbar h1{font-family:'Cairo',sans-serif;font-weight:800;font-size:21px;}
   .topbar-actions{display:flex;align-items:center;gap:8px;}
   .icon-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--card);color:var(--text-1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;flex-shrink:0;}
@@ -214,6 +218,12 @@
   .status-item.own .status-ring{background:var(--card-2);position:relative;}
   .status-item.own .plus{position:absolute;bottom:-2px;left:-2px;width:20px;height:20px;border-radius:50%;background:var(--violet);border:2.5px solid var(--bg-panel);display:flex;align-items:center;justify-content:center;}
   .status-item.own .plus svg{width:10px;height:10px;}
+
+  .group-status-item{position:relative;}
+  .group-status-ring{width:54px;height:54px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;}
+  .group-status-ring-inner{width:100%;height:100%;border-radius:50%;background:var(--bg-panel);display:flex;align-items:center;justify-content:center;color:var(--violet-2);border:2px solid var(--bg-panel);}
+  .group-status-ring-inner svg{width:22px;height:22px;}
+  .group-status-item:active .group-status-ring{transform:scale(.95);}
 
   .avatar-circle{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;font-weight:800;color:#fff;flex-shrink:0;position:relative;}
 
@@ -317,7 +327,7 @@
   /* ============================================================
      OVERLAYS: info panel / settings modal / confirm modal
   ============================================================ */
-  .overlay-bg{position:fixed;inset:0;background:rgba(4,6,15,0.6);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .overlay-bg{position:fixed;inset:0;background:rgba(4,6,15,0.48);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s;}
   .overlay-bg.show{opacity:1;pointer-events:auto;}
 
   .side-panel{position:fixed;top:0;bottom:0;right:0;width:100%;max-width:400px;background:var(--bg-panel);z-index:50;transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;box-shadow:-20px 0 50px rgba(0,0,0,0.4);}
@@ -467,7 +477,7 @@
 .auth-view .panel{flex:1;width:100%;padding:24px 18px;background:transparent;overflow-y:auto;}
 .auth-view .card-stack{max-width:430px;margin:auto;}
 .auth-view .card{background:rgba(17,22,43,.88);backdrop-filter:blur(18px);border:1px solid rgba(167,139,250,.16);box-shadow:0 28px 90px rgba(0,0,0,.38);padding:30px 28px 26px;}
-body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
+body[data-mode="light"] .auth-view .card{background:#ffffff;}
 .auth-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 24px;text-align:right;}
 .auth-logo{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:1px;background:linear-gradient(135deg,#7c5cff,#2fe6d9);box-shadow:0 12px 35px rgba(124,92,255,.28);color:#fff;font-family:'Cairo',sans-serif;font-weight:900;letter-spacing:-1px;}
 .auth-logo span{font-size:20px;line-height:1;}
@@ -760,12 +770,6 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
           <span class="notif-dot hidden" id="notifDot"></span>
         </button>
         <button class="icon-btn" onclick="openNewChatPanel()" title="محادثة جديدة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
-        <button class="icon-btn group-add-btn" onclick="openGroupPanel('create')" title="إنشاء مجموعة">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.8 3.1-6 7-6s7 2.2 7 6"/>
-            <path d="M17 11h5M19.5 8.5v5"/>
-          </svg>
-        </button>
         <button class="icon-btn" onclick="openFriendReqPanel()" title="طلبات الصداقة" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
           <span class="nav-badge hidden" id="friendReqBadge" style="top:-4px;left:-4px;">0</span>
@@ -785,6 +789,15 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
       <div class="status-item own" onclick="openStatusAdd()">
         <div class="status-ring"><div class="avatar-circle" id="ownAvatarStory" style="width:100%;height:100%;font-size:16px;"></div><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></div></div>
         <span>حالتي</span>
+      </div>
+      <div class="status-item group-status-item" onclick="openGroupPanel('create')" title="إنشاء مجموعة">
+        <div class="group-status-ring"><div class="group-status-ring-inner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.8 3.1-6 7-6 2.1 0 3.9.7 5.2 1.8"/>
+            <path d="M17 11h5M19.5 8.5v5"/>
+          </svg>
+        </div></div>
+        <span>مجموعة</span>
       </div>
       <div id="statusStripFriends" style="display:flex;gap:14px;"></div>
     </div>
@@ -2004,6 +2017,13 @@ auth.onAuthStateChanged(user=>{
     userStatusRef.update({ name: state.ownName, email: user.email || '' });
     userStatusRef.once('value').then(snap=>{
       const v = snap.val() || {};
+      if(v.photoURL){
+        try{ localStorage.setItem('anchat_avatar_'+user.uid, v.photoURL); }catch(e){}
+        if(!user.photoURL){ user.updateProfile({photoURL:v.photoURL}).catch(()=>{}); }
+      } else if(user.photoURL){
+        userStatusRef.update({photoURL:user.photoURL});
+        try{ localStorage.setItem('anchat_avatar_'+user.uid, user.photoURL); }catch(e){}
+      }
       if(!v.code){
         const code = genFriendCode();
         userStatusRef.update({ code });
@@ -2015,6 +2035,7 @@ auth.onAuthStateChanged(user=>{
       const codeEl2 = document.getElementById('settingsCodeValue2');
       if(codeEl) codeEl.textContent = state.ownCode;
       if(codeEl2) codeEl2.textContent = state.ownCode;
+      renderOwnAvatar();
     });
 
     if(connectedRef) connectedRef.off();
@@ -2061,8 +2082,11 @@ auth.onAuthStateChanged(user=>{
    CHAT LIST
 ============================================================ */
 function renderOwnAvatar(){
-  const photo = state.currentUser && state.currentUser.photoURL;
-  const html = photo ? `<img src="${photo}" alt="">` : `<span>${initialOf(state.ownName)}</span>`;
+  const uid = state.currentUser && state.currentUser.uid;
+  let cachedPhoto = null;
+  try{ cachedPhoto = uid ? localStorage.getItem('anchat_avatar_'+uid) : null; }catch(e){}
+  const photo = (state.currentUser && state.currentUser.photoURL) || cachedPhoto || null;
+  const html = photo ? `<img src="${photo}" alt="صورة الملف الشخصي">` : `<span>${initialOf(state.ownName)}</span>`;
   ['ownAvatar','ownAvatarStory','settingsAvatar','ownAvatarCalls'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -2747,13 +2771,13 @@ function handleAvatarSelected(file){
       db.ref('users/'+uid).update({ photoURL: url })
     ]);
   }).then(()=>{
-    // Refresh the local user object so state.currentUser.photoURL reflects
-    // the newly saved photo, then re-render it in every spot in the app.
+    try{ localStorage.setItem('anchat_avatar_'+uid, url); }catch(e){}
+    // Keep the URL in both Firebase Auth and the user profile so it survives logout/login.
     return state.currentUser.reload();
   }).then(()=>{
     state.currentUser = auth.currentUser;
     renderOwnAvatar();
-    showToast('تم تحديث صورة الملف الشخصي');
+    showToast('تم تحديث صورة الملف الشخصي وحفظها');
   }).catch(()=>{ showToast('تعذر رفع الصورة، تحقق من اتصالك بالإنترنت'); });
 }
 
