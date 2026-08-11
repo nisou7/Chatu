@@ -2,8 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#ffffff">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>AN chat — دردشة آمنة</title>
+<title>AN chat — دردشة عصرية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -514,6 +515,300 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
 }
 
 </style>
+
+<style id="ANchat-v5-modern-redesign">
+:root{
+  --bg-deep:#f4f9ff;
+  --bg-panel:#ffffff;
+  --card:#ffffff;
+  --card-2:#eef7ff;
+  --card-border:rgba(33,92,160,.10);
+  --violet:#4f8cff;
+  --violet-2:#72b7ff;
+  --cyan:#32c7f5;
+  --coral:#ff6b7a;
+  --green:#20c997;
+  --text-1:#10243f;
+  --text-2:#60748d;
+  --text-3:#8ea1b5;
+  --sent-a:#318cff;
+  --sent-b:#4db7ff;
+  --wallpaper-tint-1:rgba(49,140,255,.08);
+  --wallpaper-tint-2:rgba(50,199,245,.07);
+}
+html,body{
+  width:100%;
+  min-width:100%;
+  background:#f4f9ff !important;
+}
+body{
+  color:var(--text-1) !important;
+}
+body[data-mode="light"]{
+  --bg-deep:#f4f9ff;
+  --bg-panel:#ffffff;
+  --card:#ffffff;
+  --card-2:#eef7ff;
+  --card-border:rgba(33,92,160,.10);
+  --text-1:#10243f;
+  --text-2:#60748d;
+  --text-3:#8ea1b5;
+}
+body[data-mode="dark"]{
+  --bg-deep:#edf6ff;
+  --bg-panel:#ffffff;
+  --card:#ffffff;
+  --card-2:#eef7ff;
+  --card-border:rgba(33,92,160,.10);
+  --text-1:#10243f;
+  --text-2:#60748d;
+  --text-3:#8ea1b5;
+  background:#edf6ff !important;
+  color:#10243f !important;
+}
+#view-chatlist,#view-chat,#view-login,#view-signup{
+  width:100vw !important;
+  max-width:none !important;
+  min-width:100% !important;
+}
+.app-shell{
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:#fff !important;
+}
+@media (min-width:640px){
+  body{display:block !important;}
+  #view-chatlist .app-shell,#view-chat .app-shell{
+    width:100% !important;
+    max-width:680px !important;
+    height:100dvh !important;
+    max-height:none !important;
+    margin:0 auto !important;
+    border-radius:0 !important;
+    box-shadow:0 8px 35px rgba(42,103,170,.10) !important;
+  }
+}
+
+/* ----- modern auth ----- */
+.auth-view{
+  min-height:100dvh;
+  background:linear-gradient(180deg,#eaf6ff 0%,#ffffff 48%,#f8fcff 100%);
+}
+.auth-view .hero{
+  background:
+    radial-gradient(70% 70% at 15% 15%,rgba(50,199,245,.20),transparent 60%),
+    radial-gradient(70% 70% at 85% 80%,rgba(49,140,255,.16),transparent 60%),
+    #f4faff !important;
+}
+.auth-view .blob{opacity:.18;filter:blur(85px);}
+.auth-view .blob-1{background:#4f8cff;}
+.auth-view .blob-2{background:#32c7f5;}
+.auth-view .blob-3{display:none;}
+.logo-mark,.auth-logo{
+  background:linear-gradient(135deg,#328cff,#43c9f5) !important;
+  box-shadow:0 10px 26px rgba(49,140,255,.22) !important;
+}
+.auth-brand strong,.hero-top span{color:#10243f !important;}
+.hero-mid h1{color:#10243f !important;}
+.hero-mid h1 em{background:linear-gradient(90deg,#248cff,#22bde8);-webkit-background-clip:text;background-clip:text;}
+.hero-mid p{color:#60748d !important;}
+.bub{box-shadow:0 8px 22px rgba(38,98,160,.10) !important;border:1px solid rgba(49,140,255,.08);}
+.bub-1{background:linear-gradient(135deg,#348fff,#36bce9) !important;}
+.bub-2{background:#fff !important;color:#10243f !important;}
+.bub-3{background:#e8f7ff !important;color:#16638e !important;}
+.auth-view .panel .card{
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid rgba(49,140,255,.10) !important;
+  box-shadow:0 18px 55px rgba(45,103,165,.12) !important;
+}
+.auth-view input{
+  background:#f5faff !important;
+  border-color:#dcecf8 !important;
+  color:#10243f !important;
+}
+.auth-view input:focus{border-color:#55a7ff !important;box-shadow:0 0 0 4px rgba(49,140,255,.08);}
+.auth-view .primary-btn,.auth-view button[type="submit"]{
+  background:linear-gradient(135deg,#328cff,#35bde9) !important;
+  box-shadow:0 10px 24px rgba(49,140,255,.20) !important;
+}
+
+/* ----- top navigation ----- */
+.topbar{
+  padding:12px 16px 10px !important;
+  background:rgba(255,255,255,.96) !important;
+  border-bottom:1px solid #edf3f8 !important;
+}
+.topbar h1{
+  font-size:24px !important;
+  color:#10243f !important;
+  letter-spacing:-.4px;
+}
+.topbar-actions{gap:7px !important;}
+.icon-btn{
+  width:42px !important;
+  height:42px !important;
+  border-radius:14px !important;
+  background:#f2f8fd !important;
+  color:#2d78b9 !important;
+  border:1px solid #e1edf6 !important;
+  box-shadow:0 3px 10px rgba(41,101,160,.05);
+}
+.icon-btn:hover,.icon-btn:active{background:#e5f4ff !important;}
+.icon-btn svg{width:20px !important;height:20px !important;}
+.avatar-btn{
+  width:42px !important;height:42px !important;
+  border:2px solid #d7edff !important;
+  box-shadow:0 3px 12px rgba(49,140,255,.12);
+}
+.v3-feature-btn{display:none !important;}
+
+.searchbar{
+  margin:8px 16px 14px !important;
+}
+.searchbar input{
+  background:#f2f8fd !important;
+  border:1px solid #e1edf6 !important;
+  border-radius:17px !important;
+  padding:13px 44px 13px 16px !important;
+  color:#10243f !important;
+}
+.searchbar input:focus{border-color:#6ab5f4 !important;box-shadow:0 0 0 4px rgba(49,140,255,.07);}
+.searchbar svg{color:#7d9ab5 !important;}
+
+/* ----- stories / quick actions ----- */
+.status-strip{
+  gap:16px !important;
+  padding:2px 16px 14px !important;
+  overflow-x:auto !important;
+  scrollbar-width:none;
+}
+.status-strip::-webkit-scrollbar{display:none;}
+.status-item{min-width:74px !important;}
+.status-ring{
+  width:64px !important;height:64px !important;
+  border:3px solid #fff !important;
+  box-shadow:0 5px 18px rgba(42,111,177,.14);
+}
+.status-item .status-label{color:#4e6880 !important;font-size:12px !important;}
+.group-add-btn{
+  background:linear-gradient(135deg,#4d8dff,#37c3ee) !important;
+  color:#fff !important;
+  border:none !important;
+  box-shadow:0 8px 18px rgba(49,140,255,.18);
+}
+
+/* ----- chat list ----- */
+.chat-list,.contacts-list{
+  background:#fff !important;
+}
+.contact-row{
+  margin:3px 10px !important;
+  padding:12px 10px !important;
+  border-radius:18px !important;
+}
+.contact-row:hover,.contact-row:active{background:#f2f8fd !important;}
+.contact-row .avatar-circle{
+  box-shadow:0 4px 13px rgba(40,103,164,.12);
+}
+.contact-row .cname{color:#10243f !important;}
+.contact-row .cmeta{color:#7d91a7 !important;}
+
+/* ----- bottom navigation ----- */
+.bottom-nav{
+  background:rgba(255,255,255,.98) !important;
+  border-top:1px solid #e8f0f6 !important;
+  box-shadow:0 -5px 22px rgba(42,96,148,.06) !important;
+  padding:7px 8px calc(7px + env(safe-area-inset-bottom)) !important;
+}
+.nav-item{color:#8aa0b5 !important;border-radius:14px !important;}
+.nav-item.active{
+  color:#318cff !important;
+  background:#edf7ff !important;
+}
+.nav-item svg{width:23px !important;height:23px !important;}
+.nav-item span{font-size:10.5px !important;}
+
+/* ----- chat view ----- */
+.chat-header{
+  background:#fff !important;
+  border-bottom:1px solid #e8f0f6 !important;
+  padding:10px 12px !important;
+  box-shadow:0 2px 12px rgba(35,94,145,.05);
+}
+.chat-header .avatar-circle{
+  width:42px !important;height:42px !important;
+  box-shadow:0 4px 14px rgba(40,103,164,.12);
+}
+.chat-header-info h3{color:#10243f !important;}
+.chat-header-info p{color:#7d91a7 !important;}
+.chat-header-actions .icon-btn{background:#f2f8fd !important;}
+.chat-area{
+  background:
+    radial-gradient(120% 60% at 10% 0%,rgba(49,140,255,.055),transparent 60%),
+    #f8fbfe !important;
+  padding:14px 12px 10px !important;
+}
+.msg-bubble{
+  box-shadow:0 3px 12px rgba(37,92,142,.08) !important;
+  border:1px solid rgba(40,103,164,.05);
+}
+.msg-row.sent .msg-bubble{
+  background:linear-gradient(135deg,#318cff,#46b9ef) !important;
+}
+.msg-row.received .msg-bubble{
+  background:#fff !important;
+  color:#10243f !important;
+}
+.chat-input-bar{
+  background:#fff !important;
+  border-top:1px solid #e8f0f6 !important;
+  box-shadow:0 -5px 18px rgba(35,94,145,.05);
+}
+.chat-input-bar textarea{
+  background:#f3f8fc !important;
+  border:1px solid #e1edf6 !important;
+  color:#10243f !important;
+  border-radius:18px !important;
+}
+.send-btn{
+  background:linear-gradient(135deg,#318cff,#39bce9) !important;
+  box-shadow:0 7px 17px rgba(49,140,255,.18);
+}
+
+/* ----- settings ----- */
+.app-settings,.settings-view,.app-settings-body{
+  background:#fff !important;
+}
+.settings-header{
+  background:#fff !important;
+  border-bottom:1px solid #e8f0f6 !important;
+}
+.settings-section-title{color:#7b95ad !important;}
+.settings-card,.setting-row{
+  background:#fff !important;
+  border-color:#e8f0f6 !important;
+}
+.settings-card{box-shadow:0 5px 20px rgba(42,96,148,.05) !important;}
+/* PIN/encryption UI removed from the visible product */
+#pinModal,#pinChatBtn,.encrypted-note,.msg-locked{display:none !important;}
+
+/* Remove any remaining v3 feature chips/panels from the chat home */
+.v3-feature-panel,.v3-features,.feature-strip,.feature-chip{display:none !important;}
+
+@media(max-width:600px){
+  .topbar h1{font-size:23px !important;}
+  .topbar{padding-top:10px !important;}
+  .topbar-actions .icon-btn{width:40px !important;height:40px !important;}
+  .status-ring{width:62px !important;height:62px !important;}
+  .contact-row{margin-inline:8px !important;}
+  .chat-area{padding-left:10px !important;padding-right:10px !important;}
+}
+</style>
+
+<style id="v5-hide-old-feature-panels">#v3FeaturePanel,#v3AIPanel,#v3ArchivePanel,#v3ChannelPanel,#v3PollPanel,#v3RoomPanel,#v3StickerPanel,#v3ThemePanel,#v3MessagePanel,#v3PrivacyPanel{display:none !important;}</style>
 </head>
 <body>
 
@@ -749,19 +1044,26 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
 ========================================================= -->
 <div id="view-chatlist" class="hidden">
   <div class="app-shell">
-    <div class="topbar modern-topbar">
-      <h1 id="chatListTitle">الدردشات</h1>
-      <div class="topbar-actions modern-topbar-actions">
-        <button class="icon-btn" onclick="toggleThemeMode()" title="الوضع الليلي / النهاري" aria-label="الوضع الليلي / النهاري">
+    <div class="topbar">
+      <h1>الدردشات</h1>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="toggleThemeMode()" title="تبديل الوضع الليلي/النهاري">
           <svg id="modeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
         </button>
-        <button class="icon-btn" onclick="openNotifPanel()" title="الإشعارات" aria-label="الإشعارات" style="position:relative;">
+        <button class="icon-btn" onclick="openNotifPanel()" title="الإشعارات" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
           <span class="notif-dot hidden" id="notifDot"></span>
         </button>
-        <button class="icon-btn" onclick="openNewChatPanel()" title="إضافة صديق" aria-label="إضافة صديق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button>
-        <button class="icon-btn" onclick="openFriendReqPanel()" title="طلبات الصداقة" aria-label="طلبات الصداقة" style="position:relative;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2.5 20c0-3.8 2.8-6 6.5-6s6.5 2.2 6.5 6"/><circle cx="17.5" cy="8.5" r="3"/><path d="M18 8.5h6M21 5.5v6"/></svg>
+        <button class="icon-btn" onclick="openNewChatPanel()" title="محادثة جديدة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="icon-btn v3-feature-btn" onclick="openV3Panel('v3FeaturePanel')" title="ميزات AN chat v3.0">✦</button>
+        <button class="icon-btn group-add-btn" onclick="openGroupPanel('create')" title="إنشاء مجموعة">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.8 3.1-6 7-6s7 2.2 7 6"/>
+            <path d="M17 11h5M19.5 8.5v5"/>
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="openFriendReqPanel()" title="طلبات الصداقة" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
           <span class="nav-badge hidden" id="friendReqBadge" style="top:-4px;left:-4px;">0</span>
         </button>
         <button class="avatar-btn" onclick="openAppSettings()" title="الملف الشخصي والإعدادات">
@@ -786,18 +1088,26 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
       </div>
       <div id="statusStripFriends" style="display:flex;gap:14px;"></div>
     </div>
+    <div class="v3-quick-bar">
+      <button class="v3-chip" onclick="openV3Panel('v3FeaturePanel')">✦ كل الميزات</button>
+      <button class="v3-chip" onclick="openV3StickerPanel()">😀 ملصقات</button>
+      <button class="v3-chip" onclick="openV3Poll()">📊 استطلاع</button>
+      <button class="v3-chip" onclick="openV3Channels()">📢 قنوات</button>
+      <button class="v3-chip" onclick="openV3VoiceRoom()">🎙️ غرف صوتية</button>
+    </div>
+
     <div class="section-label">الرسائل</div>
     <div class="contact-list" id="contactList"></div>
 
     <div class="bottom-nav">
       <button class="nav-item active" id="navChatsBtn" onclick="goTo('chatlist')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.3 8L4 21l1.5-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg><span class="nav-badge hidden" id="navMsgBadge">0</span></span>
-        <span class="nav-label">الدردشات</span></button>
-      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="nav-label">الحالات</span></button>
+        الدردشات</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>الحالات</button>
       <button class="nav-item" id="navCallsBtn" onclick="goTo('calls')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><span class="nav-badge hidden" id="navCallBadge">0</span></span>
-        <span class="nav-label">المكالمات</span></button>
-      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nav-label">الإعدادات</span></button>
+        المكالمات</button>
+      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>الإعدادات</button>
     </div>
   </div>
 </div>
@@ -810,7 +1120,7 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
     <div class="topbar">
       <h1>المكالمات</h1>
       <div class="topbar-actions">
-        <button class="icon-btn" onclick="toggleThemeMode()" title="الوضع الليلي / النهاري" aria-label="الوضع الليلي / النهاري">
+        <button class="icon-btn" onclick="toggleThemeMode()" title="تبديل الوضع الليلي/النهاري">
           <svg id="modeIconCalls" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
         </button>
         <button class="avatar-btn" onclick="openAppSettings()" title="الملف الشخصي والإعدادات">
@@ -825,12 +1135,12 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
     <div class="bottom-nav">
       <button class="nav-item" onclick="goTo('chatlist')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-11.3 8L4 21l1.5-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg><span class="nav-badge hidden" id="navMsgBadge2">0</span></span>
-        <span class="nav-label">الدردشات</span></button>
-      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="nav-label">الحالات</span></button>
+        الدردشات</button>
+      <button class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>الحالات</button>
       <button class="nav-item active" onclick="goTo('calls')">
         <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg><span class="nav-badge hidden" id="navCallBadge2">0</span></span>
-        <span class="nav-label">المكالمات</span></button>
-      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nav-label">الإعدادات</span></button>
+        المكالمات</button>
+      <button class="nav-item" onclick="openAppSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>الإعدادات</button>
     </div>
   </div>
 </div>
@@ -870,14 +1180,10 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
         <p id="chatFriendStatus">—</p>
       </div>
       <div class="chat-header-actions">
+        <button id="pinChatBtn" class="hidden v5-pin-removed" type="button" aria-hidden="true" tabindex="-1"></button>
         <button class="icon-btn" onclick="startCall('video')" title="مكالمة فيديو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
         <button class="icon-btn" onclick="startCall('audio')" title="مكالمة صوتية"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg></button>
-        <button class="icon-btn" id="pinChatBtn" onclick="openPinModal()" title="تشفير المحادثة بـ PIN">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
-          </svg>
-        </button>
-        <button class="icon-btn hidden" id="groupManageBtn" onclick="openGroupPanel('manage',state.activeChatId)" title="إدارة المجموعة">
+<button class="icon-btn hidden" id="groupManageBtn" onclick="openGroupPanel('manage',state.activeChatId)" title="إدارة المجموعة">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.8 3.1-6 7-6s7 2.2 7 6"/>
             <path d="M17 11h5M19.5 8.5v5"/>
@@ -890,8 +1196,12 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
     <div class="chat-area" id="chatArea"></div>
 
     <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(this.files[0]); this.value='';">
+    <div class="v3-reply-bar" id="v3ReplyBar"><span>↩️</span><div class="reply-text" id="v3ReplyText"></div><button onclick="v3CancelReply()">×</button></div>
+
     <div class="chat-input-bar" id="chatInputBar">
+      <button class="round-btn" title="تسجيل رسالة صوتية" id="v3VoiceBtn" onclick="toggleV3Recording()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
       <button class="round-btn" title="مرفقات" onclick="document.getElementById('fileInput').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.1l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg></button>
+      <div class="v3-recording" id="v3Recording"><span class="pulse"></span><span id="v3RecordingTime">0:00</span><button class="v3-mini-btn" style="margin-inline-start:auto;padding:5px 8px;" onclick="stopV3Recording(true)">إلغاء</button></div>
       <textarea id="msgInput" rows="1" placeholder="اكتب رسالة..." oninput="autoGrow(this)" onkeydown="handleKey(event)"></textarea>
       <button class="round-btn" title="ملصق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></button>
       <button class="round-btn send-btn" onclick="sendMessage()" title="إرسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
@@ -1024,19 +1334,6 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
       <div class="input-wrap"><textarea id="bioInput" rows="2" placeholder="اكتب نبذة قصيرة عنك..." onchange="updateOwnBio(this.value)"></textarea></div>
     </div>
 
-    <div class="panel-section-title">اللغة</div>
-    <div class="language-row">
-      <div class="setting-row-text">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2c2.5 2.8 3.8 6.1 3.8 10S14.5 19.2 12 22c-2.5-2.8-3.8-6.1-3.8-10S9.5 4.8 12 2z"/></svg>
-        <div><div class="label">لغة التطبيق</div><div class="sub">تتغير واجهة التطبيق فورًا</div></div>
-      </div>
-      <select id="appLanguageSelect" class="language-select" onchange="applyAppLanguage(this.value)">
-        <option value="ar">العربية</option>
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-      </select>
-    </div>
-
     <div class="panel-section-title">الخصوصية</div>
     <div class="setting-row">
       <div class="setting-row-text">
@@ -1065,6 +1362,19 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
     <div class="panel-section-title">جهات الاتصال المحظورة</div>
     <div id="blockedListWrap"><p class="hint" id="noBlockedHint" style="padding:6px 2px 14px;">لا توجد جهات اتصال محظورة حاليًا.</p></div>
 
+    <div class="panel-section-title">اللغة</div>
+    <div class="setting-row v5-language-row">
+      <div class="setting-row-text">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4.5 6 4.5 9S15 18 12 21c-3-3-4.5-6-4.5-9S9 6 12 3z"/></svg>
+        <div><div class="label">لغة التطبيق</div><div class="sub">اختر لغة واجهة AN chat</div></div>
+      </div>
+      <select id="languageSelect" onchange="changeAppLanguage(this.value)" style="border:1px solid #dcecf8;background:#f3f8fc;color:#1a4d77;border-radius:12px;padding:8px 10px;font-family:inherit;font-weight:700;outline:none;">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+      </select>
+    </div>
+
     <div style="margin-top:10px;">
       <button class="danger-btn" onclick="logout()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
@@ -1077,7 +1387,7 @@ body[data-mode="light"] .auth-view .card{background:rgba(255,255,255,.94);}
 <!-- PIN encryption modal -->
 <div class="pin-modal" id="pinModal">
   <div class="pin-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
-  <h4>تشفير محادثة AN chat</h4>
+  <h4></h4>
   <p id="pinModalText">ضع رمز PIN من 6 أرقام. يجب أن يستخدم الطرفان نفس الرمز لفك تشفير الرسائل.</p>
   <div class="pin-input-wrap">
     <input id="chatPinInput" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" type="password" placeholder="••••••">
@@ -1389,8 +1699,8 @@ function toggleThemeMode(){
   applyThemeMode(cur);
 }
 (function initThemeMode(){
-  let saved = 'dark';
-  try{ saved = localStorage.getItem('chatapp_theme_mode') || 'dark'; }catch(e){}
+  let saved = 'light';
+  try{ saved = localStorage.getItem('chatapp_theme_mode') || 'light'; }catch(e){}
   applyThemeMode(saved);
 })();
 
@@ -1602,7 +1912,7 @@ function attachGroupPreviewListeners(){
       if(val){
         const key=Object.keys(val)[0], m=val[key];
         g.lastMessage={
-          text:m.encrypted?'🔒 رسالة مشفرة':(m.text||'📎 ملف'),
+          text:m.encrypted?'🔒 رسالة':(m.text||'📎 ملف'),
           time:formatTime(m.time),
           from:m.from===state.currentUser.uid?'me':'them'
         };
@@ -1802,7 +2112,7 @@ function attachPreviewListeners(){
         const m = val[key];
         const isNewIncoming = c._notifiedInit && m.from !== state.currentUser.uid &&
           (!c.lastMessage || c.lastMessage.time !== formatTime(m.time) || c.lastMessage.text !== (m.text||m.fileName||''));
-        c.lastMessage = { text: m.encrypted ? '🔒 رسالة مشفرة' : (m.type==='call' ? callLabel({callKind:m.callKind,callStatus:m.callStatus,duration:m.duration}).title : (m.type==='image' ? '📷 صورة' : (m.type==='file' ? '📎 '+(m.fileName||'ملف') : m.text))), time: formatTime(m.time), from: m.from===state.currentUser.uid ? 'me' : 'them' };
+        c.lastMessage = { text: m.encrypted ? '🔒 رسالة' : (m.type==='call' ? callLabel({callKind:m.callKind,callStatus:m.callStatus,duration:m.duration}).title : (m.type==='image' ? '📷 صورة' : (m.type==='file' ? '📎 '+(m.fileName||'ملف') : m.text))), time: formatTime(m.time), from: m.from===state.currentUser.uid ? 'me' : 'them' };
         if(isNewIncoming && state.activeChatId !== c.id){
           pushNotification(`رسالة جديدة من ${c.name}`);
           c.unread = (c.unread||0) + 1;
@@ -2371,7 +2681,7 @@ async function renderMessages(){
 
   let html=`<div class="date-divider">اليوم</div>`;
   if(c.chatPinRequired && !state.chatPins[c.uid]){
-    html+=`<div class="encrypted-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>المحادثة محمية بتشفير PIN — اضغط القفل لإدخال الرمز</div>`;
+    html+=`<div class="encrypted-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>`;
   }
   for(const m of (c.messages||[])){
     const sent=m.from==='me';
@@ -2400,16 +2710,10 @@ function callLabel(m){
 }
 
 async function messageBodyHtmlAsync(m,c){
+  // v5.0: PIN chat encryption has been removed from the user interface.
+  // Legacy encrypted records are shown as a normal legacy message placeholder.
   if(m.encrypted){
-    if(!state.chatPins[c.uid]){
-      return `<div class="msg-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>رسالة مشفرة — أدخل PIN</div>`;
-    }
-    try{
-      const plain=await decryptWithPin(m.ciphertext,m.iv,m.salt,state.chatPins[c.uid]);
-      return escapeHtml(plain);
-    }catch(e){
-      return `<div class="msg-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>PIN غير صحيح أو الرسالة تالفة</div>`;
-    }
+    return escapeHtml(m.text || 'رسالة قديمة');
   }
   return messageBodyHtml(m);
 }
@@ -2434,7 +2738,7 @@ async function decryptWithPin(ciphertext,ivB64,saltB64,pin){
   return new TextDecoder().decode(plain);
 }
 function openPinModal(){
-  if(state.activeChatType!=='user'){ showToast('تشفير PIN متاح للمحادثات الفردية فقط'); return; }
+  if(state.activeChatType!=='user'){ showToast(''); return; }
   const c=activeContact(); if(!c) return;
   const input=document.getElementById('chatPinInput');
   input.value='';
@@ -2522,30 +2826,24 @@ async function sendMessage(){
     const g=activeGroup();
     if(!g) return;
     input.value=''; autoGrow(input);
-    await db.ref('groups/'+g.id+'/messages').push({
+    db.ref('groups/'+g.id+'/messages').push({
       from:state.currentUser.uid,
       fromName:state.ownName,
       text,type:'text',
       time:firebase.database.ServerValue.TIMESTAMP
-    });
+    }).catch(()=>{ input.value=text; showToast('تعذر إرسال الرسالة'); });
     return;
   }
 
   const c=activeContact();
   if(!c || c.blocked) return;
-  if(!state.chatPins[c.uid]){
-    showToast('فعّل تشفير PIN أولًا من زر القفل');
-    openPinModal();
-    return;
-  }
   input.value=''; autoGrow(input);
-  try{
-    const enc=await encryptWithPin(text,state.chatPins[c.uid]);
-    await db.ref('chats/'+chatIdFor(c.uid)+'/messages').push({
-      from:state.currentUser.uid,type:'text',encrypted:true,...enc,
-      time:firebase.database.ServerValue.TIMESTAMP
-    });
-  }catch(e){ showToast('تعذر تشفير الرسالة'); input.value=text; }
+  db.ref('chats/'+chatIdFor(c.uid)+'/messages').push({
+    from:state.currentUser.uid,
+    type:'text',
+    text,
+    time:firebase.database.ServerValue.TIMESTAMP
+  }).catch(()=>{ input.value=text; showToast('تعذر إرسال الرسالة'); });
 }
 /* ============================================================
    FILE / IMAGE ATTACHMENTS
@@ -3253,7 +3551,7 @@ body[data-mode="light"] .contact-list{background:#fff;}
 .v3-status-action{display:flex;flex-direction:column;align-items:center;gap:6px;width:56px;flex-shrink:0;cursor:pointer;}
 .v3-status-action .v3-group-icon{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#7c5cff,#2fe6d9);color:#fff;box-shadow:0 8px 18px rgba(124,92,255,.18);}
 .v3-status-action span{font-size:11px;color:var(--text-2);white-space:nowrap;}
-
+.v3-feature-btn{background:linear-gradient(135deg,#f4efff,#e9fbfa)!important;color:#5c4bd8!important;}
 .v3-quick-bar{display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto;scrollbar-width:none;}
 .v3-quick-bar::-webkit-scrollbar{display:none;}
 .v3-chip{border:1px solid var(--card-border);background:var(--card-2);color:var(--text-1);border-radius:999px;padding:7px 11px;font-size:11.5px;white-space:nowrap;cursor:pointer;}
@@ -3319,33 +3617,6 @@ body[data-mode="light"] .contact-list{background:#fff;}
 .v3-room .room-head{display:flex;align-items:center;justify-content:space-between;}
 .v3-room .live{color:var(--coral);font-size:11px;font-weight:800;}
 @media(max-width:420px){.v3-feature-grid{grid-template-columns:1fr 1fr;gap:8px}.v3-feature-card{padding:11px}.v3-feature-card small{font-size:10px}.v3-audio-msg audio{width:190px}}
-
-  /* ===== AN chat v4.1 recovery UI ===== */
-  .modern-topbar{padding:14px 16px 10px;min-height:66px;}
-  .modern-topbar h1{font-size:24px;letter-spacing:-.3px;}
-  .modern-topbar-actions{gap:9px;}
-  .modern-topbar .icon-btn{width:42px;height:42px;border:1px solid var(--card-border);background:linear-gradient(145deg,var(--card),var(--card-2));box-shadow:0 6px 18px rgba(0,0,0,.08);}
-  .modern-topbar .icon-btn svg{width:20px;height:20px;}
-  .modern-topbar .icon-btn:active{transform:scale(.96);}
-  .modern-topbar .avatar-btn{width:42px;height:42px;border:2px solid var(--violet-2);box-shadow:0 6px 18px rgba(124,92,255,.18);}
-  .status-strip{padding-top:4px;padding-bottom:18px;gap:16px;}
-  .v3-status-action .v3-group-icon{width:54px;height:54px;background:linear-gradient(135deg,var(--violet),var(--cyan));box-shadow:0 8px 20px rgba(124,92,255,.20);}
-  .searchbar{margin:2px 16px 16px;}
-  .searchbar input{padding-top:12px;padding-bottom:12px;border-radius:16px;}
-  .contact-list{padding-top:2px;}
-  .bottom-nav{height:68px;}
-  .nav-item{padding-top:8px;font-size:11px;}
-  .nav-item svg{width:21px;height:21px;}
-  .language-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px 18px;}
-  .language-row .setting-row-text{flex:1;}
-  .language-select{min-width:118px;border:1px solid var(--card-border);background:var(--card-2);color:var(--text-1);border-radius:12px;padding:9px 11px;font-family:inherit;font-size:13px;outline:none;}
-  body[data-mode="light"] .modern-topbar .icon-btn{box-shadow:0 5px 15px rgba(20,24,50,.08);}
-  @media(max-width:639px){
-    body{display:block!important;width:100vw;min-width:100vw;background:var(--bg-panel);}
-    #view-chatlist,#view-chat,#view-calls{width:100vw!important;max-width:none!important;height:100%!important;}
-    .app-shell{width:100vw!important;max-width:none!important;margin:0!important;border-radius:0!important;box-shadow:none!important;}
-  }
-
 </style>
 
 <script id="an-v3-js">
@@ -3489,7 +3760,7 @@ body[data-mode="light"] .contact-list{background:#fff;}
         for(let i=0;i<list.length;i++){
           const m=list[i],sent=m.from==='me',body=v3MessageBody(m,m.key)||await Promise.resolve(messageBodyHtml(m));
           const sender=!sent?`<div class="msg-sender">${safe(m.senderName||'عضو')}</div>`:'';
-          html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${sender}${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div></div></div>`;
+          html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${sender}${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div><div class="v3-msg-actions"><button onclick="openV3MessageActions(${i},'${safe(m.key||'')}',true)">⋯ خيارات الرسالة</button></div></div></div>`;
         }
       }else html+='<div class="empty-state" style="padding:70px 20px;"><div>ابدأ أول رسالة في هذه المجموعة ✨</div></div>';
       area.innerHTML=html;area.scrollTop=area.scrollHeight;return;
@@ -3498,12 +3769,12 @@ body[data-mode="light"] .contact-list{background:#fff;}
     if(c.blocked){bar.classList.add('hidden');banner.classList.remove('hidden');q('blockedName').textContent=c.name;}
     else{bar.classList.remove('hidden');banner.classList.add('hidden');}
     let html='<div class="date-divider">اليوم</div>';
-    if(c.chatPinRequired&&!state.chatPins[c.uid])html+='<div class="encrypted-note">🔒 المحادثة محمية بتشفير PIN — اضغط القفل لإدخال الرمز</div>';
+    if(c.chatPinRequired&&!state.chatPins[c.uid])html+='<div class="encrypted-note">🔒 </div>';
     const list=c.messages||[];
     for(let i=0;i<list.length;i++){
       const m=list[i],sent=m.from==='me';
       const body=await messageBodyHtmlAsync(m,c);
-      html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div></div></div>`;
+      html+=`<div class="msg-row ${sent?'sent':'received'}" data-v3-index="${i}" data-v3-key="${safe(m.key||'')}"><div class="msg-bubble ${m.pinned?'v3-pinned':''}">${v3Quote(m)}${body}<div class="msg-meta"><span>${m.time}${m.edited?' · معدل':''}</span>${sent?readReceiptSvg(true):''}</div><div class="v3-msg-actions"><button onclick="openV3MessageActions(${i},'${safe(m.key||'')}',false)">⋯ خيارات الرسالة</button></div></div></div>`;
     }
     area.innerHTML=html;area.scrollTop=area.scrollHeight;
   };
@@ -3580,7 +3851,7 @@ body[data-mode="light"] .contact-list{background:#fff;}
       v3CancelReply();return;
     }
     const c=activeContact();if(!c||c.blocked)return;
-    if(!state.chatPins[c.uid]){showToast('فعّل تشفير PIN أولًا من زر القفل');openPinModal();return;}
+    if(!state.chatPins[c.uid]){showToast('');openPinModal();return;}
     input.value='';autoGrow(input);
     try{
       const enc=await encryptWithPin(text,state.chatPins[c.uid]);
@@ -3779,56 +4050,35 @@ body[data-mode="light"] .contact-list{background:#fff;}
   setTimeout(v3Boot,500);
 
 })();
-</script>
 
-<script id="an-language-js">
-(function(){
-  const LANGS={
-    ar:{title:'الدردشات',search:'بحث في الدردشات...',myStatus:'حالتي',group:'مجموعة',messages:'الرسائل',chats:'الدردشات',statuses:'الحالات',calls:'المكالمات',settings:'الإعدادات',profile:'الملف الشخصي',bio:'نبذة عني (بايو)',bioPh:'اكتب نبذة قصيرة عنك...',privacy:'الخصوصية',online:'إظهار حالة الاتصال',onlineSub:'يسمح لأصدقائك برؤية أنك متصل الآن',read:'إيصالات القراءة',readSub:'إظهار علامة ✓✓ عند قراءة رسائلك',notifications:'الإشعارات',sound:'صوت الإشعارات',soundSub:'تشغيل صوت عند وصول رسالة',blocked:'جهات الاتصال المحظورة',noBlocked:'لا توجد جهات اتصال محظورة حاليًا.',logout:'تسجيل الخروج',language:'اللغة',languageSub:'تتغير واجهة التطبيق فورًا',addFriend:'إضافة صديق',friendRequests:'طلبات الصداقة',newChat:'محادثة جديدة'},
-    en:{title:'Chats',search:'Search chats...',myStatus:'My status',group:'Group',messages:'Messages',chats:'Chats',statuses:'Status',calls:'Calls',settings:'Settings',profile:'Profile',bio:'About me',bioPh:'Write a short bio...',privacy:'Privacy',online:'Show online status',onlineSub:'Let your friends see when you are online',read:'Read receipts',readSub:'Show ✓✓ when your messages are read',notifications:'Notifications',sound:'Notification sound',soundSub:'Play a sound when a message arrives',blocked:'Blocked contacts',noBlocked:'No blocked contacts.',logout:'Log out',language:'Language',languageSub:'The interface changes instantly',addFriend:'Add friend',friendRequests:'Friend requests',newChat:'New chat'},
-    fr:{title:'Discussions',search:'Rechercher dans les discussions...',myStatus:'Mon statut',group:'Groupe',messages:'Messages',chats:'Discussions',statuses:'Statut',calls:'Appels',settings:'Paramètres',profile:'Profil',bio:'À propos de moi',bioPh:'Écrivez une courte bio...',privacy:'Confidentialité',online:'Afficher le statut en ligne',onlineSub:'Permet à vos amis de voir quand vous êtes en ligne',read:'Accusés de lecture',readSub:'Afficher ✓✓ lorsque vos messages sont lus',notifications:'Notifications',sound:'Son des notifications',soundSub:'Jouer un son à la réception d’un message',blocked:'Contacts bloqués',noBlocked:'Aucun contact bloqué.',logout:'Se déconnecter',language:'Langue',languageSub:'L’interface change instantanément',addFriend:'Ajouter un ami',friendRequests:'Demandes d’amitié',newChat:'Nouvelle discussion'}
-  };
-  const t=(k)=>LANGS[localStorage.getItem('an_chat_language')||'ar'][k]||LANGS.ar[k]||k;
-  function setTxt(sel,key){const el=document.querySelector(sel);if(el)el.textContent=t(key);}
-  function setTitleAndSearch(){
-    setTxt('#chatListTitle','title');
-    const s=document.querySelector('#view-chatlist .searchbar input');if(s)s.placeholder=t('search');
-    const sec=document.querySelector('#view-chatlist .section-label');if(sec)sec.textContent=t('messages');
-    const statuses=document.querySelectorAll('#view-chatlist .status-strip .status-item.own span');if(statuses[0])statuses[0].textContent=t('myStatus');
-    const group=document.querySelector('#view-chatlist .v3-status-action span');if(group)group.textContent=t('group');
-    const nav=document.querySelectorAll('#view-chatlist .bottom-nav .nav-item');
-    const keys=['chats','statuses','calls','settings']; nav.forEach((b,i)=>{const s=b.querySelector('span.nav-label');if(s)s.textContent=t(keys[i]);});
+/* ============================================================
+   v5.0 LANGUAGE
+============================================================ */
+function changeAppLanguage(lang){
+  try{ localStorage.setItem('an_chat_language',lang); }catch(e){}
+  const html=document.documentElement;
+  if(lang==='ar'){
+    html.lang='ar'; html.dir='rtl';
+    showToast('تم اختيار العربية');
+  }else if(lang==='en'){
+    html.lang='en'; html.dir='ltr';
+    showToast('English selected');
+  }else{
+    html.lang='fr'; html.dir='ltr';
+    showToast('Français sélectionné');
   }
-  function setSettings(){
-    setTxt('#appSettingsPanel .panel-head h3','settings');
-    const titles=document.querySelectorAll('#appSettingsPanel .panel-section-title');
-    const keys=['profile','language','privacy','notifications','blocked'];
-    titles.forEach((el,i)=>{if(keys[i])el.textContent=t(keys[i]);});
-    const bioLabel=document.querySelector('#bioInput')?.closest('.field')?.querySelector('label');if(bioLabel)bioLabel.textContent=t('bio');
-    const bio=document.getElementById('bioInput');if(bio)bio.placeholder=t('bioPh');
-    const rows=document.querySelectorAll('#appSettingsPanel .setting-row');
-    if(rows[0]){rows[0].querySelector('.label').textContent=t('online');rows[0].querySelector('.sub').textContent=t('onlineSub');}
-    if(rows[1]){rows[1].querySelector('.label').textContent=t('read');rows[1].querySelector('.sub').textContent=t('readSub');}
-    if(rows[2]){rows[2].querySelector('.label').textContent=t('sound');rows[2].querySelector('.sub').textContent=t('soundSub');}
-    const no=document.getElementById('noBlockedHint');if(no)no.textContent=t('noBlocked');
-    const out=document.querySelector('#appSettingsPanel .danger-btn');if(out){const txt=[...out.childNodes].find(n=>n.nodeType===3 && n.textContent.trim());if(txt)txt.textContent=' '+t('logout');}
-    const sel=document.getElementById('appLanguageSelect');if(sel)sel.value=localStorage.getItem('an_chat_language')||'ar';
-    const langLabel=document.querySelector('#appSettingsPanel .language-row .label');if(langLabel)langLabel.textContent=t('language');
-    const langSub=document.querySelector('#appSettingsPanel .language-row .sub');if(langSub)langSub.textContent=t('languageSub');
-  }
-  window.applyAppLanguage=function(lang){
-    if(!LANGS[lang])lang='ar';
-    localStorage.setItem('an_chat_language',lang);
-    document.documentElement.lang=lang;
-    document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-    document.body.classList.toggle('lang-ltr',lang!=='ar');
-    setTitleAndSearch();setSettings();
-    const labels=document.querySelectorAll('[data-lang-key]');labels.forEach(el=>{el.textContent=t(el.dataset.langKey);});
-  };
-  window.initAppLanguage=function(){applyAppLanguage(localStorage.getItem('an_chat_language')||'ar');};
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(initAppLanguage,0));
+}
+(function initV5Language(){
+  let lang='ar';
+  try{ lang=localStorage.getItem('an_chat_language')||'ar'; }catch(e){}
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  window.addEventListener('load',()=>{
+    const el=document.getElementById('languageSelect');
+    if(el) el.value=lang;
+  });
 })();
-</script>
 
+</script>
 </body>
 </html>
