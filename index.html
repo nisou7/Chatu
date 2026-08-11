@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#8B5CF6">
+  <title>BlueChat — Messenger + WhatsApp</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{
+      --blue:#8B5CF6;--blue2:#6D28D9;--blue-soft:#F1EAFF;--ink:#102033;
+      --muted:#718096;--line:#E8EEF5;--bg:#F6F9FC;--card:#fff;--danger:#EF4444;
+      --green:#22C55E;--shadow:0 18px 55px rgba(30,70,110,.10);--radius:24px;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    button,input,textarea{font:inherit}button{border:0;cursor:pointer}
+    .app{min-height:100vh}.hidden{display:none!important}
+    .screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .auth-wrap{width:min(1060px,100%);display:grid;grid-template-columns:1.05fr .95fr;background:var(--card);border-radius:32px;overflow:hidden;box-shadow:var(--shadow)}
+    .auth-art{background:linear-gradient(145deg,#A78BFA,#6D28D9);color:white;padding:54px;display:flex;flex-direction:column;justify-content:space-between;min-height:680px;position:relative;overflow:hidden}
+    .auth-art:before,.auth-art:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.12)}
+    .auth-art:before{width:360px;height:360px;top:-120px;left:-120px}.auth-art:after{width:300px;height:300px;bottom:-130px;right:-80px}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:25px;position:relative;z-index:2}
+    .brand-mark{width:48px;height:48px;border-radius:16px;background:white;color:var(--blue);display:grid;place-items:center}
+    .auth-art h1{font-size:48px;line-height:1.05;margin:0 0 18px;position:relative;z-index:2}.auth-art p{font-size:17px;line-height:1.8;opacity:.9;position:relative;z-index:2}
+    .feature-list{display:grid;gap:12px;position:relative;z-index:2}.feature{display:flex;gap:10px;align-items:center}
+    .auth-card{padding:52px}.auth-card h2{margin:0 0 8px;font-size:30px}.sub{color:var(--muted);margin:0 0 28px}
+    .field{margin:14px 0}.field label{display:block;font-size:13px;font-weight:800;margin:0 0 8px}.input{width:100%;border:1px solid var(--line);background:#FBFDFF;border-radius:15px;padding:14px 15px;outline:none;transition:.2s}.input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(139,92,246,.12)}
+    .btn{width:100%;padding:14px 18px;border-radius:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px}.primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;box-shadow:0 10px 24px rgba(109,40,217,.22)}.ghost{background:var(--blue-soft);color:var(--blue2)}
+    .link{color:var(--blue2);font-weight:800;background:none;padding:0}.row-between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .divider{display:flex;align-items:center;gap:12px;color:#9AA7B7;margin:22px 0}.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}
+    .google{background:#fff;border:1px solid var(--line);color:var(--ink)}.msg{padding:12px 14px;border-radius:13px;background:#FFF4F4;color:#B42318;font-size:13px;margin-bottom:14px}.ok{background:#ECFDF3;color:#16794A}
+    .app-shell{height:100vh;display:grid;grid-template-columns:300px minmax(0,1fr);direction:ltr;background:white}
+    .sidebar{border-left:1px solid var(--line);direction:rtl;display:flex;flex-direction:column;background:#fff}.side-head{padding:20px 18px 10px}.profile-mini{display:flex;align-items:center;gap:11px}.avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;background:var(--blue-soft);display:grid;place-items:center;color:var(--blue2);font-weight:900;flex:0 0 auto}.profile-mini .name{font-weight:900}.profile-mini small{color:var(--muted)}
+    .icon-btn{width:42px;height:42px;border-radius:13px;background:#F4F8FC;color:#536579;display:grid;place-items:center}.icon-btn:hover{background:var(--blue-soft);color:var(--blue2)}
+    .search{margin:12px 18px;position:relative}.search input{padding-right:44px}.search i{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#9AA7B7}
+    .nav{display:grid;grid-template-columns:repeat(4,1fr);padding:0 12px 10px;gap:5px}.nav button{background:none;color:#8492A4;padding:10px 5px;border-radius:13px;font-size:11px;font-weight:800}.nav button.active{color:var(--blue2);background:var(--blue-soft)}.nav svg{display:block;margin:auto auto 5px}
+    .conversation-list{overflow:auto;padding:5px 10px 18px}.conv{display:flex;align-items:center;gap:11px;padding:11px 9px;border-radius:16px;cursor:pointer}.conv:hover,.conv.active{background:#F1F8FF}.conv-main{min-width:0;flex:1}.conv-top{display:flex;justify-content:space-between;gap:8px}.conv-name{font-weight:850}.time{font-size:10px;color:#9AA7B7}.preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}.badge{background:var(--blue);color:#fff;border-radius:99px;font-size:10px;padding:3px 7px}
+    .main{direction:rtl;display:flex;flex-direction:column;min-width:0;background:var(--bg)}.topbar{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 20px}.top-actions{display:flex;gap:8px}.user-title{display:flex;align-items:center;gap:11px}.user-title strong{display:block}.status{font-size:11px;color:var(--muted);margin-top:3px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#A7B2BE;margin-left:5px}.dot.online{background:var(--green)}.dot.red{background:var(--danger)}
+    .chat{flex:1;overflow:auto;padding:22px 5%;display:flex;flex-direction:column;gap:8px}.empty{margin:auto;text-align:center;color:var(--muted)}.empty .big{width:70px;height:70px;border-radius:24px;background:var(--blue-soft);color:var(--blue2);display:grid;place-items:center;margin:0 auto 15px}
+    .bubble-row{display:flex;gap:8px;align-items:flex-end}.bubble-row.me{justify-content:flex-start}.bubble-row.them{justify-content:flex-end}.bubble{max-width:min(70%,520px);padding:11px 14px;border-radius:18px;background:#fff;box-shadow:0 3px 15px rgba(25,55,85,.05);line-height:1.6}.me .bubble{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-bottom-right-radius:5px}.them .bubble{border-bottom-left-radius:5px}.bubble-meta{font-size:9px;opacity:.7;margin-top:3px;text-align:left}.checks{font-weight:900}.checks.read{color:#DDD0FF}
+    .typing{display:flex;gap:4px;padding:9px 13px;background:#fff;border-radius:18px;width:max-content}.typing span{width:6px;height:6px;border-radius:50%;background:#AAB7C6;animation:b 1s infinite}.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}@keyframes b{50%{transform:translateY(-4px);opacity:.5}}
+    .composer{background:#fff;border-top:1px solid var(--line);padding:12px 18px;display:flex;gap:8px;align-items:flex-end}.composer textarea{resize:none;max-height:110px;flex:1;border:1px solid var(--line);background:#F8FBFE;border-radius:17px;padding:12px 14px;outline:none}.send{width:46px;height:46px;border-radius:15px;background:var(--blue);color:#fff;display:grid;place-items:center}
+    .panel{position:absolute;inset:72px 0 0 auto;width:min(390px,100%);background:#fff;border-right:1px solid var(--line);box-shadow:-15px 0 40px rgba(30,70,110,.08);z-index:10;padding:20px;overflow:auto}.panel h3{margin:5px 0 18px}.panel-head{display:flex;align-items:center;gap:10px;margin-bottom:20px}.setting-item{display:flex;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid var(--line);cursor:pointer}.setting-item .grow{flex:1}.setting-item small{color:var(--muted);display:block;margin-top:3px}.danger{color:var(--danger)}
+    .modal-back{position:fixed;inset:0;background:rgba(15,30,50,.38);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:50;padding:20px}.modal{width:min(460px,100%);background:#fff;border-radius:25px;padding:24px;box-shadow:var(--shadow)}.modal h3{margin:0 0 7px}.modal p{color:var(--muted);font-size:13px}.modal-actions{display:flex;gap:9px;margin-top:18px}.modal-actions .btn{flex:1}
+    .story-strip{display:flex;gap:13px;padding:14px 18px;background:#fff;border-bottom:1px solid var(--line);overflow:auto}.story{min-width:68px;text-align:center;font-size:10px;font-weight:800}.story .avatar{width:58px;height:58px;margin:auto;border:3px solid #fff;box-shadow:0 0 0 2px var(--blue)}
+    .toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#102033;color:#fff;padding:11px 16px;border-radius:13px;z-index:100;font-size:13px;box-shadow:var(--shadow)}
+    @media(max-width:850px){.auth-wrap{grid-template-columns:1fr}.auth-art{display:none}.auth-card{padding:30px 22px}.app-shell{grid-template-columns:1fr}.sidebar{display:none}.topbar{height:64px}.chat{padding:16px 4%}.bubble{max-width:82%}.panel{inset:64px 0 0 auto}}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendPasswordResetEmail,updateProfile,GoogleAuthProvider,signInWithRedirect,getRedirectResult} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import {getFirestore,doc,setDoc,getDoc,updateDoc,collection,query,where,getDocs,addDoc,orderBy,onSnapshot,serverTimestamp,limit} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import {getDatabase,ref,set,onValue,onDisconnect,update as rtdbUpdate} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
+import {getAnalytics,isSupported} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+
+/* =========================================================
+   1) ضع إعدادات مشروع Firebase هنا.
+   من Firebase Console > Project settings > Your apps > Web app
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDUbSnMl5watk5jgXCPG3gN6SZLQOHLeVc",
+  authDomain: "anchat-dab7a.firebaseapp.com",
+  projectId: "anchat-dab7a",
+  storageBucket: "anchat-dab7a.firebasestorage.app",
+  messagingSenderId: "317024353609",
+  appId: "1:317024353609:web:5649ee868c1231ddb2ee98",
+  measurementId: "G-TRKBM3MT2C"
+};
+
+const configured = !Object.values(firebaseConfig).some(v => String(v).includes("PUT_YOUR"));
+let app,auth,db,rtdb;
+if(configured){
+  app=initializeApp(firebaseConfig);
+  auth=getAuth(app);
+  db=getFirestore(app);
+  // Realtime Database اختياري في هذه المرحلة؛ لا نفترض عنواناً غير موجود في إعداداتك.
+  if(firebaseConfig.databaseURL) rtdb=getDatabase(app);
+  isSupported().then(ok=>{if(ok) getAnalytics(app)}).catch(()=>{});
+}
+
+const state={screen:"login",user:null,profile:null,activeFriend:null,unsubscribe:null,typingUnsub:null,onlineUnsub:null,lang:"ar",theme:"light",panel:null};
+const appEl=document.getElementById("app");
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const icon=(name,size=19)=>`<i data-lucide="${name}" width="${size}" height="${size}"></i>`;
+function refreshIcons(){if(window.lucide)lucide.createIcons();}
+function toast(t){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast">${esc(t)}</div>`;setTimeout(()=>r.innerHTML="",2600)}
+function initials(n="U"){return esc(n.trim().slice(0,1).toUpperCase()||"U")}
+function avatar(p,n){return p?`<img class="avatar" src="${esc(p)}" alt="">`:`<div class="avatar">${initials(n)}</div>`}
+function isConfigured(){if(!configured){toast("أضف إعدادات Firebase أولاً");return false}return true}
+function nav(screen){state.screen=screen;state.panel=null;render()}
+function authError(e){const m={"auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة","auth/email-already-in-use":"هذا البريد مستخدم مسبقاً","auth/weak-password":"كلمة المرور ضعيفة","auth/invalid-email":"البريد الإلكتروني غير صالح","auth/too-many-requests":"محاولات كثيرة، حاول لاحقاً","auth/user-not-found":"المستخدم غير موجود"};return m[e.code]||e.message||"حدث خطأ"}
+
+function authView(){
+ if(state.screen==="register")return registerView();
+ if(state.screen==="forgot")return forgotView();
+ return loginView();
+}
+function loginView(){return `<div class="screen"><div class="auth-wrap">
+  <section class="auth-art"><div class="brand"><span class="brand-mark">${icon("message-circle",25)}</span>BlueChat</div>
+    <div><h1>تواصل أجمل.<br>ببساطة أكبر.</h1><p>دردشة سريعة وأنيقة تجمع أفضل أفكار Messenger وWhatsApp في واجهة زرقاء وبيضاء حديثة.</p></div>
+    <div class="feature-list"><div class="feature">${icon("shield-check",19)} خصوصية وأمان مع Firebase</div><div class="feature">${icon("zap",19)} رسائل لحظية وإشعارات</div><div class="feature">${icon("users",19)} أصدقاء ومجموعات بدون حسابات وهمية</div></div>
+  </section>
+  <section class="auth-card"><h2>مرحباً بعودتك 👋</h2><p class="sub">سجّل الدخول للمتابعة إلى محادثاتك.</p><div id="authMsg"></div>
+    <form id="loginForm"><div class="field"><label>البريد الإلكتروني</label><input class="input" id="email" type="email" required placeholder="name@example.com"></div>
+    <div class="field"><label>كلمة المرور</label><input class="input" id="password" type="password" required placeholder="••••••••"></div>
+    <div class="row-between" style="margin:4px 0 18px"><span></span><button type="button" class="link" id="forgotBtn">نسيت كلمة السر؟</button></div>
+    <button class="btn primary">${icon("log-in",18)} تسجيل الدخول</button></form>
+    <div class="divider">أو</div><button class="btn google" id="googleBtn">${icon("chrome",18)} الدخول باستخدام Google</button>
+    <p style="text-align:center;color:var(--muted);margin-top:22px">ليس لديك حساب؟ <button class="link" id="registerBtn">إنشاء حساب</button></p>
+  </section></div></div>`}
+function registerView(){return `<div class="screen"><div class="auth-wrap">
+  <section class="auth-art"><div class="brand"><span class="brand-mark">${icon("message-circle",25)}</span>BlueChat</div>
+  <div><h1>أنشئ هويتك<br>وابدأ الدردشة.</h1><p>سيحصل حسابك على ID فريد من 8 أحرف وأرقام لاستخدامه عند إضافة الأصدقاء.</p></div>
+  <div class="feature-list"><div class="feature">${icon("fingerprint",19)} ID فريد لكل مستخدم</div><div class="feature">${icon("user-plus",19)} إضافة الأصدقاء بالـ ID</div></div></section>
+  <section class="auth-card"><button class="icon-btn" id="backLogin">${icon("arrow-right")}</button><h2 style="margin-top:18px">إنشاء حساب</h2><p class="sub">أدخل بياناتك الحقيقية للبدء.</p><div id="authMsg"></div>
+  <form id="registerForm"><div class="field"><label>اسم المستخدم</label><input class="input" id="rname" required minlength="3" maxlength="30" placeholder="مثلاً: Nassim"></div>
+  <div class="field"><label>البريد الإلكتروني</label><input class="input" id="remail" type="email" required placeholder="name@example.com"></div>
+  <div class="field"><label>كلمة المرور</label><input class="input" id="rpass" type="password" required minlength="6" placeholder="6 أحرف على الأقل"></div>
+  <div class="field"><label>إعادة كلمة المرور</label><input class="input" id="rpass2" type="password" required placeholder="أعد كتابة كلمة المرور"></div>
+  <button class="btn primary">${icon("user-plus",18)} إنشاء الحساب</button></form>
+  <p style="text-align:center;color:var(--muted);margin-top:22px">لديك حساب؟ <button class="link" id="loginBtn">تسجيل الدخول</button></p></section></div></div>`}
+function forgotView(){return `<div class="screen"><div class="auth-wrap" style="max-width:620px"><section class="auth-card" style="width:100%">
+  <button class="icon-btn" id="backLogin">${icon("arrow-right")}</button><div style="text-align:center;margin:15px 0 20px"><div class="big" style="margin:auto;width:70px;height:70px;border-radius:24px;background:var(--blue-soft);color:var(--blue2);display:grid;place-items:center">${icon("key-round",30)}</div></div>
+  <h2>استعادة كلمة السر</h2><p class="sub">اكتب بريدك الإلكتروني وسنرسل لك رابطاً آمناً لإعادة تعيين كلمة السر.</p><div id="authMsg"></div>
+  <form id="forgotForm"><div class="field"><label>البريد الإلكتروني</label><input class="input" id="femail" type="email" required placeholder="name@example.com"></div><button class="btn primary">${icon("send",18)} إرسال رابط الاستعادة</button></form>
+  <p style="text-align:center;color:var(--muted);margin-top:20px">بعد فتح الرابط من البريد، اختر كلمة السر الجديدة.</p></section></div></div>`}
+
+function render(){
+ document.documentElement.lang=state.lang;
+ document.documentElement.dir=state.lang==="ar"?"rtl":"ltr";
+ appEl.innerHTML=state.user?chatApp():`<div class="app">${authView()}</div>`;
+ bind();
+ refreshIcons();
+}
+function chatApp(){
+ const p=state.profile||{};
+ return `<div class="app-shell">
+ <aside class="sidebar"><div class="side-head"><div class="profile-mini">${avatar(p.photoURL,p.username)}<div style="flex:1;min-width:0"><div class="name">${esc(p.username||"مستخدم")}</div><small>@${esc(p.uid8||"--------")}</small></div><button class="icon-btn" id="settingsBtn">${icon("settings-2")}</button></div>
+ <div class="search"><input class="input" id="search" placeholder="البحث عن محادثة أو صديق">${icon("search")}</div></div>
+ <div class="nav"><button class="${state.screen==="home"?"active":""}" id="homeBtn">${icon("message-circle",20)}الدردشات</button><button id="storyBtn">${icon("circle-play",20)}الستوري</button><button id="notifBtn">${icon("bell",20)}الإشعارات</button><button id="addBtn">${icon("user-plus",20)}إضافة</button></div>
+ <div class="conversation-list" id="conversationList"></div></aside>
+ <main class="main">
+ ${state.activeFriend?chatHeader(state.activeFriend):topHome()}
+ ${state.activeFriend?chatBody():homeBody()}
+ ${state.panel?panelView():""}
+ </main></div>`;
+}
+function topHome(){return `<div class="topbar"><div><strong style="font-size:21px">الدردشات</strong><div class="status">تواصل مع أصدقائك بسهولة</div></div><div class="top-actions"><button class="icon-btn" id="addBtn2">${icon("user-plus")}</button><button class="icon-btn" id="settingsBtn2">${icon("settings-2")}</button></div></div>`}
+function chatHeader(f){return `<div class="topbar"><div class="user-title"><button class="icon-btn" id="backChats">${icon("arrow-right")}</button>${avatar(f.photoURL,f.username)}<div><strong>${esc(f.username)}</strong><div class="status"><span class="dot ${f.online?"online":"red"}"></span>${f.online?"متصل الآن":"آخر ظهور "+formatTime(f.lastSeen)}</div></div></div><div class="top-actions"><button class="icon-btn" id="chatSearch">${icon("search")}</button><button class="icon-btn" id="chatMenu">${icon("ellipsis-vertical")}</button></div></div>`}
+function homeBody(){return `<div class="story-strip"><div class="story" id="myStory">${avatar(state.profile?.photoURL,state.profile?.username)}<div>قصتي</div></div><div class="story"><div class="avatar" style="background:var(--blue-soft)">${icon("plus")}</div><div>إضافة قصة</div></div></div><div class="empty"><div class="big">${icon("messages-square",34)}</div><h3>ابدأ محادثة جديدة</h3><p>أضف صديقاً باستخدام الـ ID الخاص به، وستظهر المحادثة هنا.</p><button class="btn primary" style="width:auto;display:inline-flex" id="emptyAdd">${icon("user-plus",17)} إضافة صديق</button></div>`}
+function chatBody(){return `<div class="chat" id="chatMessages"><div class="empty"><div class="big">${icon("loader-circle",28)}</div><p>جارٍ تحميل الرسائل...</p></div></div><div id="typingArea"></div><form class="composer" id="composer"><button type="button" class="icon-btn" id="attachBtn">${icon("paperclip")}</button><button type="button" class="icon-btn" id="imageBtn">${icon("image")}</button><textarea id="messageInput" rows="1" placeholder="اكتب رسالة..."></textarea><button class="send">${icon("send",19)}</button></form>`}
+function panelView(){
+ if(state.panel==="settings")return settingsPanel();
+ if(state.panel==="chatSettings")return chatSettingsPanel();
+ if(state.panel==="add")return addPanel();
+ if(state.panel==="notifications")return `<div class="panel"><div class="panel-head"><button class="icon-btn" id="closePanel">${icon("x")}</button><h3>الإشعارات</h3></div><div class="empty" style="padding-top:50px">${icon("bell-off",35)}<p>لا توجد إشعارات جديدة.</p></div></div>`;
+ if(state.panel==="story")return `<div class="panel"><div class="panel-head"><button class="icon-btn" id="closePanel">${icon("x")}</button><h3>الستوري</h3></div><p>يمكن إضافة الستوري وربطها بـ Firebase Storage في الخطوة التالية.</p><button class="btn primary" id="addStory">${icon("plus")} إضافة ستوري</button></div>`;
+}
+function settingsPanel(){const p=state.profile||{};return `<div class="panel"><div class="panel-head"><button class="icon-btn" id="closePanel">${icon("x")}</button><h3>الإعدادات</h3></div>
+ <div style="text-align:center;padding:8px 0 18px">${avatar(p.photoURL,p.username)}<h3 style="margin:10px 0 3px">${esc(p.username||"")}</h3><small style="color:var(--muted)">${esc(p.email||"")}</small></div>
+ <div class="setting-item"><div class="grow"><b>BlueChat ID</b><small>${esc(p.uid8||"--------")}</small></div><button class="icon-btn" id="copyId">${icon("copy")}</button></div>
+ <div class="setting-item" id="profileEdit">${icon("user-round")}<div class="grow"><b>الملف الشخصي</b><small>الاسم والصورة</small></div>${icon("chevron-left")}</div>
+ <div class="setting-item" id="languageBtn">${icon("languages")}<div class="grow"><b>اللغة</b><small>${state.lang==="ar"?"العربية":"English"}</small></div>${icon("chevron-left")}</div>
+ <div class="setting-item" id="themeBtn">${icon("palette")}<div class="grow"><b>مظهر التطبيق</b><small>${state.theme==="light"?"فاتح":"داكن"}</small></div>${icon("chevron-left")}</div>
+ <div class="setting-item danger" id="logoutBtn">${icon("log-out")}<div class="grow"><b>تسجيل الخروج</b></div></div></div>`}
+function chatSettingsPanel(){return `<div class="panel"><div class="panel-head"><button class="icon-btn" id="closePanel">${icon("x")}</button><h3>إعدادات الدردشة</h3></div>
+ <div class="setting-item">${icon("pin")}<div class="grow"><b>تثبيت الدردشة</b><small>إبقاء المحادثة في الأعلى</small></div><input type="checkbox"></div>
+ <div class="setting-item">${icon("bell-off")}<div class="grow"><b>كتم الإشعارات</b><small>إيقاف تنبيهات هذه المحادثة</small></div><input type="checkbox"></div>
+ <div class="setting-item" id="chatTheme">${icon("palette")}<div class="grow"><b>ثيم الدردشة</b><small>تغيير خلفية المحادثة</small></div>${icon("chevron-left")}</div>
+ <div class="setting-item">${icon("search")}<div class="grow"><b>البحث داخل المحادثة</b></div>${icon("chevron-left")}</div>
+ <div class="setting-item danger" id="blockFriend">${icon("ban")}<div class="grow"><b>حظر ${esc(state.activeFriend?.username||"المستخدم")}</b></div></div>
+ <div class="setting-item danger">${icon("trash-2")}<div class="grow"><b>حذف المحادثة</b></div></div></div>`}
+function addPanel(){return `<div class="panel"><div class="panel-head"><button class="icon-btn" id="closePanel">${icon("x")}</button><h3>إضافة صديق</h3></div><p>لا توجد دردشات عشوائية. أدخل BlueChat ID المكوّن من 8 أحرف أو أرقام.</p>
+ <form id="addFriendForm"><div class="field"><label>BlueChat ID</label><input class="input" id="friendId" maxlength="8" minlength="8" required placeholder="A7K2P9QX"></div><button class="btn primary">${icon("user-plus")} بحث وإضافة</button></form><div id="friendResult" style="margin-top:18px"></div></div>`}
+
+function bind(){
+ if(!state.user){bindAuth();return}
+ $("#settingsBtn")?.addEventListener("click",()=>{state.panel="settings";render()});
+ $("#settingsBtn2")?.addEventListener("click",()=>{state.panel="settings";render()});
+ $("#addBtn")?.addEventListener("click",()=>{state.panel="add";render()});
+ $("#addBtn2")?.addEventListener("click",()=>{state.panel="add";render()});
+ $("#emptyAdd")?.addEventListener("click",()=>{state.panel="add";render()});
+ $("#notifBtn")?.addEventListener("click",()=>{state.panel="notifications";render()});
+ $("#storyBtn")?.addEventListener("click",()=>{state.panel="story";render()});
+ $("#closePanel")?.addEventListener("click",()=>{state.panel=null;render()});
+ $("#copyId")?.addEventListener("click",()=>navigator.clipboard?.writeText(state.profile.uid8).then(()=>toast("تم نسخ الـ ID")));
+ $("#logoutBtn")?.addEventListener("click",async()=>{if(isConfigured())await signOut(auth)});
+ $("#languageBtn")?.addEventListener("click",()=>{state.lang=state.lang==="ar"?"en":"ar";render()});
+ $("#themeBtn")?.addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";toast("تم تغيير المظهر — النسخة الداكنة يمكن توسيعها لاحقاً")});
+ $("#chatMenu")?.addEventListener("click",()=>{state.panel="chatSettings";render()});
+ $("#backChats")?.addEventListener("click",()=>{state.activeFriend=null;cleanupChat();render();loadConversations()});
+ $("#composer")?.addEventListener("submit",sendMessage);
+ $("#messageInput")?.addEventListener("input",handleTyping);
+ $("#addFriendForm")?.addEventListener("submit",addFriend);
+ $("#profileEdit")?.addEventListener("click",editProfile);
+ $("#blockFriend")?.addEventListener("click",()=>toast("أضف قواعد الحظر في Firestore قبل تفعيل الحظر الحقيقي"));
+ document.querySelectorAll(".conv").forEach(x=>x.addEventListener("click",()=>openFriend(x.dataset.uid)));
+ document.querySelectorAll("#conversationList .conv").forEach(x=>x.addEventListener("click",()=>openFriend(x.dataset.uid)));
+}
+function bindAuth(){
+ $("#registerBtn")?.addEventListener("click",()=>{state.screen="register";render()});
+ $("#loginBtn")?.addEventListener("click",()=>{state.screen="login";render()});
+ $("#forgotBtn")?.addEventListener("click",()=>{state.screen="forgot";render()});
+ $("#backLogin")?.addEventListener("click",()=>{state.screen="login";render()});
+ $("#loginForm")?.addEventListener("submit",login);
+ $("#registerForm")?.addEventListener("submit",register);
+ $("#forgotForm")?.addEventListener("submit",forgot);
+ $("#googleBtn")?.addEventListener("click",googleLogin);
+}
+function authMsg(t,ok=false){const el=$("#authMsg");if(el)el.innerHTML=`<div class="msg ${ok?"ok":""}">${esc(t)}</div>`}
+async function login(e){e.preventDefault();if(!isConfigured())return;try{await signInWithEmailAndPassword(auth,$("#email").value.trim(),$("#password").value)}catch(err){authMsg(authError(err))}}
+function makeId(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<8;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s}
+async function uniqueId(){for(let i=0;i<10;i++){const id8=makeId();const q=await getDocs(query(collection(db,"users"),where("uid8","==",id8),limit(1)));if(q.empty)return id8}throw Error("تعذر إنشاء ID")}
+async function register(e){e.preventDefault();if(!isConfigured())return;const name=$("#rname").value.trim(),email=$("#remail").value.trim(),p=$("#rpass").value,p2=$("#rpass2").value;if(p!==p2)return authMsg("كلمتا المرور غير متطابقتين");try{const id8=await uniqueId();const cred=await createUserWithEmailAndPassword(auth,email,p);await updateProfile(cred.user,{displayName:name});await setDoc(doc(db,"users",cred.user.uid),{uid:cred.user.uid,uid8,username:name,email,photoURL:"",createdAt:serverTimestamp(),lastUsernameChange:serverTimestamp()});authMsg("تم إنشاء الحساب، جارٍ فتح التطبيق…",true)}catch(err){authMsg(authError(err))}}
+async function forgot(e){e.preventDefault();if(!isConfigured())return;try{await sendPasswordResetEmail(auth,$("#femail").value.trim());authMsg("تم إرسال رابط إعادة تعيين كلمة السر إلى بريدك الإلكتروني.",true)}catch(err){authMsg(authError(err))}}
+async function googleLogin(){if(!isConfigured())return;try{await signInWithRedirect(auth,new GoogleAuthProvider())}catch(e){toast(authError(e))}}
+
+async function loadProfile(){
+ const s=await getDoc(doc(db,"users",auth.currentUser.uid));if(s.exists())state.profile=s.data();
+ else{const id8=await uniqueId();state.profile={uid:auth.currentUser.uid,uid8,username:auth.currentUser.displayName||"User",email:auth.currentUser.email||"",photoURL:auth.currentUser.photoURL||""};await setDoc(doc(db,"users",auth.currentUser.uid),state.profile)}
+ setPresence();
+}
+function setPresence(){
+ if(!rtdb)return;const r=ref(rtdb,"status/"+state.user.uid);const data={online:true,lastSeen:Date.now()};set(r,data);onDisconnect(r).set({online:false,lastSeen:Date.now()});
+}
+async function loadConversations(){
+ const list=$("#conversationList");if(!list||!db)return;
+ const q=query(collection(db,"users",state.user.uid,"friends"),orderBy("createdAt","desc"));onSnapshot(q,snap=>{if(!snap.empty){list.innerHTML=snap.docs.map(d=>{const f=d.data();return `<div class="conv ${state.activeFriend?.uid===f.uid?"active":""}" data-uid="${esc(f.uid)}">${avatar(f.photoURL,f.username)}<div class="conv-main"><div class="conv-top"><span class="conv-name">${esc(f.username)}</span><span class="time">${formatTime(f.lastMessageAt)}</span></div><div class="preview">${esc(f.lastMessage||"ابدأ المحادثة الآن")}</div></div></div>`}).join("");document.querySelectorAll(".conv").forEach(x=>x.addEventListener("click",()=>openFriend(x.dataset.uid)));refreshIcons()}else list.innerHTML=`<div style="text-align:center;color:var(--muted);padding:35px 15px;font-size:12px">لا توجد محادثات بعد.<br>استخدم إضافة صديق.</div>`});
+}
+function formatTime(ts){if(!ts)return"";const d=ts?.toDate?ts.toDate():new Date(ts);if(isNaN(d))return"";return d.toLocaleTimeString(state.lang==="ar"?"ar-DZ":"en",{hour:"2-digit",minute:"2-digit"})}
+async function openFriend(uid){
+ const s=await getDoc(doc(db,"users",uid));if(!s.exists())return toast("المستخدم غير موجود");state.activeFriend=s.data();state.activeFriend.uid=uid;state.panel=null;render();subscribeMessages();subscribeOnline();loadConversations();
+}
+function chatId(a,b){return [a,b].sort().join("_")}
+function cleanupChat(){state.unsubscribe?.();state.typingUnsub?.();state.onlineUnsub?.();state.unsubscribe=state.typingUnsub=state.onlineUnsub=null}
+function subscribeMessages(){
+ cleanupChat();const cid=chatId(state.user.uid,state.activeFriend.uid);const q=query(collection(db,"chats",cid,"messages"),orderBy("createdAt","asc"),limit(100));
+ state.unsubscribe=onSnapshot(q,snap=>{const el=$("#chatMessages");if(!el)return;el.innerHTML=snap.empty?`<div class="empty"><div class="big">${icon("message-circle",32)}</div><h3>لا توجد رسائل</h3><p>قل مرحباً 👋</p></div>`:snap.docs.map(d=>{const m=d.data(),me=m.senderId===state.user.uid;return `<div class="bubble-row ${me?"me":"them"}"><div class="bubble">${esc(m.text||"")}<div class="bubble-meta">${formatTime(m.createdAt)} ${me?`<span class="checks ${m.read?"read":""}">${m.read?"✓✓":"✓"}</span>`:""}</div></div></div>`}).join("");el.scrollTop=el.scrollHeight;refreshIcons();markRead(snap)});
+}
+async function markRead(snap){for(const d of snap.docs){const m=d.data();if(m.receiverId===state.user.uid&&!m.read)updateDoc(d.ref,{read:true}).catch(()=>{})}}
+function subscribeOnline(){if(!rtdb)return;const r=ref(rtdb,"status/"+state.activeFriend.uid);state.onlineUnsub=onValue(r,s=>{const v=s.val()||{};state.activeFriend.online=!!v.online;state.activeFriend.lastSeen=v.lastSeen;const st=document.querySelector(".topbar .status");if(st)st.innerHTML=`<span class="dot ${v.online?"online":"red"}"></span>${v.online?"متصل الآن":"آخر ظهور "+formatTime(v.lastSeen)}`})}
+let typingTimer;
+async function handleTyping(){if(!rtdb||!state.activeFriend)return;const r=ref(rtdb,`typing/${chatId(state.user.uid,state.activeFriend.uid)}/${state.user.uid}`);await set(r,true);clearTimeout(typingTimer);typingTimer=setTimeout(()=>set(r,false),1000)}
+async function sendMessage(e){e.preventDefault();if(!db||!state.activeFriend)return;const input=$("#messageInput"),text=input.value.trim();if(!text)return;input.value="";const cid=chatId(state.user.uid,state.activeFriend.uid);await addDoc(collection(db,"chats",cid,"messages"),{senderId:state.user.uid,receiverId:state.activeFriend.uid,text,read:false,createdAt:serverTimestamp()});const a=doc(db,"users",state.user.uid,"friends",state.activeFriend.uid),b=doc(db,"users",state.activeFriend.uid,"friends",state.user.uid);await updateDoc(a,{lastMessage:text,lastMessageAt:serverTimestamp()}).catch(()=>{});await updateDoc(b,{lastMessage:text,lastMessageAt:serverTimestamp()}).catch(()=>{})}
+async function addFriend(e){e.preventDefault();if(!db)return;const id=$("#friendId").value.trim().toUpperCase();if(id.length!==8)return toast("الـ ID يجب أن يكون 8 أحرف أو أرقام");const q=await getDocs(query(collection(db,"users"),where("uid8","==",id),limit(1)));const r=$("#friendResult");if(q.empty){r.innerHTML=`<div class="msg">لم نجد مستخدماً بهذا الـ ID.</div>`;return}const d=q.docs[0],f=d.data();if(d.id===state.user.uid){r.innerHTML=`<div class="msg">لا يمكنك إضافة نفسك.</div>`;return}await setDoc(doc(db,"users",state.user.uid,"friends",d.id),{uid:d.id,uid8:f.uid8,username:f.username,photoURL:f.photoURL||"",createdAt:serverTimestamp(),lastMessage:""});await setDoc(doc(db,"users",d.id,"friends",state.user.uid),{uid:state.user.uid,uid8:state.profile.uid8,username:state.profile.username,photoURL:state.profile.photoURL||"",createdAt:serverTimestamp(),lastMessage:""});r.innerHTML=`<div class="msg ok">تمت إضافة ${esc(f.username)}. يمكنك بدء المحادثة الآن.</div>`;loadConversations()}
+async function editProfile(){const p=state.profile||{};const newName=prompt("اسم المستخدم الجديد:",p.username||"");if(!newName||newName.trim()===p.username)return;const last=p.lastUsernameChange?.toDate?.()||new Date(0);if(Date.now()-last.getTime()<30*24*60*60*1000){toast("يمكن تغيير اسم المستخدم مرة واحدة كل 30 يوماً");return}await updateDoc(doc(db,"users",state.user.uid),{username:newName.trim(),lastUsernameChange:serverTimestamp()});state.profile.username=newName.trim();await updateProfile(state.user,{displayName:newName.trim()});toast("تم تغيير اسم المستخدم");render();loadConversations()}
+async function init(){
+ if(!configured){render();toast("الواجهة تعمل. لإتاحة التسجيل الحقيقي اربط Firebase من الإعدادات داخل الكود.");return}
+ getRedirectResult(auth).catch(()=>{});
+ onAuthStateChanged(auth,async user=>{state.user=user;if(user){await loadProfile();state.screen="home";render();loadConversations()}else{state.profile=null;state.activeFriend=null;render()}});
+}
+init();
+</script>
+</body>
+</html>
