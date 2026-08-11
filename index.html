@@ -67,21 +67,23 @@ import {getAnalytics,isSupported} from "https://www.gstatic.com/firebasejs/12.16
 const firebaseConfig = {
   apiKey: "AIzaSyDUbSnMl5watk5jgXCPG3gN6SZLQOHLeVc",
   authDomain: "anchat-dab7a.firebaseapp.com",
+  databaseURL: "https://anchat-dab7a-default-rtdb.firebaseio.com",
   projectId: "anchat-dab7a",
   storageBucket: "anchat-dab7a.firebasestorage.app",
   messagingSenderId: "317024353609",
-  appId: "1:317024353609:web:5649ee868c1231ddb2ee98",
-  measurementId: "G-TRKBM3MT2C"
+  appId: "1:317024353609:web:98ac253f7a43a7bcb2ee98",
+  measurementId: "G-WBBPK1K18F"
 };
 
 const configured = !Object.values(firebaseConfig).some(v => String(v).includes("PUT_YOUR"));
+const firebaseProjectId = firebaseConfig.projectId;
 let app,auth,db,rtdb;
 if(configured){
   app=initializeApp(firebaseConfig);
   auth=getAuth(app);
   db=getFirestore(app);
   // Realtime Database اختياري في هذه المرحلة؛ لا نفترض عنواناً غير موجود في إعداداتك.
-  if(firebaseConfig.databaseURL) rtdb=getDatabase(app);
+  rtdb=getDatabase(app);
   isSupported().then(ok=>{if(ok) getAnalytics(app)}).catch(()=>{});
 }
 
