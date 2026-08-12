@@ -657,7 +657,19 @@
   }
   .story-viewer.hidden{display:none;}
   .story-viewer video,.story-viewer img{max-width:100%;max-height:78vh;border-radius:18px;object-fit:contain;}
-  .story-viewer .story-close{
+    .story-more-btn{position:absolute;top:16px;left:16px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;cursor:pointer;font-size:17px;z-index:5;backdrop-filter:blur(8px);display:none;}
+  .story-more-btn.show{display:flex;align-items:center;justify-content:center;}
+  .story-menu{position:absolute;top:64px;left:16px;z-index:8;background:#fff;color:#1f172a;border-radius:14px;padding:6px;box-shadow:0 12px 35px rgba(0,0,0,.28);display:none;min-width:130px;}
+  .story-menu.show{display:block;}
+  .story-menu button{border:0;background:transparent;width:100%;padding:10px 12px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:800;text-align:right;cursor:pointer;color:#ef4444;}
+  .story-menu button:hover{background:#fff1f2;}
+  .story-time{color:rgba(255,255,255,.78);font-size:11px;font-weight:700;margin-top:6px;text-align:center;}
+  .message-tools{display:flex;gap:5px;margin-top:5px;align-items:center;}
+  .translate-btn{border:0;background:transparent;color:inherit;opacity:.7;font-family:'Cairo',sans-serif;font-size:10px;font-weight:800;cursor:pointer;padding:1px 4px;}
+  .translate-btn:hover{opacity:1;text-decoration:underline;}
+  .translation-text{display:block;margin-top:6px;padding-top:6px;border-top:1px solid currentColor;opacity:.88;font-size:12px;font-weight:700;}
+  .language-select{height:34px;border:1px solid var(--border-soft);border-radius:10px;background:var(--card-bg);color:var(--ink);font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;padding:0 7px;max-width:105px;}
+.story-viewer .story-close{
     position:absolute; top:16px; right:16px; width:40px;height:40px;border:0;border-radius:50%;
     background:rgba(255,255,255,.14);color:#fff;cursor:pointer;font-size:16px;
   }
@@ -917,10 +929,6 @@
     outline:3px solid var(--violet-400);
     outline-offset:2px;
   }
-
-  .firebase-status{font-size:10px;font-weight:700;text-align:center;margin-top:8px;color:var(--muted);}
-  .firebase-status.ok{color:#16A34A;}
-  .firebase-status.warn{color:#D97706;}
 
   /* ===== المكالمات الحقيقية WebRTC ===== */
   .call-overlay{position:absolute;inset:0;z-index:40;background:linear-gradient(180deg,#170b2b,#2d1554);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center}
@@ -1204,6 +1212,9 @@
           <div class="chat-messages" id="chatMessages"></div>
           <div class="chat-input-row">
             <button type="button" class="icon-btn" id="chatAttachBtn" title="إرفاق"><i class="fa-solid fa-paperclip"></i></button>
+            <select id="messageLanguageSelect" class="language-select" title="لغة الترجمة">
+              <option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="tr">Türkçe</option>
+            </select>
             <input type="text" id="chatMessageInput" placeholder="اكتب رسالة...">
             <button type="button" class="icon-btn send-btn" id="chatSendBtn" title="إرسال"><i class="fa-solid fa-paper-plane"></i></button>
           </div>
@@ -1296,7 +1307,7 @@
   </div>
 
 
-    <div id="firebaseStatus" class="firebase-status warn">جاري تهيئة Firebase…</div>
+    
 
   <footer class="tag">AN chat — دردشتك، أسلوبك ⚡</footer>
 </div>
@@ -1308,8 +1319,13 @@
   <input type="file" id="groupAvatarInput" accept="image/*" hidden>
   <div class="story-viewer hidden" id="storyViewer">
     <button type="button" class="story-close" id="storyViewerClose"><i class="fa-solid fa-xmark"></i></button>
+    <button type="button" class="story-more-btn" id="storyMoreBtn" aria-label="خيارات السطوري"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+    <div class="story-menu" id="storyMenu">
+      <button type="button" id="storyMenuDelete"><i class="fa-solid fa-trash"></i> حذف سطوري</button>
+    </div>
     <div id="storyViewerContent"></div>
     <div class="story-caption" id="storyViewerCaption"></div>
+    <div class="story-time" id="storyViewerTime"></div>
     <div class="story-owner-actions">
       <button type="button" class="story-delete-btn" id="storyDeleteBtn"><i class="fa-solid fa-trash"></i> حذف سطوري</button>
     </div>
@@ -1786,6 +1802,7 @@
         });
         window.chats = chats;
         window.__anFriendsCache = chats.slice();
+        if(typeof window.ANRefreshStories==='function') window.ANRefreshStories();
         renderChatList(searchInput?.value || '');
         if(typeof renderMemberPickList==='function') renderMemberPickList();
       },
@@ -2630,6 +2647,22 @@
   });
 
   let openedStoryId=null;
+  function storyDateValue(story, field){
+    const v=story?.[field];
+    if(!v)return null;
+    if(v.toDate)return v.toDate();
+    if(v.toMillis)return new Date(v.toMillis());
+    const d=new Date(v); return Number.isNaN(d.getTime())?null:d;
+  }
+  function storyTimeText(story){
+    const created=storyDateValue(story,'createdAt');
+    const expires=storyDateValue(story,'expiresAt');
+    if(!created || !expires)return 'تنتهي بعد 24 ساعة من نشرها';
+    const left=Math.max(0,expires.getTime()-Date.now());
+    const h=Math.floor(left/3600000), m=Math.floor((left%3600000)/60000);
+    const published=created.toLocaleTimeString('ar-DZ',{hour:'2-digit',minute:'2-digit'});
+    return `نُشرت ${published} · تنتهي خلال ${h}س ${m}د`;
+  }
   function showStory(story, owner, isMine=false){
     if(!story) return;
     openedStoryId=story.id||null;
@@ -2637,13 +2670,19 @@
       ? `<video src="${story.url}" controls autoplay playsinline></video>`
       : `<img src="${story.url}" alt="سطوري">`;
     storyViewerCaption.textContent = owner || 'قصتي';
+    document.getElementById('storyViewerTime').textContent=storyTimeText(story);
+    const more=document.getElementById('storyMoreBtn'), menu=document.getElementById('storyMenu');
+    more.classList.toggle('show',!!isMine && !!openedStoryId); menu.classList.remove('show');
     const del=document.getElementById('storyDeleteBtn');
-    if(del) del.classList.toggle('show',!!isMine && !!openedStoryId);
+    if(del) del.classList.remove('show');
     storyViewer.classList.remove('hidden');
   }
 
   document.getElementById('storyViewerClose').addEventListener('click', ()=>{
     storyViewerContent.innerHTML = '';
+    document.getElementById('storyMenu')?.classList.remove('show');
+    document.getElementById('storyMoreBtn')?.classList.remove('show');
+    document.getElementById('storyViewerTime').textContent='';
     storyViewer.classList.add('hidden');
   });
 
@@ -2665,6 +2704,9 @@
       showToast('تم حذف السطوري بنجاح 🗑️');
     }catch(e){ showToast(e?.message || 'تعذر حذف السطوري.'); }
   });
+
+  document.getElementById('storyMoreBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('storyMenu')?.classList.toggle('show');});
+  document.getElementById('storyMenuDelete')?.addEventListener('click',()=>{document.getElementById('storyMenu')?.classList.remove('show');document.getElementById('storyDeleteBtn')?.click();});
 
   // عرض القصص: السطوري الفعّال يحصل على إطار بنفسجي، وحالة اتصال الصديق تظهر بنقطة دائرية.
   renderStories = function(){
@@ -2707,7 +2749,7 @@
     document.getElementById('myStoryItem')?.addEventListener('click',()=>{ myStory ? showStory(myStory,'قصتي',true) : openStoryPicker(); });
     row.querySelectorAll('[data-story-index]').forEach(item=>item.addEventListener('click',()=>{
       const s=stories[Number(item.dataset.storyIndex)];
-      if(s?.media) showStory(s.media,s.name,false);
+      if(s?.media) showStory({...s.media,id:s.id,createdAt:s.createdAt,expiresAt:s.expiresAt},s.name,false);
       else showToast('لا توجد وسائط منشورة لهذا السطوري بعد');
     }));
   };
@@ -3024,29 +3066,55 @@
 
   let storiesExpiryTimer=null;
   function startStoriesListener(){
-    if(storiesUnsub)storiesUnsub(); if(storiesExpiryTimer)clearInterval(storiesExpiryTimer); if(!db)return;
-    const applyStories=snap=>{
+    if(storiesUnsub)storiesUnsub();
+    if(storiesExpiryTimer)clearInterval(storiesExpiryTimer);
+    if(!db)return;
+    let storyUnsubs=[];
+    let latestStoryDocs=[];
+    const renderFromDocs=()=>{
       const now=Date.now(),me=uid();
-      const active=snap.docs.map(d=>({id:d.id,...d.data()})).filter(s=>{const ex=s.expiresAt?.toMillis?s.expiresAt.toMillis():new Date(s.expiresAt||0).getTime();return ex>now;});
+      const friendIds=new Set((window.__anFriendsCache||[]).map(f=>f.uid).filter(Boolean));
+      const active=latestStoryDocs.filter(s=>{
+        const ex=s.expiresAt?.toMillis?s.expiresAt.toMillis():new Date(s.expiresAt||0).getTime();
+        return ex>now && (s.ownerUid===me || friendIds.has(s.ownerUid));
+      });
       const own=active.find(s=>s.ownerUid===me)||null;
       window.myStory=own;
-      if(typeof window.ANSetLocalStory==='function') window.ANSetLocalStory(own ? {id:own.id,url:own.url,type:own.type,ownerUid:own.ownerUid,expiresAt:own.expiresAt} : null);
-      const remoteStories=active.filter(s=>s.ownerUid!==me).map(s=>({id:s.id,ownerUid:s.ownerUid,name:s.ownerName||'مستخدم',media:{url:s.url,type:s.type},expiresAt:s.expiresAt}));
+      if(typeof window.ANSetLocalStory==='function') window.ANSetLocalStory(own ? {id:own.id,url:own.url,type:own.type,ownerUid:own.ownerUid,expiresAt:own.expiresAt,createdAt:own.createdAt} : null);
+      const remoteStories=active.filter(s=>s.ownerUid!==me).map(s=>({id:s.id,ownerUid:s.ownerUid,name:s.ownerName||'مستخدم',media:{url:s.url,type:s.type},expiresAt:s.expiresAt,createdAt:s.createdAt}));
       window.stories=remoteStories;
-      if(typeof window.ANSetStories==='function') window.ANSetStories(remoteStories);
-      else if(typeof window.renderStories==='function') window.renderStories();
+      if(typeof window.ANSetStories==='function') window.ANSetStories(remoteStories); else if(typeof window.renderStories==='function') window.renderStories();
     };
-    storiesUnsub=fsOnSnapshot(fsCollection(db,'stories'),applyStories,e=>console.warn('stories listener',e));
+    const subscribe=()=>{
+      storyUnsubs.forEach(u=>{try{u();}catch{}}); storyUnsubs=[]; latestStoryDocs=[];
+      const me=uid(); if(!me)return;
+      const ids=[me,...(window.__anFriendsCache||[]).map(f=>f.uid).filter(Boolean)];
+      const unique=[...new Set(ids)];
+      // Firestore يسمح بحد أقصى 30 قيمة في استعلام in، لذلك نقسم الأصدقاء إلى مجموعات.
+      for(let i=0;i<unique.length;i+=30){
+        const chunk=unique.slice(i,i+30);
+        try{
+          const q=fsQuery(fsCollection(db,'stories'),fsWhere('ownerUid','in',chunk));
+          storyUnsubs.push(fsOnSnapshot(q,snap=>{
+            const others=latestStoryDocs.filter(x=>!chunk.includes(x.ownerUid));
+            latestStoryDocs=[...others,...snap.docs.map(d=>({id:d.id,...d.data()}))];
+            renderFromDocs();
+          },e=>console.warn('stories listener',e)));
+        }catch(e){console.warn('stories query',e);}
+      }
+      renderFromDocs();
+    };
+    subscribe();
+    window.ANRefreshStories=subscribe;
+    storiesUnsub=()=>{storyUnsubs.forEach(u=>{try{u();}catch{}});storyUnsubs=[];};
     storiesExpiryTimer=setInterval(()=>{
       if(!uid())return;
-      // إعادة التصيير حتى تختفي القصة تلقائيًا عند مرور 24 ساعة حتى بدون أي تعديل جديد في Firestore.
-      const me=uid();
-      if(window.myStory?.expiresAt){
-        const ex=window.myStory.expiresAt?.toMillis?window.myStory.expiresAt.toMillis():new Date(window.myStory.expiresAt).getTime();
-        if(ex<=Date.now()){ window.myStory=null; if(typeof window.ANSetLocalStory==='function')window.ANSetLocalStory(null); }
+      renderFromDocs();
+      if(openedStoryId){
+        const current=[...(window.myStory?[window.myStory]:[]),...(window.stories||[]).map(s=>({...s,...(s.media||{})}))].find(s=>s.id===openedStoryId);
+        if(current) document.getElementById('storyViewerTime').textContent=storyTimeText(current);
+        else { storyViewerContent.innerHTML='';storyViewer.classList.add('hidden');openedStoryId=null;document.getElementById('storyMoreBtn')?.classList.remove('show'); }
       }
-      const active=(window.stories||[]).filter(s=>{const ex=s.expiresAt?.toMillis?s.expiresAt.toMillis():new Date(s.expiresAt||0).getTime();return ex>Date.now();});
-      if(active.length!==(window.stories||[]).length){window.stories=active;if(typeof window.ANSetStories==='function')window.ANSetStories(active);}
     },30000);
   }
 
@@ -3331,14 +3399,13 @@
     callLogUnsub=()=>unsubs.forEach(u=>{try{u();}catch{}});
   }
   function messageMarkup(m){
-    const t=timeText(m.createdAt);
-    // سجلات المكالمات لا تظهر داخل الدردشة؛ سجلها موجود فقط في تبويب المكالمات.
     if(m.type==='call') return '';
     if(m.type==='image')return `<img class="chat-media" src="${esc2(m.url)}" alt="صورة">`;
     if(m.type==='video')return `<video class="chat-media" src="${esc2(m.url)}" controls playsinline></video>`;
     if(m.type==='audio')return `<audio class="chat-audio" src="${esc2(m.url)}" controls></audio>`;
     if(m.type==='file')return `<a href="${esc2(m.url)}" target="_blank" rel="noopener" style="color:inherit;font-weight:800"><i class="fa-solid fa-file"></i> ${esc2(m.fileName||'ملف')}</a>`;
-    return esc2(m.text||'');
+    const text=esc2(m.text||'');
+    return `${text}<div class="message-tools"><button type="button" class="translate-btn" data-translate-text="${esc2(m.text||'')}"><i class="fa-solid fa-language"></i> ترجمة</button></div>`;
   }
   window.ANMessageMarkup = messageMarkup;
   window.ANConversationId = conversationId;
@@ -3347,7 +3414,7 @@
     if(typeof window.openChatWindow!=='function')return;
     if(window.__anCallChatPatched)return;window.__anCallChatPatched=true;
     const oldOpen=window.openChatWindow;
-    window.openChatWindow=function(c){oldOpen(c);if(!db||!uid()||!c?.uid)return;const cid=conversationId(uid(),c.uid);if(window.__anMsgUnsub)window.__anMsgUnsub();window.__anMsgUnsub=fsOnSnapshot(fsCollection(db,'conversations',cid,'messages'),snap=>{const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));const chatMsgs=msgs.filter(m=>m.type!=='call');const box=document.getElementById('chatMessages');if(box){box.innerHTML=chatMsgs.map(m=>`<div class="msg-row ${m.senderId===uid()?'out':'in'}"><div class="msg-bubble">${messageMarkup(m)}<span class="msg-time">${esc2(timeText(m.createdAt))}</span></div></div>`).join('');box.scrollTop=box.scrollHeight;}const last=chatMsgs[chatMsgs.length-1];if(last){c.last=last.type==='image'?'📷 صورة':last.type==='video'?'🎥 فيديو':last.type==='audio'?'🎵 رسالة صوتية':last.text||'رسالة';c.time=timeText(last.createdAt);if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');}});};
+    window.openChatWindow=function(c){oldOpen(c);if(!db||!uid()||!c?.uid)return;const cid=conversationId(uid(),c.uid);if(window.__anMsgUnsub)window.__anMsgUnsub();window.__anMsgUnsub=fsOnSnapshot(fsCollection(db,'conversations',cid,'messages'),snap=>{const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));const chatMsgs=msgs.filter(m=>m.type!=='call');const box=document.getElementById('chatMessages');if(box){box.innerHTML=chatMsgs.map(m=>`<div class="msg-row ${m.senderId===uid()?'out':'in'}"><div class="msg-bubble">${messageMarkup(m)}<span class="msg-time">${esc2(timeText(m.createdAt))}</span></div></div>`).join('');box.scrollTop=box.scrollHeight;bindTranslationButtons(box);}const last=chatMsgs[chatMsgs.length-1];if(last){c.last=last.type==='image'?'📷 صورة':last.type==='video'?'🎥 فيديو':last.type==='audio'?'🎵 رسالة صوتية':last.text||'رسالة';c.time=timeText(last.createdAt);if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');}});};
   }
   window.openChatWindow = window.openChatWindow || (typeof openChatWindow==='function' ? openChatWindow : null);
 
@@ -3360,6 +3427,35 @@
   callAcceptBtn.onclick=acceptCall;callRejectBtn.onclick=()=>rejectCall('declined');callEndBtn.onclick=()=>finishCall('completed');
   callMuteBtn.onclick=()=>{const t=localStream?.getAudioTracks?.()[0];if(!t)return;t.enabled=!t.enabled;callMuteBtn.classList.toggle('active',!t.enabled);callMuteBtn.innerHTML=t.enabled?'<i class="fa-solid fa-microphone"></i>':'<i class="fa-solid fa-microphone-slash"></i>';};
   callSpeakerBtn.onclick=()=>{remoteVideo.muted=!remoteVideo.muted;callSpeakerBtn.classList.toggle('active',!remoteVideo.muted);};
+
+  async function translateMessage(text,target){
+    const q=String(text||'').trim(); if(!q)return '';
+    const lang=target||document.getElementById('messageLanguageSelect')?.value||'ar';
+    if(lang==='auto')return q;
+    const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(q)+'&langpair=auto|'+encodeURIComponent(lang);
+    const res=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!res.ok)throw new Error('تعذر الاتصال بخدمة الترجمة');
+    const data=await res.json();
+    const translated=data?.responseData?.translatedText;
+    if(!translated)throw new Error('لم يتم العثور على ترجمة');
+    return translated;
+  }
+  function bindTranslationButtons(root=document){
+    root.querySelectorAll('.translate-btn').forEach(btn=>{
+      if(btn.dataset.bound==='1')return; btn.dataset.bound='1';
+      btn.addEventListener('click',async()=>{
+        const bubble=btn.closest('.msg-bubble'); if(!bubble)return;
+        const text=btn.dataset.translateText||'';
+        let out=bubble.querySelector('.translation-text');
+        if(out){out.remove();return;}
+        btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري الترجمة';
+        try{const translated=await translateMessage(text); out=document.createElement('span');out.className='translation-text';out.textContent=translated;bubble.insertBefore(out,bubble.querySelector('.msg-time'));btn.innerHTML='<i class="fa-solid fa-language"></i> إخفاء الترجمة';}
+        catch(e){showToast(e?.message||'تعذر ترجمة الرسالة');btn.innerHTML='<i class="fa-solid fa-language"></i> ترجمة';}
+        btn.disabled=false;
+      });
+    });
+  }
+  window.ANTranslateMessage=translateMessage;
 
   async function bootRealFeatures(u){
     if(!u||!db||realBootUid===u.uid)return;realBootUid=u.uid;
