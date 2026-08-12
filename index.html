@@ -1272,7 +1272,8 @@
     orderBy,
     limit,
     onSnapshot,
-    serverTimestamp
+    serverTimestamp,
+    writeBatch
   } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1391,9 +1392,25 @@
 
   async function sendFirebaseFriendRequest(fromUser, toUid, toAnId) {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    if (!fromUser?.uid || !toUid || fromUser.uid === toUid) throw new Error('INVALID_FRIEND_REQUEST');
+
+    // لا تسمح بإرسال طلب جديد إذا كانت الصداقة موجودة أو يوجد طلب معلّق.
+    const existingFriend = await getDoc(doc(firebaseDb, 'users', fromUser.uid, 'friends', toUid));
+    if (existingFriend.exists()) throw new Error('ALREADY_FRIENDS');
+
+    const existingQ = query(
+      collection(firebaseDb, 'friendRequests'),
+      where('fromUid', '==', fromUser.uid),
+      where('toUid', '==', toUid),
+      where('status', '==', 'pending'),
+      limit(1)
+    );
+    const existing = await getDocs(existingQ);
+    if (!existing.empty) throw new Error('FRIEND_REQUEST_ALREADY_SENT');
+
     return addDoc(collection(firebaseDb, 'friendRequests'), {
       fromUid: fromUser.uid,
-      fromName: fromUser.displayName || 'مستخدم',
+      fromName: fromUser.displayName || fromUser.name || 'مستخدم',
       fromAnId: fromUser.anId || '',
       toUid,
       toAnId,
@@ -1402,38 +1419,89 @@
     });
   }
 
-  // مراقبة طلبات الصداقة الواردة لحظيًا من Firestore.
-  function listenFirebaseFriendRequests(uid, onChange, onError) {
-    if (!firebaseAvailable || !uid) return () => {};
-    const q = query(collection(firebaseDb, 'friendRequests'), where('toUid', '==', uid));
-    return onSnapshot(q, snap => {
-      const incoming = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(r => r.status === 'pending')
-        .sort((a,b) => {
-          const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-          const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-          return bt - at;
-        });
-      onChange(incoming);
-    }, error => {
-      console.error('Firebase friend requests listener:', error);
-      if (onError) onError(error);
+  async function acceptFirebaseFriendRequest(requestId, requestData, currentUser) {
+    if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    if (!requestId || !requestData?.fromUid || !currentUser?.uid) throw new Error('INVALID_FRIEND_REQUEST');
+    if (requestData.toUid && requestData.toUid !== currentUser.uid) throw new Error('INVALID_FRIEND_REQUEST');
+    if (requestData.fromUid === currentUser.uid) throw new Error('INVALID_FRIEND_REQUEST');
+
+    const friendProfileSnap = await getDoc(doc(firebaseDb, 'users', requestData.fromUid));
+    if (!friendProfileSnap.exists()) throw new Error('USER_NOT_FOUND');
+    const friend = friendProfileSnap.data();
+    const meProfileSnap = await getDoc(doc(firebaseDb, 'users', currentUser.uid));
+    const me = meProfileSnap.exists() ? meProfileSnap.data() : {};
+
+    const batch = writeBatch(firebaseDb);
+    batch.set(doc(firebaseDb, 'users', currentUser.uid, 'friends', requestData.fromUid), {
+      uid: requestData.fromUid,
+      name: friend.name || requestData.fromName || 'مستخدم',
+      anId: friend.anId || requestData.fromAnId || '',
+      online: friend.online !== false,
+      addedAt: serverTimestamp()
+    }, { merge: true });
+    batch.set(doc(firebaseDb, 'users', requestData.fromUid, 'friends', currentUser.uid), {
+      uid: currentUser.uid,
+      name: me.name || currentUser.displayName || 'مستخدم',
+      anId: me.anId || makeStableId(currentUser.uid),
+      online: me.online !== false,
+      addedAt: serverTimestamp()
+    }, { merge: true });
+    batch.update(doc(firebaseDb, 'friendRequests', requestId), {
+      status: 'accepted',
+      acceptedAt: serverTimestamp()
     });
+    await batch.commit();
+    return { uid: requestData.fromUid, name: friend.name || requestData.fromName || 'مستخدم', anId: friend.anId || requestData.fromAnId || '' };
   }
 
-  async function updateFirebaseFriendRequest(requestId, status) {
+  async function declineFirebaseFriendRequest(requestId, currentUser) {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
-    if (!requestId || !['accepted','declined'].includes(status)) return;
-    await updateDoc(doc(firebaseDb, 'friendRequests', requestId), {
-      status,
-      respondedAt: serverTimestamp(),
-      respondedBy: firebaseAuth?.currentUser?.uid || ''
-    });
+    if (!requestId || !currentUser?.uid) throw new Error('INVALID_FRIEND_REQUEST');
+    const ref = doc(firebaseDb, 'friendRequests', requestId);
+    const snap = await getDoc(ref);
+    if (!snap.exists() || snap.data().toUid !== currentUser.uid) throw new Error('INVALID_FRIEND_REQUEST');
+    await updateDoc(ref, { status:'rejected', rejectedAt:serverTimestamp() });
+  }
+
+  function listenFirebaseFriendRequests(uid, onChange, onError) {
+    if (!firebaseAvailable) return () => {};
+    const q = query(
+      collection(firebaseDb, 'friendRequests'),
+      where('toUid', '==', uid),
+      where('status', '==', 'pending')
+    );
+    return onSnapshot(q, snap => {
+      const rows = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      rows.sort((a,b) => {
+        const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return bt - at;
+      });
+      onChange(rows);
+    }, onError);
+  }
+
+  function listenFirebaseFriends(uid, onChange, onError) {
+    if (!firebaseAvailable) return () => {};
+    return onSnapshot(collection(firebaseDb, 'users', uid, 'friends'), snap => {
+      const rows = snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+      rows.sort((a,b) => String(a.name||'').localeCompare(String(b.name||''), 'ar'));
+      onChange(rows);
+    }, onError);
+  }
+
+  function listenFirebaseMessages(fromUid, toUid, onChange, onError) {
+    if (!firebaseAvailable) return () => {};
+    const conversationId = [fromUid, toUid].sort().join('_');
+    const q = query(collection(firebaseDb, 'conversations', conversationId, 'messages'), orderBy('createdAt', 'asc'));
+    return onSnapshot(q, snap => {
+      onChange(snap.docs.map(d => ({ id:d.id, ...d.data() })));
+    }, onError);
   }
 
   async function sendFirebaseMessage(fromUid, toUid, text) {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    if (!fromUid || !toUid || !text) throw new Error('INVALID_MESSAGE');
     const conversationId = [fromUid, toUid].sort().join('_');
     return addDoc(collection(firebaseDb, 'conversations', conversationId, 'messages'), {
       senderId: fromUid,
@@ -1457,8 +1525,11 @@
     firebaseLogout,
     searchFirebaseUserByAnId,
     sendFirebaseFriendRequest,
+    acceptFirebaseFriendRequest,
+    declineFirebaseFriendRequest,
     listenFirebaseFriendRequests,
-    updateFirebaseFriendRequest,
+    listenFirebaseFriends,
+    listenFirebaseMessages,
     sendFirebaseMessage
   };
 
@@ -1516,6 +1587,7 @@
   let firebaseProfile = null;
   let firebaseMessageUnsub = null;
   let firebaseFriendRequestsUnsub = null;
+  let firebaseFriendsUnsub = null;
   let firebaseAuthBooted = false;
 
   function firebaseErrorMessage(error){
@@ -1530,9 +1602,12 @@
       'auth/popup-blocked':'المتصفح منع نافذة Google. اسمح بالنوافذ المنبثقة.',
       'auth/unauthorized-domain':'أضف نطاق GitHub Pages إلى Authorized domains في Firebase Authentication.',
       'permission-denied':'قواعد Firestore تمنع العملية. راجع قواعد Rules.',
+      'FIREBASE_CONFIG_MISSING':'أكمل apiKey و appId في إعداد Firebase داخل هذا الملف.',
+      'ALREADY_FRIENDS':'هذا المستخدم موجود بالفعل في قائمة أصدقائك.',
       'FRIEND_REQUEST_ALREADY_SENT':'تم إرسال طلب الصداقة لهذا المستخدم من قبل.',
-      'INVALID_FRIEND_REQUEST':'بيانات طلب الصداقة غير مكتملة.',
-      'FIREBASE_CONFIG_MISSING':'أكمل apiKey و appId في إعداد Firebase داخل هذا الملف.'
+      'INVALID_FRIEND_REQUEST':'بيانات طلب الصداقة غير صحيحة.',
+      'USER_NOT_FOUND':'لم يتم العثور على حساب هذا المستخدم.',
+      'INVALID_MESSAGE':'لا يمكن إرسال رسالة فارغة.'
     };
     return map[code] || ('حدث خطأ: ' + (error?.message || 'غير معروف'));
   }
@@ -1548,42 +1623,44 @@
     firebaseProfile = profile || {};
     const name = normalizeFirebaseName(firebaseProfile.name || user?.displayName || user?.email);
     currentUser = { name, id: firebaseProfile.anId || makeLocalDisplayId(user?.uid || '') };
-    renderTopbar();
-    renderStories();
-    renderNotifications();
-    goHome();
 
     if(firebaseFriendRequestsUnsub) firebaseFriendRequestsUnsub();
+    if(firebaseFriendsUnsub) firebaseFriendsUnsub();
+    if(firebaseMessageUnsub) { firebaseMessageUnsub(); firebaseMessageUnsub = null; }
+
+    // طلبات الصداقة الحقيقية فقط: لا توجد إشعارات أو أسماء تجريبية.
     firebaseFriendRequestsUnsub = window.ANFirebase.listenFirebaseFriendRequests(
       user.uid,
       requests => {
         notifications = requests.map(r => ({
-          id: r.id,
-          type: 'request',
-          requestId: r.id,
-          fromUid: r.fromUid || '',
-          fromAnId: r.fromAnId || '',
-          fromName: r.fromName || 'مستخدم AN chat',
-          text: `${r.fromName || 'مستخدم AN chat'} أرسل لك طلب صداقة`,
-          time: formatFirebaseTime(r.createdAt)
+          id:r.id, requestId:r.id, type:'request',
+          fromUid:r.fromUid || '', fromAnId:r.fromAnId || '', fromName:r.fromName || 'مستخدم',
+          data:r,
+          text:(r.fromName || 'مستخدم') + ' أرسل لك طلب صداقة',
+          time:formatFirebaseTime(r.createdAt)
         }));
         renderNotifications();
       },
-      error => showToast(firebaseErrorMessage(error))
+      error => { console.error('friend requests listener', error); showToast(firebaseErrorMessage(error)); }
     );
-  }
 
-  function formatFirebaseTime(timestamp){
-    try{
-      if(!timestamp) return 'الآن';
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-      if(Number.isNaN(date.getTime())) return 'الآن';
-      const now = new Date();
-      if(date.toDateString() === now.toDateString()){
-        return date.getHours().toString().padStart(2,'0') + ':' + date.getMinutes().toString().padStart(2,'0');
-      }
-      return date.toLocaleDateString('ar-DZ', {day:'numeric', month:'short'});
-    }catch(e){ return 'الآن'; }
+    // الأصدقاء المقبولون يظهرون مباشرة في تبويب المحادثات.
+    firebaseFriendsUnsub = window.ANFirebase.listenFirebaseFriends(
+      user.uid,
+      friends => {
+        chats = friends.filter(f => f.uid && f.uid !== user.uid).map(f => ({
+          uid:f.uid, name:f.name || 'مستخدم', anId:f.anId || '',
+          last:'ابدأ محادثة جديدة', time:'', unread:0, online:f.online !== false, isGroup:false
+        }));
+        renderChatList(searchInput?.value || '');
+      },
+      error => { console.error('friends listener', error); showToast(firebaseErrorMessage(error)); }
+    );
+
+    renderTopbar();
+    renderStories();
+    renderNotifications();
+    goHome();
   }
 
   function normalizeFirebaseName(v){ return String(v || 'مستخدم').trim() || 'مستخدم'; }
@@ -1607,11 +1684,8 @@
           showToast(firebaseErrorMessage(e));
         }
       } else {
-        if(firebaseFriendRequestsUnsub){ firebaseFriendRequestsUnsub(); firebaseFriendRequestsUnsub = null; }
         firebaseUser = null;
         firebaseProfile = null;
-        notifications = [];
-        renderNotifications();
       }
     });
   }
@@ -1681,9 +1755,11 @@
   // تسجيل الخروج الحقيقي
   document.getElementById('logoutBtn').addEventListener('click', async ()=>{
     try{ await window.ANFirebase.firebaseLogout(); }catch(e){ console.error(e); }
-    if(firebaseFriendRequestsUnsub){ firebaseFriendRequestsUnsub(); firebaseFriendRequestsUnsub = null; }
+    if(firebaseFriendRequestsUnsub) { firebaseFriendRequestsUnsub(); firebaseFriendRequestsUnsub = null; }
+    if(firebaseFriendsUnsub) { firebaseFriendsUnsub(); firebaseFriendsUnsub = null; }
+    if(firebaseMessageUnsub) { firebaseMessageUnsub(); firebaseMessageUnsub = null; }
     firebaseUser = null; firebaseProfile = null;
-    notifications = [];
+    chats = []; notifications = []; calls = [];
     homePanel.classList.add('hidden');
     closeOverlays();
     document.querySelector('footer.tag').style.display = '';
@@ -1732,12 +1808,7 @@
   let stories = [];
   let chats = [];
   let notifications = [];
-  let calls = [
-    { name:'سارة أحمد', type:'in', video:false, time:'اليوم، 10:42' },
-    { name:'عمر خالد', type:'missed', video:true, time:'اليوم، 09:15' },
-    { name:'يوسف كريم', type:'out', video:false, time:'أمس، 21:03' },
-    { name:'ليان محمد', type:'in', video:true, time:'أمس، 18:27' }
-  ];
+  let calls = [];
 
   function renderTopbar(){
     document.getElementById('welcomeLine').textContent = 'مرحبًا، ' + (currentUser.name || 'صديقنا');
@@ -1910,11 +1981,14 @@
 
       list.querySelectorAll('.btn-accept').forEach(btn=>{
         btn.addEventListener('click', async ()=>{
-          const n = notifications[Number(btn.getAttribute('data-idx'))];
-          if(!n?.requestId) return;
+          const idx = Number(btn.getAttribute('data-idx'));
+          const n = notifications[idx];
+          if(!n?.requestId || !firebaseUser){ showToast('لا يمكن معالجة طلب الصداقة الآن.'); return; }
           btn.disabled = true;
           try{
-            await window.ANFirebase.updateFirebaseFriendRequest(n.requestId, 'accepted');
+            await window.ANFirebase.acceptFirebaseFriendRequest(n.requestId, n.data || {fromUid:n.fromUid,toUid:firebaseUser.uid,fromName:n.fromName,fromAnId:n.fromAnId}, firebaseUser);
+            notifications.splice(idx, 1);
+            renderNotifications();
             showToast('تم قبول طلب الصداقة ✅');
           }catch(error){
             btn.disabled = false;
@@ -1924,16 +1998,15 @@
       });
       list.querySelectorAll('.btn-decline').forEach(btn=>{
         btn.addEventListener('click', async ()=>{
-          const n = notifications[Number(btn.getAttribute('data-idx'))];
-          if(!n?.requestId) return;
-          btn.disabled = true;
+          const idx = Number(btn.getAttribute('data-idx'));
+          const n = notifications[idx];
+          if(!n?.requestId || !firebaseUser){ showToast('لا يمكن معالجة طلب الصداقة الآن.'); return; }
           try{
-            await window.ANFirebase.updateFirebaseFriendRequest(n.requestId, 'declined');
+            await window.ANFirebase.declineFirebaseFriendRequest(n.requestId, firebaseUser);
+            notifications.splice(idx, 1);
+            renderNotifications();
             showToast('تم رفض طلب الصداقة');
-          }catch(error){
-            btn.disabled = false;
-            showToast(firebaseErrorMessage(error));
-          }
+          }catch(error){ showToast(firebaseErrorMessage(error)); }
         });
       });
     }
@@ -2043,27 +2116,8 @@
   searchInput.addEventListener('input', function(){
     const val = this.value.trim();
     const idMatch = val.match(/^AN-?\s?([A-Za-z0-9]{8})$/i);
-
-    if(idMatch){
-      const id = 'AN-' + idMatch[1].toUpperCase();
-      const fakeName = 'مستخدم ' + id;
-      document.getElementById('idResultAvatar').textContent = initialOf(fakeName);
-      document.getElementById('idResultAvatar').style.background = colorFor(fakeName);
-      document.getElementById('idResultName').textContent = fakeName;
-      document.getElementById('idResultId').textContent = id;
-      const btn = document.getElementById('idResultBtn');
-      btn.classList.remove('sent');
-      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال طلب صداقة';
-      btn.onclick = function(){
-        this.classList.add('sent');
-        this.innerHTML = '<i class="fa-solid fa-check"></i> تم الإرسال';
-        showToast('تم إرسال طلب الصداقة إلى ' + id + ' 🚀');
-      };
-      idResult.classList.remove('hidden');
-    } else {
-      idResult.classList.add('hidden');
-    }
-
+    // لا تعرض أي مستخدم وهمي؛ نتيجة البحث تظهر فقط إذا وجد المستخدم فعليًا في Firestore.
+    if(!idMatch) idResult.classList.add('hidden');
     const tab = currentTab();
     if(tab === 'tabChats') renderChatList(val);
   });
@@ -2074,8 +2128,12 @@
   searchInput.addEventListener('input', async function(){
     const val = this.value.trim();
     const idMatch = val.match(/^AN-?\s?([A-Za-z0-9]{8})$/i);
-    if(!idMatch || !window.ANFirebase?.firebaseAvailable || !firebaseUser) return;
+    if(!idMatch || !window.ANFirebase?.firebaseAvailable || !firebaseUser){
+      idResult.classList.add('hidden');
+      return;
+    }
     const id = 'AN-' + idMatch[1].toUpperCase();
+    idResult.classList.add('hidden');
     lastFirebaseSearch = id;
     try{
       const found = await window.ANFirebase.searchFirebaseUserByAnId(id);
@@ -2175,14 +2233,9 @@
   });
 
   /* ===== صفحة الدردشة مع صديق ===== */
-  const demoMessages = {}; // { name: [ {text, out, time} ] }
+  const demoMessages = {}; // يحتفظ فقط بالرسائل المحلية المؤقتة عند عدم توفر Firebase
   function seedMessages(name){
-    if(demoMessages[name]) return demoMessages[name];
-    demoMessages[name] = [
-      { text:'أهلًا! كيف حالك اليوم؟', out:false, time:'10:12' },
-      { text:'الحمد لله بخير، وأنت؟ 😊', out:true, time:'10:13' },
-      { text:'تمام، شو أخبار الشغل؟', out:false, time:'10:14' }
-    ];
+    if(!demoMessages[name]) demoMessages[name] = [];
     return demoMessages[name];
   }
 
@@ -2218,7 +2271,23 @@
     goBackBtn.classList.add('hidden');
     document.getElementById('chatSettingsMenu').classList.add('hidden');
     closeFabMenu();
-    renderChatMessages(name);
+    if(firebaseMessageUnsub) { firebaseMessageUnsub(); firebaseMessageUnsub = null; }
+    if(firebaseUser && c.uid && !c.isGroup){
+      firebaseMessageUnsub = window.ANFirebase.listenFirebaseMessages(
+        firebaseUser.uid, c.uid,
+        messages => {
+          const localMsgs = messages.map(m => ({
+            text:m.text || '', out:m.senderId === firebaseUser.uid,
+            time:formatFirebaseTime(m.createdAt)
+          }));
+          demoMessages[name] = localMsgs;
+          renderChatMessages(name);
+        },
+        error => { console.error('messages listener', error); showToast(firebaseErrorMessage(error)); }
+      );
+    } else {
+      renderChatMessages(name);
+    }
     updateSearchRowVisibility();
     setTimeout(()=> document.getElementById('chatMessageInput').focus(), 200);
   }
