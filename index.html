@@ -285,6 +285,7 @@
     transition: border-color .2s, background .2s, transform .15s;
   }
   .btn-google:hover{ border-color:var(--violet-400); background:var(--violet-50); transform: translateY(-1px);}
+  .btn-google:disabled{ cursor:wait; transform:none; }
   .btn-google svg{ width:19px; height:19px; }
 
   .switch-line{
@@ -1386,6 +1387,8 @@
         uid: user.uid,
         name: normalizeUserName(preferredName || user.displayName, user.email),
         email: user.email || '',
+        photoURL: user.photoURL || '',
+        provider: user.providerData?.[0]?.providerId || 'password',
         anId: makeStableId(user.uid),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -1396,10 +1399,22 @@
       return profile;
     }
     const data = snap.data();
+    const patch = {};
     if (!data.anId) {
-      const anId = makeStableId(user.uid);
-      await updateDoc(ref, { anId, updatedAt: serverTimestamp() });
-      data.anId = anId;
+      patch.anId = makeStableId(user.uid);
+      data.anId = patch.anId;
+    }
+    if (user.photoURL && data.photoURL !== user.photoURL) {
+      patch.photoURL = user.photoURL;
+      data.photoURL = user.photoURL;
+    }
+    if (user.providerData?.[0]?.providerId && data.provider !== user.providerData[0].providerId) {
+      patch.provider = user.providerData[0].providerId;
+      data.provider = patch.provider;
+    }
+    if (Object.keys(patch).length) {
+      patch.updatedAt = serverTimestamp();
+      await updateDoc(ref, patch);
     }
     return data;
   }
@@ -1666,7 +1681,10 @@
       'auth/weak-password':'كلمة السر ضعيفة. استخدم 6 أحرف على الأقل.',
       'auth/invalid-email':'البريد الإلكتروني غير صحيح.',
       'auth/popup-closed-by-user':'تم إغلاق نافذة Google.',
-      'auth/popup-blocked':'المتصفح منع نافذة Google. اسمح بالنوافذ المنبثقة.',
+      'auth/popup-blocked':'المتصفح منع نافذة Google. اسمح بالنوافذ المنبثقة لهذا الموقع.',
+      'auth/cancelled-popup-request':'يوجد تسجيل دخول Google آخر قيد التنفيذ.',
+      'auth/operation-not-allowed':'تسجيل الدخول باستخدام Google غير مفعّل في Firebase. فعّله من Authentication > Sign-in method.',
+      'auth/account-exists-with-different-credential':'هذا البريد مرتبط بطريقة دخول أخرى. سجّل الدخول بالطريقة الأصلية أولًا ثم اربط Google بالحساب.',
       'auth/unauthorized-domain':'أضف نطاق GitHub Pages إلى Authorized domains في Firebase Authentication.',
       'permission-denied':'قواعد Firestore تمنع العملية. راجع قواعد Rules.',
       'FRIEND_REQUEST_ALREADY_SENT':'تم إرسال طلب الصداقة لهذا المستخدم من قبل.',
@@ -1831,11 +1849,24 @@
 
   // تسجيل Google الحقيقي
   document.getElementById('googleBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('googleBtn');
+    if(btn.disabled) return;
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.style.opacity = '.7';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري الاتصال بـ Google...</span>';
     try{
       const result = await window.ANFirebase.firebaseGoogleLogin();
       await applyFirebaseUser(result.user, result.profile);
       showToast('تم تسجيل الدخول باستخدام Google ✓');
-    }catch(error){ showToast(firebaseErrorMessage(error)); }
+    }catch(error){
+      console.error('Google sign-in error:', error);
+      showToast(firebaseErrorMessage(error));
+    }finally{
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.innerHTML = original;
+    }
   });
 
   // تسجيل الخروج الحقيقي
