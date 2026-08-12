@@ -899,6 +899,15 @@
   .firebase-status.ok{color:#16A34A;}
   .firebase-status.warn{color:#D97706;}
 
+  /* ===== تحسينات الحضور والمكالمات ===== */
+  .chat-last.offline-status{color:var(--muted)}
+  .call-meta.noanswer{color:#ef4444}
+  .call-duration{font-size:10.5px;color:var(--muted);font-weight:700;margin-right:3px}
+  .call-overlay{backdrop-filter:blur(10px)}
+  .call-overlay .call-subtitle{font-size:12px;opacity:.72;margin-top:2px}
+  .call-overlay.incoming .call-avatar{animation:callPulse 1.5s infinite}
+  @keyframes callPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  .call-control.reject{background:#ef4444}.call-control.accept{background:#22c55e}
   /* ===== المكالمات الحقيقية WebRTC ===== */
   .call-overlay{position:absolute;inset:0;z-index:40;background:linear-gradient(180deg,#170b2b,#2d1554);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center}
   .call-overlay.hidden{display:none}
@@ -913,6 +922,7 @@
   .incoming-actions{display:flex;gap:18px;margin-top:28px}.incoming-actions .call-control{width:62px;height:62px}
   .call-banner{font-size:11px;color:var(--muted);font-weight:700;text-align:center;padding:6px 12px}
   .msg-call{min-width:190px;text-align:center}.msg-call i{font-size:20px;margin-bottom:5px}.msg-call strong{display:block;font-size:13px}.msg-call small{display:block;margin-top:2px;opacity:.8}
+  .msg-call.call-missed{color:#ef4444}.msg-call.call-missed i{color:#ef4444}
 
 </style>
 </head>
@@ -1944,48 +1954,29 @@
   }
 
   function renderCallsList(){
-    const list = document.getElementById('callsList');
-    if(calls.length === 0){
-      list.innerHTML = '<div class="empty-list"><i class="fa-solid fa-phone" style="font-size:22px; display:block; margin-bottom:8px;"></i>لا توجد مكالمات بعد</div>';
-      return;
-    }
-    const meta = {
-      in:    { icon:'fa-arrow-down-left', cls:'in',     label:'واردة'  },
-      out:   { icon:'fa-arrow-up-right',  cls:'out',    label:'صادرة'  },
-      missed:{ icon:'fa-arrow-down-left', cls:'missed', label:'فائتة'  }
+    const list=document.getElementById('callsList');
+    if(calls.length===0){list.innerHTML='<div class="empty-list"><i class="fa-solid fa-phone" style="font-size:22px;display:block;margin-bottom:8px;"></i>لا توجد مكالمات بعد</div>';return;}
+    const meta={
+      in:{icon:'fa-arrow-down-left',cls:'in',label:'واردة'},out:{icon:'fa-arrow-up-right',cls:'out',label:'صادرة'},
+      missed:{icon:'fa-phone-slash',cls:'missed',label:'فائتة'}
     };
-    list.innerHTML = calls.map(c => {
-      const m = meta[c.type];
-      return `
-      <div class="call-item" data-name="${c.name}">
-        <div class="chat-avatar">
-          <div class="letter-avatar" style="background:${colorFor(c.name)}; width:50px; height:50px;">${initialOf(c.name)}</div>
-        </div>
-        <div class="call-info">
-          <div class="call-name">${c.name}</div>
-          <div class="call-meta ${m.cls}"><i class="fa-solid ${m.icon}"></i> ${m.label} · <span class="call-time">${c.time}</span></div>
-        </div>
-        <div class="call-actions">
-          <button type="button" class="call-audio" title="اتصال صوتي"><i class="fa-solid fa-phone"></i></button>
-          <button type="button" class="call-video" title="اتصال فيديو"><i class="fa-solid fa-video"></i></button>
-        </div>
+    list.innerHTML=calls.map(c=>{
+      const m=meta[c.type]||meta.out;
+      let label=m.label;
+      if(c.status==='no_answer')label='لم يرد';
+      else if(c.status==='declined')label='مرفوضة';
+      else if(c.status==='canceled')label='ملغاة';
+      const duration=(c.duration||0)>0?`<span class="call-duration">${formatCallDurationUI(c.duration)}</span>`:'';
+      return `<div class="call-item" data-name="${escapeHTML(c.name)}" data-uid="${escapeHTML(c.uid||'')}">
+        <div class="chat-avatar"><div class="letter-avatar" style="background:${colorFor(c.name)};width:50px;height:50px;">${initialOf(c.name)}</div></div>
+        <div class="call-info"><div class="call-name">${escapeHTML(c.name)}</div><div class="call-meta ${m.cls}"><i class="fa-solid ${m.icon}"></i> ${label} · <span class="call-time">${escapeHTML(c.time)}</span>${duration}</div></div>
+        <div class="call-actions"><button type="button" class="call-audio" title="اتصال صوتي"><i class="fa-solid fa-phone"></i></button><button type="button" class="call-video" title="اتصال فيديو"><i class="fa-solid fa-video"></i></button></div>
       </div>`;
     }).join('');
-
-    list.querySelectorAll('.call-audio').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const name = btn.closest('.call-item').getAttribute('data-name');
-        showToast('جارٍ الاتصال بـ ' + name + ' 📞');
-      });
-    });
-    list.querySelectorAll('.call-video').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const name = btn.closest('.call-item').getAttribute('data-name');
-        showToast('جارٍ بدء مكالمة فيديو مع ' + name + ' 🎥');
-      });
-    });
+    list.querySelectorAll('.call-audio').forEach(btn=>btn.addEventListener('click',()=>{const item=btn.closest('.call-item'),name=item.getAttribute('data-name'),c=(window.chats||[]).find(x=>x.name===name);if(c?.uid&&window.createRealCall)window.createRealCall(c.uid,'audio');else showToast('افتح الدردشة مع '+name+' لإجراء المكالمة');}));
+    list.querySelectorAll('.call-video').forEach(btn=>btn.addEventListener('click',()=>{const item=btn.closest('.call-item'),name=item.getAttribute('data-name'),c=(window.chats||[]).find(x=>x.name===name);if(c?.uid&&window.createRealCall)window.createRealCall(c.uid,'video');else showToast('افتح الدردشة مع '+name+' لإجراء المكالمة');}));
   }
-
+  function formatCallDurationUI(sec){sec=Math.max(0,Number(sec)||0);return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
   window.renderChatList = renderChatList;
   window.renderCallsList = renderCallsList;
 
@@ -2817,7 +2808,7 @@
   const callRejectBtn = document.getElementById('callRejectBtn');
   const callEndBtn = document.getElementById('callEndBtn');
 
-  let presenceTimer = null, presenceUnsub = null, storiesUnsub = null, callsUnsub = null;
+  let presenceTimer = null, presenceUnsub = null, storiesUnsub = null, callsUnsub = null, callLogsUnsub = null;
   let presenceCache = new Map();
   let currentCall = null;
   let currentPeer = null;
@@ -2826,330 +2817,314 @@
   let callCandidateUnsubs = [];
   let callStartMs = 0;
   let callLogged = false;
+  let callMissTimer = null;
 
-  const esc = v => String(v ?? '').replace(/[&<>\"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const currentUid = () => auth?.currentUser?.uid || window.firebaseUser?.uid || null;
   const friendByUid = uid => (window.chats || []).find(c=>c.uid===uid);
 
+  function timestampMs(ts){
+    if(!ts) return 0;
+    if(typeof ts.toMillis==='function') return ts.toMillis();
+    const d=ts?.toDate ? ts.toDate() : new Date(ts);
+    const ms=d?.getTime?.();
+    return Number.isFinite(ms)?ms:0;
+  }
   function humanLastSeen(ts){
-    if(!ts) return 'غير متصل';
-    const d = ts?.toDate ? ts.toDate() : new Date(ts);
-    if(Number.isNaN(d.getTime())) return 'غير متصل';
-    const diff = Math.max(0,Date.now()-d.getTime());
-    const sec=Math.floor(diff/1000);
+    const ms=timestampMs(ts);
+    if(!ms) return 'غير متصل';
+    const diff=Math.max(0,Date.now()-ms), sec=Math.floor(diff/1000);
     if(sec<60) return 'منذ أقل من دقيقة';
-    const min=Math.floor(sec/60);
-    if(min<60) return 'منذ '+min+' دقيقة';
-    const h=Math.floor(min/60);
-    if(h<24) return 'منذ '+h+' ساعة';
-    const day=Math.floor(h/24);
-    return 'منذ '+day+' يوم';
+    const min=Math.floor(sec/60); if(min<60) return 'منذ '+min+' دقيقة';
+    const h=Math.floor(min/60); if(h<24) return 'منذ '+h+' ساعة';
+    return 'منذ '+Math.floor(h/24)+' يوم';
   }
 
   async function setPresence(online){
     const uid=currentUid(); if(!db||!uid) return;
-    try { await fsSetDoc(fsDoc(db,'users',uid), {online:!!online,lastSeen:fsServerTimestamp()}, {merge:true}); } catch(e){ console.warn('presence',e); }
+    try{await fsSetDoc(fsDoc(db,'users',uid),{online:!!online,lastSeen:fsServerTimestamp()},{merge:true});}catch(e){console.warn('presence',e);}
   }
   function startPresence(){
-    if(presenceTimer) clearInterval(presenceTimer);
+    if(presenceTimer)clearInterval(presenceTimer);
     setPresence(true);
-    presenceTimer=setInterval(()=>{ if(document.visibilityState==='visible') setPresence(true); },20000);
-    document.addEventListener('visibilitychange', onVisibility, false);
-    window.addEventListener('beforeunload',()=>{ setPresence(false); }, {capture:true});
+    presenceTimer=setInterval(()=>{if(document.visibilityState==='visible')setPresence(true);},15000);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setPresence(true);},{passive:true});
+    window.addEventListener('pagehide',()=>setPresence(false),{capture:true});
+    window.addEventListener('beforeunload',()=>setPresence(false),{capture:true});
   }
-  function onVisibility(){ if(document.visibilityState==='visible') setPresence(true); else setPresence(false); }
-
   function startPresenceListener(){
-    if(presenceUnsub) presenceUnsub();
-    if(!db) return;
-    presenceUnsub=fsOnSnapshot(fsCollection(db,'users'), snap=>{
-      presenceCache=new Map();
-      snap.docs.forEach(d=>presenceCache.set(d.id,d.data()||{}));
+    if(presenceUnsub)presenceUnsub(); if(!db)return;
+    presenceUnsub=fsOnSnapshot(fsCollection(db,'users'),snap=>{
+      presenceCache=new Map();snap.docs.forEach(d=>presenceCache.set(d.id,d.data()||{}));
       (window.chats||[]).forEach(c=>{
-        if(c.uid){
-          const p=presenceCache.get(c.uid)||{};
-          const last=p.lastSeen;
-          const lastMs=last?.toMillis ? last.toMillis() : (last?new Date(last).getTime():0);
-          c.online=!!p.online && lastMs>0 && (Date.now()-lastMs)<45000;
-          c.lastSeen=humanLastSeen(last);
-        }
+        if(!c.uid)return;
+        const p=presenceCache.get(c.uid)||{}, lastMs=timestampMs(p.lastSeen);
+        c.online=!!p.online&&lastMs>0&&(Date.now()-lastMs)<45000;
+        c.lastSeen=humanLastSeen(p.lastSeen);
       });
-      if(typeof window.renderChatList==='function') window.renderChatList(document.getElementById('searchFriends')?.value||'');
-      if(currentCall?.peerUid && document.getElementById('chatWindowPanel')?.dataset.name){
-        const c=friendByUid(currentCall.peerUid); if(c) document.getElementById('chatWindowStatus').textContent=c.online?'متصل الآن':c.lastSeen;
-      }
-    });
+      if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');
+      const openName=document.getElementById('chatWindowPanel')?.dataset.name;
+      if(openName){const c=(window.chats||[]).find(x=>x.name===openName);if(c){const st=document.getElementById('chatWindowStatus'),dot=document.getElementById('chatWindowDot');if(st)st.textContent=c.online?'متصل الآن':'غادر '+c.lastSeen;if(dot){dot.style.display='block';dot.classList.toggle('offline',!c.online);}}}
+    },e=>console.warn('presence listener',e));
   }
 
-  function renderRealStories(){
-    if(typeof renderStories==='function') renderStories();
-  }
   function startStoriesListener(){
-    if(storiesUnsub) storiesUnsub();
-    if(!db) return;
-    storiesUnsub=fsOnSnapshot(fsCollection(db,'stories'), snap=>{
-      const now=Date.now(), me=currentUid();
-      const active=snap.docs.map(d=>({id:d.id,...d.data()})).filter(s=>{
-        const ex=s.expiresAt?.toMillis ? s.expiresAt.toMillis() : new Date(s.expiresAt||0).getTime();
-        return ex>now;
-      });
+    if(storiesUnsub)storiesUnsub(); if(!db)return;
+    storiesUnsub=fsOnSnapshot(fsCollection(db,'stories'),snap=>{
+      const now=Date.now(),me=currentUid();
+      const active=snap.docs.map(d=>({id:d.id,...d.data()})).filter(s=>timestampMs(s.expiresAt)>now);
       const mine=active.find(s=>s.ownerUid===me);
-      window.myStory=mine ? {id:mine.id,url:mine.url,type:mine.type,name:mine.fileName||'قصتي',createdAt:mine.createdAt} : null;
-      myStory = window.myStory;
-      window.stories=active.filter(s=>s.ownerUid!==me).map(s=>({
-        id:s.id, ownerUid:s.ownerUid, name:s.ownerName||'مستخدم', media:{url:s.url,type:s.type}, expiresAt:s.expiresAt
-      }));
-      renderRealStories();
-    }, err=>console.warn('stories listener',err));
+      window.myStory=mine?{id:mine.id,url:mine.url,type:mine.type,name:mine.fileName||'قصتي',createdAt:mine.createdAt}:null;
+      myStory=window.myStory;
+      window.stories=active.filter(s=>s.ownerUid!==me).map(s=>({id:s.id,ownerUid:s.ownerUid,name:s.ownerName||'مستخدم',media:{url:s.url,type:s.type},expiresAt:s.expiresAt}));
+      if(typeof renderStories==='function')renderStories();
+    },e=>console.warn('stories listener',e));
   }
 
-  // الخطة المجانية: لا نستخدم Firebase Storage. نحفظ الوسائط الصغيرة داخل Firestore كـ Data URL.
-  const FREE_MEDIA_LIMIT = 600 * 1024;
-
-  function readFileAsDataURL(file){
-    return new Promise((resolve,reject)=>{
-      const reader=new FileReader();
-      reader.onload=()=>resolve(reader.result);
-      reader.onerror=()=>reject(reader.error||new Error('تعذر قراءة الملف'));
-      reader.readAsDataURL(file);
-    });
-  }
-
-  function compressImage(file, maxBytes=FREE_MEDIA_LIMIT){
-    return new Promise((resolve,reject)=>{
-      const img=new Image();
-      const objectUrl=URL.createObjectURL(file);
-      img.onload=()=>{
-        URL.revokeObjectURL(objectUrl);
-        let w=img.naturalWidth, h=img.naturalHeight;
-        const maxSide=1280;
-        if(Math.max(w,h)>maxSide){ const scale=maxSide/Math.max(w,h); w=Math.round(w*scale); h=Math.round(h*scale); }
-        const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
-        const ctx=canvas.getContext('2d',{alpha:false}); ctx.drawImage(img,0,0,w,h);
-        let quality=.78, data=canvas.toDataURL('image/jpeg',quality);
-        while(data.length*0.75>maxBytes && quality>.35){ quality-=.07; data=canvas.toDataURL('image/jpeg',quality); }
-        if(data.length*0.75>maxBytes) return reject(new Error('الصورة كبيرة جدًا للخطة المجانية. اختر صورة أصغر.'));
-        resolve({url:data,type:'image',mimeType:'image/jpeg'});
-      };
-      img.onerror=()=>{URL.revokeObjectURL(objectUrl);reject(new Error('تعذر معالجة الصورة'));};
-      img.src=objectUrl;
-    });
-  }
-
-  async function fileToFreeData(file){
-    if(file.type.startsWith('image/')) return compressImage(file);
-    if(file.size>FREE_MEDIA_LIMIT) throw new Error('الملف أكبر من 600KB. في الخطة المجانية نسمح بالملفات الصغيرة فقط.');
-    return {url:await readFileAsDataURL(file),type:file.type.startsWith('video/')?'video':file.type.startsWith('audio/')?'audio':'file',mimeType:file.type};
-  }
-
-  async function uploadStory(file){
-    if(!db||!currentUid()) throw new Error('Firebase غير متاح. سجّل الدخول أولًا.');
-    if(!file.type.startsWith('image/')) throw new Error('على الخطة المجانية يتم حفظ سطوري الصور فقط داخل Firestore.');
-    const media=await compressImage(file);
-    const uid=currentUid();
-    await fsAddDoc(fsCollection(db,'stories'),{ownerUid:uid,ownerName:window.currentUser?.name||auth.currentUser?.displayName||'مستخدم',url:media.url,type:'image',fileName:file.name,createdAt:fsServerTimestamp(),expiresAt:new Date(Date.now()+24*60*60*1000)});
-    showToast('تم حفظ السطوري وسيبقى 24 ساعة حتى بعد الخروج ✅');
-  }
-
-  // اعتراض زر السطوري قبل المستمع القديم حتى لا يبقى الرابط محليًا فقط.
-  const storyInput=document.getElementById('storyFileInput');
-  if(storyInput){
-    storyInput.addEventListener('change',async e=>{
-      e.stopImmediatePropagation();
-      const file=storyInput.files?.[0]; if(!file)return;
-      try{await uploadStory(file);}catch(err){console.error(err);showToast(err.message||'تعذر حفظ السطوري');}
-      storyInput.value='';
-    },true);
-  }
-
-  function conversationId(a,b){ return [a,b].sort().join('_'); }
-  async function uploadChatFile(file, peerUid){
-    if(!db||!currentUid()) throw new Error('Firebase غير متاح. سجّل الدخول أولًا.');
-    const uid=currentUid(), cid=conversationId(uid,peerUid);
-    const media=await fileToFreeData(file);
-    await fsAddDoc(fsCollection(db,'conversations',cid,'messages'),{senderId:uid,receiverId:peerUid,type:media.type,url:media.url,fileName:file.name,mimeType:media.mimeType||file.type,text:'',createdAt:fsServerTimestamp()});
-  }
-  const chatFile=document.getElementById('chatFileInput');
-  if(chatFile){
-    chatFile.addEventListener('change',async e=>{
-      e.stopImmediatePropagation();
-      const file=chatFile.files?.[0]; const name=document.getElementById('chatWindowPanel')?.dataset.name;
-      const c=(window.chats||[]).find(x=>x.name===name);
-      if(!file||!c?.uid){showToast('افتح محادثة مع صديق أولًا');return;}
-      try{await uploadChatFile(file,c.uid);showToast('تم حفظ وإرسال الملف 📎');}catch(err){console.error(err);showToast(err.message||'تعذر إرسال الملف');}
-      chatFile.value='';
-    },true);
-  }
+  function conversationId(a,b){return [a,b].sort().join('_');}
 
   function messageMarkup(m){
     const time=typeof formatFirebaseTime==='function'?formatFirebaseTime(m.createdAt):'الآن';
-    if(m.type==='image') return `<img class="chat-media" src="${esc(m.url)}" alt="صورة">`;
-    if(m.type==='video') return `<video class="chat-media" src="${esc(m.url)}" controls playsinline></video>`;
-    if(m.type==='audio') return `<audio class="chat-audio" src="${esc(m.url)}" controls></audio>`;
-    if(m.type==='file') return `<a href="${esc(m.url)}" target="_blank" rel="noopener" style="color:inherit;font-weight:800"><i class="fa-solid fa-file"></i> ${esc(m.fileName||'ملف')}</a>`;
-    if(m.type==='call') return `<div class="msg-call"><i class="fa-solid ${m.callType==='video'?'fa-video':'fa-phone'}"></i><strong>${esc(m.callText||'مكالمة')}</strong><small>${esc(time)}</small></div>`;
+    if(m.type==='image')return `<img class="chat-media" src="${esc(m.url)}" alt="صورة">`;
+    if(m.type==='video')return `<video class="chat-media" src="${esc(m.url)}" controls playsinline></video>`;
+    if(m.type==='audio')return `<audio class="chat-audio" src="${esc(m.url)}" controls></audio>`;
+    if(m.type==='file')return `<a href="${esc(m.url)}" target="_blank" rel="noopener" style="color:inherit;font-weight:800"><i class="fa-solid fa-file"></i> ${esc(m.fileName||'ملف')}</a>`;
+    if(m.type==='call'){
+      const status=m.callStatus||'completed';
+      const labels={
+        completed:'مكالمة مكتملة',
+        missed:'مكالمة فائتة',
+        declined:'مكالمة مرفوضة',
+        no_answer:'لم يتم الرد على المكالمة',
+        canceled:'ألغيت المكالمة',
+        failed:'تعذر إتمام المكالمة'
+      };
+      const duration=(m.duration||0)>0?` · ${formatDuration(m.duration)}`:'';
+      const label=(labels[status]||m.callText||'مكالمة')+duration;
+      const cls=['missed','declined','no_answer'].includes(status)?' call-missed':'';
+      return `<div class="msg-call${cls}"><i class="fa-solid ${m.callType==='video'?'fa-video':'fa-phone'}"></i><strong>${esc(label)}</strong><small>${esc(time)}</small></div>`;
+    }
     return esc(m.text||'');
   }
+  function formatDuration(sec){
+    sec=Math.max(0,Number(sec)||0);const m=Math.floor(sec/60),s=sec%60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
   function renderPersistentMessages(name,messages){
-    const box=document.getElementById('chatMessages'); if(!box)return;
+    const box=document.getElementById('chatMessages');if(!box)return;
     box.innerHTML=messages.map(m=>`<div class="msg-row ${m.senderId===currentUid()?'out':'in'}"><div class="msg-bubble">${messageMarkup(m)}<span class="msg-time">${m.type==='call'?'':esc(typeof formatFirebaseTime==='function'?formatFirebaseTime(m.createdAt):'الآن')}</span></div></div>`).join('');
     box.scrollTop=box.scrollHeight;
   }
 
-  async function addCallChatEvent(peerUid,callType,callText){
-    if(!db||!currentUid()||!peerUid)return;
-    try{await fsAddDoc(fsCollection(db,'conversations',conversationId(currentUid(),peerUid),'messages'),{senderId:currentUid(),receiverId:peerUid,type:'call',callType,callText,createdAt:fsServerTimestamp()});}catch(e){console.warn('call chat event',e);}
+  // ملف السطوري محفوظ في Firestore كصورة مضغوطة، ويُحذف منطقيًا بعد 24 ساعة بواسطة expiresAt.
+  async function uploadStory(file){
+    if(!db||!currentUid())throw new Error('Firebase غير متاح. سجّل الدخول أولًا.');
+    if(!file.type.startsWith('image/'))throw new Error('على الخطة المجانية يتم حفظ سطوري الصور فقط داخل Firestore.');
+    const media=await compressImage(file),uid=currentUid();
+    await fsAddDoc(fsCollection(db,'stories'),{ownerUid:uid,ownerName:window.currentUser?.name||auth.currentUser?.displayName||'مستخدم',url:media.url,type:'image',fileName:file.name,createdAt:fsServerTimestamp(),expiresAt:new Date(Date.now()+86400000)});
+    showToast('تم حفظ السطوري وسيبقى 24 ساعة حتى بعد الخروج ✅');
   }
+  const storyInput=document.getElementById('storyFileInput');
+  if(storyInput)storyInput.addEventListener('change',async e=>{e.stopImmediatePropagation();const file=storyInput.files?.[0];if(!file)return;try{await uploadStory(file);}catch(err){showToast(err.message||'تعذر حفظ السطوري');}storyInput.value='';},true);
+
+  async function uploadChatFile(file,peerUid){
+    if(!db||!currentUid())throw new Error('Firebase غير متاح. سجّل الدخول أولًا.');
+    const media=await fileToFreeData(file),uid=currentUid(),cid=conversationId(uid,peerUid);
+    await fsAddDoc(fsCollection(db,'conversations',cid,'messages'),{senderId:uid,receiverId:peerUid,type:media.type,url:media.url,fileName:file.name,mimeType:media.mimeType||file.type,text:'',createdAt:fsServerTimestamp()});
+  }
+  const chatFile=document.getElementById('chatFileInput');
+  if(chatFile)chatFile.addEventListener('change',async e=>{e.stopImmediatePropagation();const file=chatFile.files?.[0],name=document.getElementById('chatWindowPanel')?.dataset.name,c=(window.chats||[]).find(x=>x.name===name);if(!file||!c?.uid){showToast('افتح محادثة مع صديق أولًا');return;}try{await uploadChatFile(file,c.uid);showToast('تم حفظ وإرسال الملف 📎');}catch(err){showToast(err.message||'تعذر إرسال الملف');}chatFile.value='';},true);
 
   function showCallUI(type,name,status,incoming=false){
     callOverlay.classList.toggle('video',type==='video');
+    callOverlay.classList.toggle('incoming',incoming);
     callAvatar.textContent=(name||'؟').trim().charAt(0).toUpperCase();
     callAvatar.style.background=typeof colorFor==='function'?colorFor(name||'A'):'#7c3aed';
-    callName.textContent=name||'مكالمة'; callStatus.textContent=status||'';
-    incomingActions.style.display=incoming?'flex':'none'; activeControls.style.display=incoming?'none':'flex';
+    callName.textContent=name||'مكالمة';callStatus.textContent=status||'';
+    incomingActions.style.display=incoming?'flex':'none';activeControls.style.display=incoming?'none':'flex';
     callOverlay.classList.remove('hidden');
   }
-  function hideCallUI(){callOverlay.classList.add('hidden');incomingActions.style.display='none';activeControls.style.display='none';callOverlay.classList.remove('video');}
+  function hideCallUI(){callOverlay.classList.add('hidden');incomingActions.style.display='none';activeControls.style.display='none';callOverlay.classList.remove('video','incoming');}
   function clearMedia(){
     if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
     if(currentPeer){currentPeer.close();currentPeer=null;}
     remoteVideo.srcObject=null;localVideo.srcObject=null;
     callCandidateUnsubs.forEach(f=>{try{f();}catch{}});callCandidateUnsubs=[];
   }
-  async function getMedia(type){
-    return navigator.mediaDevices.getUserMedia({audio:true,video:type==='video'});
-  }
+  async function getMedia(type){return navigator.mediaDevices.getUserMedia({audio:true,video:type==='video'});}
   async function addCandidates(callRef,collectionName,pc){
-    const unsub=fsOnSnapshot(fsCollection(callRef,collectionName),snap=>{snap.docChanges().forEach(ch=>{if(ch.type==='added'){const c=ch.doc.data();pc.addIceCandidate(new RTCIceCandidate(c)).catch(()=>{});}})});
-    callCandidateUnsubs.push(unsub);
+    const unsub=fsOnSnapshot(fsCollection(callRef,collectionName),snap=>{snap.docChanges().forEach(ch=>{if(ch.type==='added'){const c=ch.doc.data();pc.addIceCandidate(new RTCIceCandidate(c)).catch(()=>{});}})});callCandidateUnsubs.push(unsub);
   }
-  async function createCall(peerUid,type){
-    if(!db||!auth.currentUser)return;
-    const peer=friendByUid(peerUid); if(!peer){showToast('لا يمكن الاتصال بهذا المستخدم');return;}
-    clearMedia(); callLogged=false; callStartMs=0;
-    const callRef=fsDoc(fsCollection(db,'calls')); const callId=callRef.id;
-    currentCall={id:callId,peerUid,type,role:'caller',name:peer.name,status:'ringing'};
-    showCallUI(type,peer.name,'جارٍ الاتصال…',false);
-    try{
-      localStream=await getMedia(type); localVideo.srcObject=localStream;
-      currentPeer=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});
-      localStream.getTracks().forEach(t=>currentPeer.addTrack(t,localStream));
-      remoteStream=new MediaStream();remoteVideo.srcObject=remoteStream;
-      currentPeer.ontrack=e=>e.streams[0]?.getTracks().forEach(t=>remoteStream.addTrack(t));
-      currentPeer.onicecandidate=e=>{if(e.candidate) fsAddDoc(fsCollection(db,'calls',callId,'callerCandidates'),e.candidate.toJSON());};
-      const offer=await currentPeer.createOffer();await currentPeer.setLocalDescription(offer);
-      await fsSetDoc(callRef,{callerId:currentUid(),calleeId:peerUid,callerName:window.currentUser?.name||auth.currentUser.displayName||'مستخدم',calleeName:peer.name,type,status:'ringing',offer:{type:offer.type,sdp:offer.sdp},createdAt:fsServerTimestamp()});
-      await addCandidates(callRef,'calleeCandidates',currentPeer);
-      const unsub=fsOnSnapshot(callRef,async snap=>{
-        const data=snap.data(); if(!data)return;
-        if(data.answer&&!currentPeer.currentRemoteDescription){await currentPeer.setRemoteDescription(new RTCSessionDescription(data.answer));callStartMs=Date.now();callStatus.textContent='متصل الآن';}
-        if(data.status==='rejected'||data.status==='ended'){await finishCall(data.status==='rejected'?'rejected':'ended');}
-      }); callCandidateUnsubs.push(unsub);
-    }catch(e){console.error(e);await finishCall('failed');showToast('تعذر بدء المكالمة. تأكد من السماح بالميكروفون/الكاميرا.');}
+
+  async function writeCallChatEvent(callId,callData,status,duration=0){
+    if(!db||!callData?.callerId||!callData?.calleeId)return;
+    // مستند ثابت لكل مكالمة: يمنع ظهور فقاعة مكررة عندما ينهي الطرفان المكالمة.
+    const cid=conversationId(callData.callerId,callData.calleeId);
+    const ref=fsDoc(db,'conversations',cid,'messages',`call_${callId}`);
+    const labels={completed:'مكالمة مكتملة',missed:'مكالمة فائتة',declined:'مكالمة مرفوضة',no_answer:'لم يتم الرد على المكالمة',canceled:'ألغيت المكالمة',failed:'تعذر إتمام المكالمة'};
+    await fsSetDoc(ref,{senderId:callData.callerId,receiverId:callData.calleeId,type:'call',callId,callType:callData.type||'audio',callStatus:status,callText:labels[status]||'مكالمة',duration:Number(duration)||0,createdAt:callData.createdAt||fsServerTimestamp()},{merge:true});
   }
+
+  async function logCall(status,overrideCall=null){
+    const call=overrideCall||currentCall;if(!db||!call||callLogged)return;
+    callLogged=true;
+    const duration=callStartMs?Math.max(0,Math.floor((Date.now()-callStartMs)/1000)):0;
+    const uid=currentUid();if(!uid)return;
+    try{await fsAddDoc(fsCollection(db,'callLogs'),{callId:call.id,ownerUid:uid,peerUid:call.peerUid,type:call.type,status,duration,createdAt:fsServerTimestamp(),direction:call.role==='caller'?'out':'in',peerName:call.name});}catch(e){console.warn('call log',e);}
+  }
+
+  async function updateCallStatus(status){
+    if(!db||!currentCall?.id)return;
+    try{await fsUpdateDoc(fsDoc(db,'calls',currentCall.id),{status,endedAt:fsServerTimestamp()});}catch(e){console.warn('call status',e);}
+  }
+
+  async function finishCall(reason='ended'){
+    if(!currentCall||currentCall.finishing)return;
+    currentCall.finishing=true;
+    if(callMissTimer){clearTimeout(callMissTimer);callMissTimer=null;}
+    const call=currentCall,wasAccepted=call.status==='accepted'||callStartMs>0;
+    let status=reason;
+    if(reason==='ended' && !wasAccepted)status='no_answer';
+    if(reason==='canceled' && !wasAccepted)status='canceled';
+    const duration=callStartMs?Math.max(0,Math.floor((Date.now()-callStartMs)/1000)):0;
+    try{await updateCallStatus(status);}catch{}
+    callLogged=false;await logCall(status,call);
+    try{await writeCallChatEvent(call.id,call,status,duration);}catch(e){console.warn('call chat event',e);}
+    clearMedia();currentCall=null;hideCallUI();
+  }
+
+  async function rejectCall(){
+    if(!currentCall||currentCall.role!=='callee')return;
+    const call=currentCall;
+    if(callMissTimer){clearTimeout(callMissTimer);callMissTimer=null;}
+    try{await fsUpdateDoc(fsDoc(db,'calls',call.id),{status:'declined',endedAt:fsServerTimestamp()});}catch(e){}
+    callLogged=false;await logCall('declined',call);
+    try{await writeCallChatEvent(call.id,call,'declined',0);}catch(e){}
+    clearMedia();currentCall=null;hideCallUI();
+  }
+
   async function acceptCall(){
     if(!currentCall||currentCall.role!=='callee')return;
-    const callId=currentCall.id; const callRef=fsDoc(db,'calls',callId);
+    if(callMissTimer){clearTimeout(callMissTimer);callMissTimer=null;}
+    const call=currentCall,callRef=fsDoc(db,'calls',call.id);
     try{
-      localStream=await getMedia(currentCall.type);localVideo.srcObject=localStream;
+      localStream=await getMedia(call.type);localVideo.srcObject=localStream;
       currentPeer=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});
       localStream.getTracks().forEach(t=>currentPeer.addTrack(t,localStream));
       remoteStream=new MediaStream();remoteVideo.srcObject=remoteStream;
       currentPeer.ontrack=e=>e.streams[0]?.getTracks().forEach(t=>remoteStream.addTrack(t));
-      currentPeer.onicecandidate=e=>{if(e.candidate)fsAddDoc(fsCollection(db,'calls',callId,'calleeCandidates'),e.candidate.toJSON());};
-      const data=(await fsGetDoc(callRef)).data() || currentCall.offer ? ((await fsGetDoc(callRef)).data() || currentCall.offer) : null;
-      if(!data?.offer)throw new Error('عرض المكالمة غير موجود');
+      currentPeer.onicecandidate=e=>{if(e.candidate)fsAddDoc(fsCollection(db,'calls',call.id,'calleeCandidates'),e.candidate.toJSON());};
+      const data=(await fsGetDoc(callRef)).data();if(!data?.offer)throw new Error('عرض المكالمة غير موجود');
       await currentPeer.setRemoteDescription(new RTCSessionDescription(data.offer));
       const answer=await currentPeer.createAnswer();await currentPeer.setLocalDescription(answer);
       await fsUpdateDoc(callRef,{answer:{type:answer.type,sdp:answer.sdp},status:'accepted',answeredAt:fsServerTimestamp()});
       await addCandidates(callRef,'callerCandidates',currentPeer);
-      const endUnsub=fsOnSnapshot(callRef,async snap=>{ const d=snap.data()||{}; if(d.status==='ended'||d.status==='rejected'){ await finishCall(d.status==='rejected'?'rejected':'ended'); } }); callCandidateUnsubs.push(endUnsub);
-      currentCall.status='accepted';callStartMs=Date.now();showCallUI(currentCall.type,currentCall.name,'متصل الآن',false);
-    }catch(e){console.error(e);showToast('تعذر قبول المكالمة');await rejectCall('failed');}
+      currentCall.status='accepted';callStartMs=Date.now();showCallUI(call.type,call.name,'متصل الآن',false);
+      const endUnsub=fsOnSnapshot(callRef,snap=>{const d=snap.data()||{};if(['ended','canceled','declined','no_answer'].includes(d.status)){finishRemoteCall(d.status);}});callCandidateUnsubs.push(endUnsub);
+    }catch(e){console.error(e);showToast('تعذر قبول المكالمة. تأكد من السماح بالميكروفون/الكاميرا.');try{await fsUpdateDoc(callRef,{status:'failed',endedAt:fsServerTimestamp()});}catch{};clearMedia();currentCall=null;hideCallUI();}
   }
-  async function rejectCall(reason='rejected'){
-    if(!currentCall||!db)return;
-    try{await fsUpdateDoc(fsDoc(db,'calls',currentCall.id),{status:reason,endedAt:fsServerTimestamp()});}catch(e){}
-    if(currentCall.role==='callee'&&reason==='rejected') await logCall('missed');
-    else if(currentCall.role==='caller'&&reason==='rejected') await logCall('declined');
-    clearMedia();currentCall=null;hideCallUI();
-  }
-  async function logCall(status){
-    if(!db||!currentCall||callLogged)return; callLogged=true;
-    const duration=callStartMs?Math.max(0,Math.floor((Date.now()-callStartMs)/1000)):0;
-    const uid=currentUid(), peerUid=currentCall.peerUid;
-    try{await fsAddDoc(fsCollection(db,'callLogs'),{ownerUid:uid,peerUid,type:currentCall.type,status,duration,createdAt:fsServerTimestamp(),direction:currentCall.role==='caller'?'out':'in',peerName:currentCall.name});}catch(e){console.warn(e);}
-  }
-  async function finishCall(status='ended'){
-    if(!currentCall || currentCall.finishing)return;
+
+  async function finishRemoteCall(status){
+    if(!currentCall||currentCall.finishing)return;
     currentCall.finishing=true;
-    const peerUid=currentCall.peerUid,type=currentCall.type;
-    if(status==='rejected') await logCall(currentCall.role==='caller'?'declined':'missed'); else await logCall('completed');
-    if(peerUid) await addCallChatEvent(peerUid,type,status==='completed'?'مكالمة مكتملة':status==='rejected'?'مكالمة مرفوضة':'مكالمة منتهية');
-    try{if(db&&currentCall.id)await fsUpdateDoc(fsDoc(db,'calls',currentCall.id),{status:'ended',endedAt:fsServerTimestamp()});}catch(e){}
+    const call=currentCall,duration=callStartMs?Math.max(0,Math.floor((Date.now()-callStartMs)/1000)):0;
+    const logStatus=status==='declined'?'declined':status==='no_answer'?'no_answer':status==='canceled'?'canceled':status==='missed'?'missed':'completed';
+    callLogged=false;await logCall(logStatus,call);
+    // الحدث نفسه موجود في المحادثة بمستند ثابت، لذلك لا نضيف نسخة ثانية.
     clearMedia();currentCall=null;hideCallUI();
   }
 
+  async function createCall(peerUid,type){
+    if(!db||!auth.currentUser)return;
+    const peer=friendByUid(peerUid);if(!peer){showToast('لا يمكن الاتصال بهذا المستخدم');return;}
+    clearMedia();callLogged=false;callStartMs=0;
+    const callRef=fsDoc(fsCollection(db,'calls')),callId=callRef.id;
+    currentCall={id:callId,peerUid,type,role:'caller',name:peer.name,status:'ringing'};
+    showCallUI(type,peer.name,'جارٍ الاتصال…',false);
+    try{
+      localStream=await getMedia(type);localVideo.srcObject=localStream;
+      currentPeer=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]});
+      localStream.getTracks().forEach(t=>currentPeer.addTrack(t,localStream));
+      remoteStream=new MediaStream();remoteVideo.srcObject=remoteStream;
+      currentPeer.ontrack=e=>e.streams[0]?.getTracks().forEach(t=>remoteStream.addTrack(t));
+      currentPeer.onicecandidate=e=>{if(e.candidate)fsAddDoc(fsCollection(db,'calls',callId,'callerCandidates'),e.candidate.toJSON());};
+      const offer=await currentPeer.createOffer();await currentPeer.setLocalDescription(offer);
+      await fsSetDoc(callRef,{callerId:currentUid(),calleeId:peerUid,callerName:window.currentUser?.name||auth.currentUser.displayName||'مستخدم',calleeName:peer.name,type,status:'ringing',offer:{type:offer.type,sdp:offer.sdp},createdAt:fsServerTimestamp()});
+      await addCandidates(callRef,'calleeCandidates',currentPeer);
+      const unsub=fsOnSnapshot(callRef,async snap=>{
+        const data=snap.data();if(!data||!currentCall)return;
+        if(data.status==='accepted'&&data.answer&&!currentPeer.currentRemoteDescription){
+          await currentPeer.setRemoteDescription(new RTCSessionDescription(data.answer));currentCall.status='accepted';callStartMs=Date.now();callStatus.textContent='متصل الآن';
+        }
+        if(['rejected','declined','missed','no_answer','canceled','ended','failed'].includes(data.status)){
+          const st=data.status==='rejected'?'declined':data.status;await finishRemoteCall(st);clearMedia();currentCall=null;hideCallUI();
+        }
+      });
+      callCandidateUnsubs.push(unsub);
+      // بعد 30 ثانية من الرنين بدون قبول: "لم يرد" وتُسجل في المكالمات والدردشة.
+      callMissTimer=setTimeout(async()=>{if(currentCall?.id===callId&&currentCall.status==='ringing')await finishCall('no_answer');},30000);
+    }catch(e){console.error(e);await finishCall('failed');showToast('تعذر بدء المكالمة. تأكد من السماح بالميكروفون/الكاميرا.');}
+  }
+
+  window.createRealCall=createCall;
+
   function listenIncomingCalls(uid){
-    if(callsUnsub)callsUnsub(); if(!db||!uid)return;
+    if(callsUnsub)callsUnsub();if(!db||!uid)return;
     callsUnsub=fsOnSnapshot(fsQuery(fsCollection(db,'calls'),fsWhere('calleeId','==',uid)),snap=>{
-      const now=Date.now(); const arr=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>{const t=x.createdAt?.toMillis?.()||0; return t && (now-t)<90000 && x.status==='ringing';}).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
-      const c=arr[0]; if(!c||currentCall)return;
+      const now=Date.now();
+      const ringing=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.status==='ringing'&&timestampMs(x.createdAt)>0&&(now-timestampMs(x.createdAt))<30000).sort((a,b)=>timestampMs(b.createdAt)-timestampMs(a.createdAt));
+      const c=ringing[0];if(!c||currentCall)return;
       currentCall={id:c.id,peerUid:c.callerId,type:c.type||'audio',role:'callee',name:c.callerName||'مستخدم',status:'ringing',offer:c.offer||null};
-      showCallUI(currentCall.type,currentCall.name,'يتصل بك…',true);
+      showCallUI(currentCall.type,currentCall.name,currentCall.type==='video'?'يتصل بك عبر الفيديو…':'يتصل بك…',true);
+      if(callMissTimer)clearTimeout(callMissTimer);
+      callMissTimer=setTimeout(async()=>{
+        if(currentCall?.id!==c.id||currentCall.role!=='callee'||currentCall.status!=='ringing')return;
+        const call=currentCall;try{await fsUpdateDoc(fsDoc(db,'calls',call.id),{status:'missed',endedAt:fsServerTimestamp()});}catch{}
+        callLogged=false;await logCall('missed',call);try{await writeCallChatEvent(call.id,call,'missed',0);}catch{}
+        clearMedia();currentCall=null;hideCallUI();
+      },30000);
     });
   }
 
   async function loadCallLogs(uid){
     if(!db||!uid)return;
-    try{
-      const snap=await fsGetDocs(fsQuery(fsCollection(db,'callLogs'),fsWhere('ownerUid','==',uid)));
-      calls=snap.docs.map(d=>{const x=d.data();return {name:x.peerName||'مستخدم',type:x.status==='missed'?'missed':x.direction==='in'?'in':'out',time:typeof formatFirebaseTime==='function'?formatFirebaseTime(x.createdAt):'الآن',duration:x.duration||0,createdAt:x.createdAt};}).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0)); window.calls=calls;
-      if(typeof window.renderCallsList==='function')window.renderCallsList();
-    }catch(e){console.warn('call logs',e);}
-    fsOnSnapshot(fsQuery(fsCollection(db,'callLogs'),fsWhere('ownerUid','==',uid)),snap=>{
-      calls=snap.docs.map(d=>{const x=d.data();return {name:x.peerName||'مستخدم',type:x.status==='missed'?'missed':x.direction==='in'?'in':'out',time:typeof formatFirebaseTime==='function'?formatFirebaseTime(x.createdAt):'الآن',duration:x.duration||0,createdAt:x.createdAt};}).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0)); window.calls=calls;
-      if(typeof window.renderCallsList==='function')window.renderCallsList();
-    });
+    const apply=snap=>{
+      calls=snap.docs.map(d=>{const x=d.data()||{};return {name:x.peerName||'مستخدم',type:x.status==='missed'||x.status==='no_answer'?'missed':x.direction==='in'?'in':'out',status:x.status,time:typeof formatFirebaseTime==='function'?formatFirebaseTime(x.createdAt):'الآن',duration:x.duration||0,createdAt:x.createdAt};}).sort((a,b)=>timestampMs(b.createdAt)-timestampMs(a.createdAt));
+      window.calls=calls;if(typeof window.renderCallsList==='function')window.renderCallsList();
+    };
+    try{apply(await fsGetDocs(fsQuery(fsCollection(db,'callLogs'),fsWhere('ownerUid','==',uid))));}catch(e){console.warn('call logs',e);}
+    if(callLogsUnsub)callLogsUnsub();
+    callLogsUnsub=fsOnSnapshot(fsQuery(fsCollection(db,'callLogs'),fsWhere('ownerUid','==',uid)),apply,e=>console.warn('call logs listener',e));
   }
 
   function patchMessageListener(){
-    const oldOpen=window.openChatWindow || (typeof openChatWindow==='function' ? openChatWindow : null);
-    if(typeof oldOpen!=='function')return;
+    const oldOpen=window.openChatWindow||(typeof openChatWindow==='function'?openChatWindow:null);if(typeof oldOpen!=='function')return;
     window.openChatWindow=function(c){
-      oldOpen(c);
-      if(!db||!currentUid()||!c?.uid)return;
-      const cid=conversationId(currentUid(),c.uid);
-      if(window.__anMsgUnsub)window.__anMsgUnsub();
+      oldOpen(c);if(!db||!currentUid()||!c?.uid)return;
+      const cid=conversationId(currentUid(),c.uid);if(window.__anMsgUnsub)window.__anMsgUnsub();
       window.__anMsgUnsub=fsOnSnapshot(fsCollection(db,'conversations',cid,'messages'),snap=>{
-        const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));
+        const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>timestampMs(a.createdAt)-timestampMs(b.createdAt));
         renderPersistentMessages(c.name,msgs);
-        const last=msgs[msgs.length-1]; if(last){c.last=last.type==='image'?'📷 صورة':last.type==='video'?'🎥 فيديو':last.type==='audio'?'🎤 صوت':last.type==='file'?'📎 ملف':last.type==='call'?'📞 مكالمة':last.text||'';c.time=typeof formatFirebaseTime==='function'?formatFirebaseTime(last.createdAt):'الآن';}
+        const last=msgs[msgs.length-1];if(last){c.last=last.type==='image'?'📷 صورة':last.type==='video'?'🎥 فيديو':last.type==='audio'?'🎤 صوت':last.type==='file'?'📎 ملف':last.type==='call'?'📞 '+(last.callStatus==='missed'||last.callStatus==='no_answer'?'لم يرد':'مكالمة'):last.text||'';c.time=typeof formatFirebaseTime==='function'?formatFirebaseTime(last.createdAt):'الآن';}
         if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');
-      });
+      },e=>console.warn('message listener',e));
     };
+    window.openChatWindow=window.openChatWindow;
   }
 
   document.getElementById('callAcceptBtn').addEventListener('click',acceptCall);
-  document.getElementById('callRejectBtn').addEventListener('click',()=>rejectCall('rejected'));
+  document.getElementById('callRejectBtn').addEventListener('click',rejectCall);
   document.getElementById('callEndBtn').addEventListener('click',()=>finishCall('ended'));
   callMuteBtn.addEventListener('click',()=>{if(!localStream)return;const t=localStream.getAudioTracks()[0];if(!t)return;t.enabled=!t.enabled;callMuteBtn.classList.toggle('active',!t.enabled);callMuteBtn.innerHTML=t.enabled?'<i class="fa-solid fa-microphone"></i>':'<i class="fa-solid fa-microphone-slash"></i>';});
   callSpeakerBtn.addEventListener('click',()=>{remoteVideo.muted=!remoteVideo.muted;callSpeakerBtn.classList.toggle('active',!remoteVideo.muted);showToast(remoteVideo.muted?'تم كتم السماعة':'تم تشغيل السماعة 🔊');});
-
-  // أزرار الاتصال من أعلى المحادثة: مكالمة حقيقية وليست رسالة تجريبية.
-  document.getElementById('chatWindowCallBtn').onclick=()=>{
-    const name=document.getElementById('chatWindowPanel').dataset.name;const c=(window.chats||[]).find(x=>x.name===name);if(c?.uid)createCall(c.uid,'audio');
-  };
-  document.getElementById('chatWindowVideoBtn').onclick=()=>{
-    const name=document.getElementById('chatWindowPanel').dataset.name;const c=(window.chats||[]).find(x=>x.name===name);if(c?.uid)createCall(c.uid,'video');
-  };
+  document.getElementById('chatWindowCallBtn').onclick=()=>{const name=document.getElementById('chatWindowPanel').dataset.name,c=(window.chats||[]).find(x=>x.name===name);if(c?.uid)createCall(c.uid,'audio');};
+  document.getElementById('chatWindowVideoBtn').onclick=()=>{const name=document.getElementById('chatWindowPanel').dataset.name,c=(window.chats||[]).find(x=>x.name===name);if(c?.uid)createCall(c.uid,'video');};
 
   async function bootRealFeatures(){
-    if(!db||!auth)return;
-    startPresence();startPresenceListener();startStoriesListener();loadCallLogs(auth.currentUser?.uid);listenIncomingCalls(auth.currentUser?.uid);patchMessageListener();
+    if(!db||!auth||!auth.currentUser)return;
+    startPresence();startPresenceListener();startStoriesListener();loadCallLogs(auth.currentUser.uid);listenIncomingCalls(auth.currentUser.uid);patchMessageListener();
   }
-  // تطبيق المزايا بعد تسجيل الدخول، وليس قبلها.
-  if(auth){auth.onAuthStateChanged?.(u=>{if(u)setTimeout(bootRealFeatures,200);else{if(presenceTimer)clearInterval(presenceTimer);if(presenceUnsub)presenceUnsub();if(storiesUnsub)storiesUnsub();if(callsUnsub)callsUnsub();}});}
+  if(auth){auth.onAuthStateChanged?.(u=>{if(u)setTimeout(bootRealFeatures,200);else{if(presenceTimer)clearInterval(presenceTimer);if(presenceUnsub)presenceUnsub();if(storiesUnsub)storiesUnsub();if(callsUnsub)callsUnsub();if(callLogsUnsub)callLogsUnsub();}});}
 </script>
 
 </body>
