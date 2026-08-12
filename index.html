@@ -915,15 +915,8 @@
   .msg-call{min-width:190px;text-align:center}.msg-call i{font-size:20px;margin-bottom:5px}.msg-call strong{display:block;font-size:13px}.msg-call small{display:block;margin-top:2px;opacity:.8}
 
 
-  .call-pricing{margin:10px 14px 4px;padding:12px;border-radius:18px;background:linear-gradient(135deg,#f7f1ff,#fff);border:1px solid #eadfff;box-shadow:0 5px 18px rgba(124,58,237,.08)}
-  .call-pricing-title{font-weight:900;color:var(--violet-600);font-size:13px;margin-bottom:9px;text-align:right}
-  .call-pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .call-pricing-grid>div{display:flex;align-items:center;gap:7px;background:#fff;border-radius:13px;padding:9px 8px;font-size:11px;min-width:0}
-  .call-pricing-grid i{color:var(--violet-600)}
-  .call-pricing-grid strong{font-size:11px}.call-pricing-grid span{margin-right:auto;color:var(--muted);font-weight:700;white-space:nowrap}
   .msg-call.missed{color:#ef4444}.msg-call.outgoing{color:#7c3aed}.msg-call.completed{color:#16a34a}.msg-call.declined{color:#ef4444}.msg-call.noanswer{color:#ef4444}
-  .call-price-line{font-size:11px;margin-top:8px;opacity:.88;font-weight:700}
-  .call-duration-line{font-size:11px;margin-top:3px;opacity:.85}
+
 
 </style>
 </head>
@@ -1127,13 +1120,6 @@
 
         <!-- ===== تبويب المكالمات ===== -->
         <div class="tab-content hidden" id="tabCalls">
-          <div class="call-pricing" id="callPricing">
-            <div class="call-pricing-title"><i class="fa-solid fa-tags"></i> أسعار المكالمات</div>
-            <div class="call-pricing-grid">
-              <div><i class="fa-solid fa-phone"></i><strong>صوتية</strong><span>مجانية حاليًا</span></div>
-              <div><i class="fa-solid fa-video"></i><strong>فيديو</strong><span>مجانية حاليًا</span></div>
-            </div>
-          </div>
           <div class="calls-list" id="callsList"></div>
         </div>
         <!-- ===== لوحة الدردشة (المحادثة مع صديق) ===== -->
@@ -1992,19 +1978,10 @@
         <div class="call-info">
           <div class="call-name">${esc(c.name)}</div>
           <div class="call-meta ${m.cls}"><i class="fa-solid ${m.icon}"></i> ${statusLabel(c)} · <span class="call-time">${esc(c.time||'الآن')}</span></div>
-          <div class="call-duration-line">${c.callType==='video'?'🎥 فيديو':'📞 صوتية'}${duration(c.duration)?' · مدة '+duration(c.duration):''} · السعر: ${c.price||0} ${c.currency||'دج'}/دقيقة</div>
-        </div>
-        <div class="call-actions">
-          <button type="button" class="call-audio" title="اتصال صوتي"><i class="fa-solid fa-phone"></i></button>
-          <button type="button" class="call-video" title="اتصال فيديو"><i class="fa-solid fa-video"></i></button>
+          <div class="call-duration-line">${c.callType==='video'?'🎥 فيديو':'📞 صوتية'}</div>
         </div>
       </div>`;
     }).join('');
-    list.querySelectorAll('.call-audio,.call-video').forEach(btn=>btn.addEventListener('click',()=>{
-      const item=btn.closest('.call-item'); const uid=item?.dataset.uid;
-      if(!uid){showToast('لا يمكن الاتصال بهذا المستخدم');return;}
-      window.ANStartCall?.(uid,btn.classList.contains('call-video')?'video':'audio');
-    }));
   }
 
   window.renderChatList = renderChatList;
@@ -2772,7 +2749,6 @@
     <div class="call-avatar" id="callAvatar">؟</div>
     <div class="call-name" id="callName">مكالمة</div>
     <div class="call-status" id="callStatus">جارٍ الاتصال…</div>
-    <div class="call-price-line" id="callPriceLine">السعر: مجاني حاليًا</div>
     <div class="incoming-actions" id="incomingActions" style="display:none">
       <button type="button" class="call-control reject" id="callRejectBtn" title="رفض"><i class="fa-solid fa-phone-slash"></i></button>
       <button type="button" class="call-control accept" id="callAcceptBtn" title="قبول"><i class="fa-solid fa-phone"></i></button>
@@ -2810,7 +2786,6 @@
   const callAvatar=document.getElementById('callAvatar');
   const callName=document.getElementById('callName');
   const callStatus=document.getElementById('callStatus');
-  const callPriceLine=document.getElementById('callPriceLine');
   const incomingActions=document.getElementById('incomingActions');
   const activeControls=document.getElementById('activeCallControls');
   const remoteVideo=document.getElementById('remoteVideo');
@@ -2821,9 +2796,6 @@
   const callRejectBtn=document.getElementById('callRejectBtn');
   const callEndBtn=document.getElementById('callEndBtn');
 
-  // الأسعار قابلة للتعديل من مكان واحد. في النسخة المجانية الحالية المكالمات مجانية.
-  const CALL_PRICES={audio:0,video:0,currency:'دج',unit:'دقيقة'};
-  const priceText=type=>CALL_PRICES[type]===0?'السعر: مجاني حاليًا':`السعر: ${CALL_PRICES[type]} ${CALL_PRICES.currency}/${CALL_PRICES.unit}`;
   const uid=()=>auth?.currentUser?.uid||null;
   const esc2=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const friendByUid=peerUid=>{
@@ -2948,7 +2920,7 @@
     callOverlay.classList.toggle('video',type==='video');
     callAvatar.textContent=(name||'؟').trim().charAt(0).toUpperCase();
     callAvatar.style.background=typeof colorFor==='function'?colorFor(name||'A'):'#7c3aed';
-    callName.textContent=name||'مكالمة';callStatus.textContent=status||'';callPriceLine.textContent=priceText(type);
+    callName.textContent=name||'مكالمة';callStatus.textContent=status||'';
     incomingActions.style.display=incoming?'flex':'none';activeControls.style.display=incoming?'none':'flex';
     callOverlay.classList.remove('hidden');
   }
@@ -2969,8 +2941,6 @@
     const payload={senderId:call.role==='caller'?uid():call.peerUid,receiverId:call.role==='caller'?call.peerUid:uid(),type:'call',callId:call.id,callType:call.type,createdAt:fsServerTimestamp()};
     payload.callStatus=status;
     payload.callText=label;
-    payload.price=CALL_PRICES[call.type] || 0;
-    payload.currency=CALL_PRICES.currency;
     payload[role+'Status']=status; payload[role+'Duration']=Number(duration||0); payload[role+'Text']=label;
     try{await fsSetDoc(ref,payload,{merge:true});}catch(e){console.warn('call chat event',e);}
   }
@@ -2979,7 +2949,7 @@
     if(!db||!call||!me)return;
     const duration=callStartMs?Math.max(0,Math.floor((Date.now()-callStartMs)/1000)):0;
     const logId=String(call.id||'call')+'_'+me;
-    try{await fsSetDoc(fsDoc(db,'callLogs',logId),{ownerUid:me,peerUid:call.peerUid,peerName:call.name,type:call.type,status,duration,direction:call.role==='caller'?'out':'in',price:CALL_PRICES[call.type]||0,currency:CALL_PRICES.currency,createdAt:fsServerTimestamp(),callId:call.id},{merge:true});}catch(e){console.warn('call log',e);}
+    try{await fsSetDoc(fsDoc(db,'callLogs',logId),{ownerUid:me,peerUid:call.peerUid,peerName:call.name,type:call.type,status,duration,direction:call.role==='caller'?'out':'in',createdAt:fsServerTimestamp(),callId:call.id},{merge:true});}catch(e){console.warn('call log',e);}
   }
   async function finishCall(status='completed',writeStatus=true){
     if(!currentCall||currentCall.finishing)return;
@@ -2987,7 +2957,6 @@
     const call={...currentCall};
     const duration=callStartMs?Math.max(0,Math.floor((Date.now()-callStartMs)/1000)):0;
     await logCall(call,status);
-    await writeCallChatEvent(call,status,duration);
     if(writeStatus&&db&&call.id){try{await fsUpdateDoc(fsDoc(db,'calls',call.id),{status:'ended',finalStatus:status,endedAt:fsServerTimestamp(),duration});}catch{}}
     clearMedia();currentCall=null;hideCallUI();
   }
@@ -2996,7 +2965,6 @@
     const call={...currentCall};
     try{if(db)await fsUpdateDoc(fsDoc(db,'calls',call.id),{status,endedAt:fsServerTimestamp(),finalStatus:status});}catch{}
     await logCall(call,call.role==='callee'&&status==='declined'?'missed':status);
-    await writeCallChatEvent(call,call.role==='callee'&&status==='declined'?'missed':status,0);
     clearMedia();currentCall=null;hideCallUI();
   }
   async function createCall(peerUid,type){
@@ -3067,7 +3035,7 @@
   async function loadCallLogs(me){
     if(!db||!me)return;
     const apply=snap=>{
-      window.calls=snap.docs.map(d=>{const x=d.data()||{};const direction=x.direction==='in'?'in':'out';return {name:x.peerName||'مستخدم',peerUid:x.peerUid||'',type:x.status==='missed'||x.status==='no_answer'?'missed':direction,status:x.status||'completed',callType:x.type||'audio',duration:x.duration||0,price:x.price||0,currency:x.currency||'دج',time:timeText(x.createdAt),createdAt:x.createdAt};}).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+      window.calls=snap.docs.map(d=>{const x=d.data()||{};const direction=x.direction==='in'?'in':'out';return {name:x.peerName||'مستخدم',peerUid:x.peerUid||'',type:x.status==='missed'||x.status==='no_answer'?'missed':direction,status:x.status||'completed',callType:x.type||'audio',duration:x.duration||0,time:timeText(x.createdAt),createdAt:x.createdAt};}).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
       if(typeof window.renderCallsList==='function')window.renderCallsList();
     };
     try{const snap=await fsGetDocs(fsQuery(fsCollection(db,'callLogs'),fsWhere('ownerUid','==',me)));apply(snap);}catch(e){console.warn('call logs read',e);}
@@ -3075,16 +3043,8 @@
   }
   function messageMarkup(m){
     const t=timeText(m.createdAt);
-    if(m.type==='call'){
-      const role=m.senderId===uid()?'caller':'callee';
-      const status=m[role+'Status']||m.callStatus||'completed';
-      const text=m[role+'Text']||m.callText||'مكالمة';
-      const duration=Number(m[role+'Duration']??m.duration??0);
-      const cls=status==='missed'?'missed':status==='declined'?'declined':status==='no_answer'?'noanswer':status==='completed'?'completed':'outgoing';
-      const icon=m.callType==='video'?'fa-video':'fa-phone';const dur=duration?` · ${Math.floor(duration/60)}:${String(duration%60).padStart(2,'0')}`:'';
-      const price=Number(m.price||0);const priceLine=`السعر: ${price} ${esc2(m.currency||'دج')}/دقيقة`;
-      return `<div class="msg-call ${cls}"><i class="fa-solid ${icon}"></i><strong>${esc2(text)}${esc2(dur)}</strong><small>${esc2(t)} · ${priceLine}</small></div>`;
-    }
+    // سجلات المكالمات لا تظهر داخل الدردشة؛ سجلها موجود فقط في تبويب المكالمات.
+    if(m.type==='call') return '';
     if(m.type==='image')return `<img class="chat-media" src="${esc2(m.url)}" alt="صورة">`;
     if(m.type==='video')return `<video class="chat-media" src="${esc2(m.url)}" controls playsinline></video>`;
     if(m.type==='audio')return `<audio class="chat-audio" src="${esc2(m.url)}" controls></audio>`;
@@ -3098,7 +3058,7 @@
     if(typeof window.openChatWindow!=='function')return;
     if(window.__anCallChatPatched)return;window.__anCallChatPatched=true;
     const oldOpen=window.openChatWindow;
-    window.openChatWindow=function(c){oldOpen(c);if(!db||!uid()||!c?.uid)return;const cid=conversationId(uid(),c.uid);if(window.__anMsgUnsub)window.__anMsgUnsub();window.__anMsgUnsub=fsOnSnapshot(fsCollection(db,'conversations',cid,'messages'),snap=>{const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));const box=document.getElementById('chatMessages');if(box){box.innerHTML=msgs.map(m=>`<div class="msg-row ${m.senderId===uid()?'out':'in'}"><div class="msg-bubble">${messageMarkup(m)}<span class="msg-time">${m.type==='call'?'':esc2(timeText(m.createdAt))}</span></div></div>`).join('');box.scrollTop=box.scrollHeight;}const last=msgs[msgs.length-1];if(last){c.last=last.type==='call'?(last.callText||last.callText||last.callerText||last.calleeText||'📞 مكالمة'):last.text||'رسالة';c.time=timeText(last.createdAt);if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');}});};
+    window.openChatWindow=function(c){oldOpen(c);if(!db||!uid()||!c?.uid)return;const cid=conversationId(uid(),c.uid);if(window.__anMsgUnsub)window.__anMsgUnsub();window.__anMsgUnsub=fsOnSnapshot(fsCollection(db,'conversations',cid,'messages'),snap=>{const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));const chatMsgs=msgs.filter(m=>m.type!=='call');const box=document.getElementById('chatMessages');if(box){box.innerHTML=chatMsgs.map(m=>`<div class="msg-row ${m.senderId===uid()?'out':'in'}"><div class="msg-bubble">${messageMarkup(m)}<span class="msg-time">${esc2(timeText(m.createdAt))}</span></div></div>`).join('');box.scrollTop=box.scrollHeight;}const last=chatMsgs[chatMsgs.length-1];if(last){c.last=last.type==='image'?'📷 صورة':last.type==='video'?'🎥 فيديو':last.type==='audio'?'🎵 رسالة صوتية':last.text||'رسالة';c.time=timeText(last.createdAt);if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');}});};
   }
   window.openChatWindow = window.openChatWindow || (typeof openChatWindow==='function' ? openChatWindow : null);
 
