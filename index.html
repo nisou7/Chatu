@@ -323,8 +323,19 @@
     to{ opacity:1; transform: translateX(0); }
   }
 
+  /* ===== صفحة استعادة كلمة السر ===== */
+  .reset-icon{width:76px;height:76px;border-radius:24px;margin:4px auto 16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ede9fe,#f5f3ff);color:var(--violet-600);font-size:30px;box-shadow:0 12px 28px rgba(109,40,217,.12)}
+  .reset-title{text-align:center;font-size:24px;font-weight:900;color:var(--ink);margin:0 0 6px}
+  .reset-subtitle{text-align:center;color:var(--muted);font-size:13px;line-height:1.8;margin:0 auto 22px;max-width:330px}
+  .reset-email-box{background:#faf8ff;border:1px solid #eee8fb;border-radius:14px;padding:11px 13px;margin:0 0 16px;display:none}
+  .reset-email-box span{font-size:11px;color:var(--muted)}
+  .reset-email-box strong{display:block;color:var(--ink);font-size:13px;word-break:break-all;margin-top:3px}
+  .reset-success{text-align:center;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:16px;padding:18px 14px;line-height:1.9;font-size:13px;display:none}
+  .reset-success i{font-size:34px;margin-bottom:8px;display:block}
+  .reset-error{text-align:center;background:#fff1f2;border:1px solid #fecdd3;color:#be123c;border-radius:14px;padding:12px;font-size:12px;display:none;margin-bottom:14px}
+  .reset-note{text-align:center;color:var(--muted);font-size:11px;line-height:1.8;margin-top:13px}
+
   .back-btn{
-    display:inline-flex; align-items:center; gap:6px;
     background:none; border:none; cursor:pointer;
     color:var(--violet-600); font-weight:700; font-size:13px;
     margin-bottom: clamp(14px, 4vw, 22px);
@@ -1011,6 +1022,35 @@
       </p>
     </section>
 
+    <!-- ===================== صفحة إعادة تعيين كلمة السر ===================== -->
+    <section class="panel hidden" id="resetPanel">
+      <button type="button" class="back-btn" id="resetBackBtn"><i class="fa-solid fa-arrow-right"></i> رجوع لتسجيل الدخول</button>
+      <div class="reset-icon"><i class="fa-solid fa-key"></i></div>
+      <h2 class="reset-title" id="resetTitle">إعادة تعيين كلمة السر</h2>
+      <p class="reset-subtitle" id="resetSubtitle">أدخل بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة السر.</p>
+      <div class="reset-error" id="resetError"></div>
+      <div id="resetRequestBox">
+        <form id="resetRequestForm" novalidate>
+          <div class="field">
+            <label for="resetEmail">البريد الإلكتروني</label>
+            <div class="input-wrap"><input type="email" id="resetEmail" placeholder="example@email.com" autocomplete="email" required><i class="fa-regular fa-envelope icon-left"></i></div>
+            <div class="hint-error" id="resetEmailError">يرجى إدخال بريد إلكتروني صحيح</div>
+          </div>
+          <button type="submit" class="btn-main" id="resetSendBtn"><i class="fa-solid fa-paper-plane"></i> إرسال رابط الاستعادة</button>
+        </form>
+        <p class="reset-note">تحقق من صندوق الوارد والبريد غير المرغوب فيه. رابط الاستعادة آمن ومؤقت.</p>
+      </div>
+      <div id="resetPasswordBox" style="display:none">
+        <div class="reset-email-box" id="resetAccountBox"><span>الحساب</span><strong id="resetAccountEmail"></strong></div>
+        <form id="resetPasswordForm" novalidate>
+          <div class="field"><label for="newResetPass">كلمة السر الجديدة</label><div class="input-wrap"><input type="password" id="newResetPass" placeholder="6 أحرف على الأقل" minlength="6" autocomplete="new-password" required><i class="fa-solid fa-lock icon-left"></i><button type="button" class="toggle-eye" data-target="newResetPass" aria-label="إظهار كلمة السر"><i class="fa-solid fa-eye"></i></button></div></div>
+          <div class="field"><label for="newResetPass2">تأكيد كلمة السر</label><div class="input-wrap"><input type="password" id="newResetPass2" placeholder="أعد كتابة كلمة السر" minlength="6" autocomplete="new-password" required><i class="fa-solid fa-lock icon-left"></i><button type="button" class="toggle-eye" data-target="newResetPass2" aria-label="إظهار كلمة السر"><i class="fa-solid fa-eye"></i></button></div></div>
+          <button type="submit" class="btn-main" id="resetSaveBtn"><i class="fa-solid fa-shield-halved"></i> حفظ كلمة السر الجديدة</button>
+        </form>
+      </div>
+      <div class="reset-success" id="resetSuccess"><i class="fa-solid fa-circle-check"></i><strong>تم تغيير كلمة السر بنجاح</strong><div>يمكنك الآن تسجيل الدخول باستخدام كلمة السر الجديدة.</div><button type="button" class="btn-main" id="resetSuccessLogin" style="margin-top:14px"><i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول</button></div>
+    </section>
+
     <!-- ===================== صفحة إنشاء حساب ===================== -->
     <section class="panel hidden" id="signupPanel">
       <button type="button" class="back-btn" id="goLogin">
@@ -1290,6 +1330,8 @@
     signInWithPopup,
     GoogleAuthProvider,
     sendPasswordResetEmail,
+    verifyPasswordResetCode,
+    confirmPasswordReset,
     updateProfile,
     signOut,
     setPersistence,
@@ -1446,7 +1488,20 @@
 
   async function firebaseResetPassword(email) {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    await firebasePersistenceReady;
     return sendPasswordResetEmail(firebaseAuth, email);
+  }
+
+  async function firebaseVerifyPasswordResetCode(actionCode) {
+    if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    await firebasePersistenceReady;
+    return verifyPasswordResetCode(firebaseAuth, actionCode);
+  }
+
+  async function firebaseConfirmPasswordReset(actionCode, newPassword) {
+    if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    await firebasePersistenceReady;
+    return confirmPasswordReset(firebaseAuth, actionCode, newPassword);
   }
 
   async function firebaseLogout() {
@@ -1604,6 +1659,8 @@
     firebaseLogin,
     firebaseGoogleLogin,
     firebaseResetPassword,
+    firebaseVerifyPasswordResetCode,
+    firebaseConfirmPasswordReset,
     firebaseLogout,
     searchFirebaseUserByAnId,
     sendFirebaseFriendRequest,
@@ -1635,6 +1692,7 @@
   // ===== التبديل بين صفحة الدخول وإنشاء الحساب =====
   const loginPanel = document.getElementById('loginPanel');
   const signupPanel = document.getElementById('signupPanel');
+  const resetPanel = document.getElementById('resetPanel');
 
   function showPanel(toShow, toHide){
     toHide.classList.add('hidden');
@@ -1647,6 +1705,8 @@
   document.getElementById('goSignup').addEventListener('click', ()=> showPanel(signupPanel, loginPanel));
   document.getElementById('goLogin').addEventListener('click', ()=> showPanel(loginPanel, signupPanel));
   document.getElementById('goLogin2').addEventListener('click', ()=> showPanel(loginPanel, signupPanel));
+  document.getElementById('resetBackBtn').addEventListener('click', ()=> showPanel(loginPanel, resetPanel));
+  document.getElementById('resetSuccessLogin').addEventListener('click', ()=> showPanel(loginPanel, resetPanel));
 
   // ===== توست النجاح =====
   const toast = document.getElementById('toast');
@@ -1680,6 +1740,9 @@
       'auth/email-already-in-use':'هذا البريد مستخدم بالفعل.',
       'auth/weak-password':'كلمة السر ضعيفة. استخدم 6 أحرف على الأقل.',
       'auth/invalid-email':'البريد الإلكتروني غير صحيح.',
+      'auth/user-not-found':'لا يوجد حساب مرتبط بهذا البريد الإلكتروني.',
+      'auth/expired-action-code':'انتهت صلاحية رابط إعادة تعيين كلمة السر. اطلب رابطًا جديدًا.',
+      'auth/invalid-action-code':'رابط إعادة تعيين كلمة السر غير صالح أو تم استخدامه مسبقًا.',
       'auth/popup-closed-by-user':'تم إغلاق نافذة Google.',
       'auth/popup-blocked':'المتصفح منع نافذة Google. اسمح بالنوافذ المنبثقة لهذا الموقع.',
       'auth/cancelled-popup-request':'يوجد تسجيل دخول Google آخر قيد التنفيذ.',
@@ -1837,15 +1900,46 @@
     }catch(error){ showToast(firebaseErrorMessage(error)); }
   });
 
-  // إعادة تعيين كلمة السر
-  document.getElementById('forgotBtn').addEventListener('click', async ()=>{
-    const email = document.getElementById('loginEmail').value.trim();
-    if(!isValidEmail(email)){ showToast('اكتب بريدك الإلكتروني أولًا.'); return; }
-    try{
-      await window.ANFirebase.firebaseResetPassword(email);
-      showToast('تم إرسال رابط استعادة كلمة السر 📩');
-    }catch(error){ showToast(firebaseErrorMessage(error)); }
+  // ===== صفحة استعادة كلمة السر =====
+  const resetRequestBox=document.getElementById('resetRequestBox'), resetPasswordBox=document.getElementById('resetPasswordBox'), resetSuccess=document.getElementById('resetSuccess'), resetError=document.getElementById('resetError'), resetTitle=document.getElementById('resetTitle'), resetSubtitle=document.getElementById('resetSubtitle');
+  let activeResetCode=null;
+  function setResetError(message){ resetError.textContent=message||''; resetError.style.display=message?'block':'none'; }
+  function prepareResetRequest(){
+    resetTitle.textContent='إعادة تعيين كلمة السر'; resetSubtitle.textContent='أدخل بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة السر.';
+    resetRequestBox.style.display='block'; resetPasswordBox.style.display='none'; resetSuccess.style.display='none'; setResetError('');
+    const e=document.getElementById('loginEmail').value.trim(); if(isValidEmail(e)) document.getElementById('resetEmail').value=e;
+  }
+  document.getElementById('forgotBtn').addEventListener('click',()=>{ prepareResetRequest(); showPanel(resetPanel,loginPanel); });
+
+  document.getElementById('resetRequestForm').addEventListener('submit',async e=>{
+    e.preventDefault(); const email=document.getElementById('resetEmail').value.trim(), btn=document.getElementById('resetSendBtn');
+    if(!isValidEmail(email)){ document.getElementById('resetEmailError').style.display='block'; return; }
+    document.getElementById('resetEmailError').style.display='none'; setResetError(''); if(btn.disabled)return;
+    const original=btn.innerHTML; btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الرابط...';
+    try{ await window.ANFirebase.firebaseResetPassword(email); resetRequestBox.style.display='none'; resetSuccess.style.display='block'; resetTitle.textContent='تحقق من بريدك الإلكتروني'; resetSubtitle.textContent='أرسلنا رابطًا لإعادة تعيين كلمة السر. افتح الرسالة ثم اضغط على الرابط للمتابعة.'; showToast('تم إرسال رابط الاستعادة 📩'); }
+    catch(error){ setResetError(firebaseErrorMessage(error)); }
+    finally{ btn.disabled=false; btn.innerHTML=original; }
   });
+
+  document.getElementById('resetPasswordForm').addEventListener('submit',async e=>{
+    e.preventDefault(); const p1=document.getElementById('newResetPass').value, p2=document.getElementById('newResetPass2').value, btn=document.getElementById('resetSaveBtn');
+    setResetError(''); if(p1.length<6){setResetError('كلمة السر يجب ألا تقل عن 6 أحرف.');return;} if(p1!==p2){setResetError('كلمتا السر غير متطابقتين.');return;} if(!activeResetCode){setResetError('رابط الاستعادة غير صالح. اطلب رابطًا جديدًا.');return;} if(btn.disabled)return;
+    const original=btn.innerHTML; btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري حفظ كلمة السر...';
+    try{ await window.ANFirebase.firebaseConfirmPasswordReset(activeResetCode,p1); activeResetCode=null; resetPasswordBox.style.display='none'; resetSuccess.style.display='block'; resetTitle.textContent='تم تغيير كلمة السر'; resetSubtitle.textContent='أصبحت كلمة السر الجديدة جاهزة. يمكنك العودة وتسجيل الدخول إلى AN chat.'; showToast('تم تغيير كلمة السر بنجاح ✓'); try{history.replaceState({},document.title,window.location.pathname)}catch(_){} }
+    catch(error){setResetError(firebaseErrorMessage(error));}
+    finally{btn.disabled=false;btn.innerHTML=original;}
+  });
+
+  async function handlePasswordResetActionLink(){
+    const params=new URLSearchParams(window.location.search), mode=params.get('mode'), code=params.get('oobCode');
+    if(mode!=='resetPassword'||!code)return;
+    showPanel(resetPanel,loginPanel); resetRequestBox.style.display='none'; resetSuccess.style.display='none'; resetPasswordBox.style.display='block'; resetTitle.textContent='إنشاء كلمة سر جديدة'; resetSubtitle.textContent='اختر كلمة سر جديدة لحماية حسابك.'; setResetError(''); activeResetCode=code;
+    const btn=document.getElementById('resetSaveBtn'); btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> التحقق من الرابط...';
+    try{ const email=await window.ANFirebase.firebaseVerifyPasswordResetCode(code); document.getElementById('resetAccountEmail').textContent=email; document.getElementById('resetAccountBox').style.display='block'; btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-shield-halved"></i> حفظ كلمة السر الجديدة'; }
+    catch(error){ activeResetCode=null; resetPasswordBox.style.display='none'; resetRequestBox.style.display='block'; setResetError(firebaseErrorMessage(error)); resetTitle.textContent='رابط غير صالح'; resetSubtitle.textContent='لا يمكن استخدام رابط الاستعادة هذا. اطلب رابطًا جديدًا من شاشة تسجيل الدخول.'; }
+  }
+  window.addEventListener('an-firebase-ready',handlePasswordResetActionLink);
+  if(window.ANFirebase)setTimeout(handlePasswordResetActionLink,0);
 
   // تسجيل Google الحقيقي
   document.getElementById('googleBtn').addEventListener('click', async ()=>{
