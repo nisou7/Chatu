@@ -1256,7 +1256,9 @@
     GoogleAuthProvider,
     sendPasswordResetEmail,
     updateProfile,
-    signOut
+    signOut,
+    setPersistence,
+    inMemoryPersistence
   } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
   import {
     getFirestore,
@@ -1289,6 +1291,9 @@
   let firebaseAuth = null;
   let firebaseDb = null;
   let firebaseAvailable = false;
+  // تسجيل الدخول في هذه النسخة لا يُحفظ تلقائيًا بعد إغلاق/إعادة تحميل الصفحة.
+  // يجب على المستخدم إدخال البريد وكلمة السر في كل جلسة جديدة.
+  let firebasePersistenceReady = Promise.resolve();
 
   try {
     if (firebaseConfig.apiKey.startsWith('PASTE_') || firebaseConfig.appId.startsWith('PASTE_')) {
@@ -1298,6 +1303,20 @@
       firebaseAuth = getAuth(firebaseApp);
       firebaseDb = getFirestore(firebaseApp);
       firebaseAvailable = true;
+
+      // منع Firebase من إعادة تسجيل الدخول تلقائيًا من الجلسة السابقة.
+      // نستخدم inMemoryPersistence، وبالتالي لا يتم حفظ جلسة المصادقة في
+      // localStorage أو IndexedDB، ويجب إدخال بيانات الدخول من جديد بعد
+      // إعادة تحميل الصفحة/فتح جلسة جديدة.
+      firebasePersistenceReady = setPersistence(firebaseAuth, inMemoryPersistence)
+        .then(async () => {
+          // تنظيف أي جلسة قديمة كانت محفوظة قبل هذا التعديل.
+          if (firebaseAuth.currentUser) await signOut(firebaseAuth);
+        })
+        .catch(error => {
+          console.error('AN chat Firebase persistence setup failed:', error);
+          throw error;
+        });
     }
   } catch (error) {
     console.error('AN chat Firebase initialization failed:', error);
@@ -1352,6 +1371,7 @@
 
   async function firebaseRegister(name, email, password) {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    await firebasePersistenceReady;
     const cred = await createUserWithEmailAndPassword(firebaseAuth, email, password);
     await updateProfile(cred.user, { displayName: normalizeUserName(name, email) });
     const profile = await ensureUserProfile(cred.user, name);
@@ -1360,6 +1380,7 @@
 
   async function firebaseLogin(email, password) {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    await firebasePersistenceReady;
     const cred = await signInWithEmailAndPassword(firebaseAuth, email, password);
     const profile = await ensureUserProfile(cred.user);
     return { user: cred.user, profile };
@@ -1367,6 +1388,7 @@
 
   async function firebaseGoogleLogin() {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    await firebasePersistenceReady;
     const cred = await signInWithPopup(firebaseAuth, googleProvider);
     const profile = await ensureUserProfile(cred.user, cred.user.displayName);
     return { user: cred.user, profile };
