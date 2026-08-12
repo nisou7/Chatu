@@ -1389,7 +1389,8 @@
         anId: makeStableId(user.uid),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        online: true
+        online: false,
+        lastSeen: null
       };
       await setDoc(ref, profile);
       return profile;
@@ -1535,7 +1536,8 @@
           uid: friend?.uid || '',
           name: friend?.name || 'مستخدم AN chat',
           anId: friend?.anId || '',
-          online: true,
+          online: false,
+          lastSeen: null,
           last: 'ابدأ المحادثة الآن',
           time: '',
           unread: 0
@@ -1696,8 +1698,15 @@
     firebaseFriendshipsUnsub = window.ANFirebase.listenFirebaseFriendships(
       user.uid,
       friends => {
-        chats = friends;
+        const previous = new Map((window.chats || chats || []).filter(c=>c?.uid).map(c=>[c.uid,c]));
+        chats = friends.map(f => {
+          const old = previous.get(f.uid) || {};
+          return {...f, last: old.last || f.last, time: old.time || f.time, unread: old.unread || 0};
+        });
+        window.chats = chats;
+        window.__anFriendsCache = chats.slice();
         renderChatList(searchInput?.value || '');
+        if(typeof renderMemberPickList==='function') renderMemberPickList();
       },
       error => showToast(firebaseErrorMessage(error))
     );
@@ -1831,6 +1840,7 @@
 
   // تسجيل الخروج الحقيقي
   document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    try{ if(window.ANSetPresence) await window.ANSetPresence(false); }catch(e){}
     try{ await window.ANFirebase.firebaseLogout(); }catch(e){ console.error(e); }
     if(firebaseFriendRequestsUnsub){ firebaseFriendRequestsUnsub(); firebaseFriendRequestsUnsub = null; }
     if(firebaseFriendshipsUnsub){ firebaseFriendshipsUnsub(); firebaseFriendshipsUnsub = null; }
@@ -1884,6 +1894,7 @@
   // لا توجد بيانات أشخاص وهميين أو إشعارات تجريبية عند بدء التطبيق.
   // تظهر هنا فقط البيانات الحقيقية التي يضيفها المستخدم لاحقًا.
   let stories = [];
+  window.ANSetStories = value => { stories = Array.isArray(value) ? value : []; renderStories(); };
   let chats = [];
   let notifications = [];
   let calls = [];
@@ -1981,7 +1992,7 @@
         <div class="call-info">
           <div class="call-name">${esc(c.name)}</div>
           <div class="call-meta ${m.cls}"><i class="fa-solid ${m.icon}"></i> ${statusLabel(c)} · <span class="call-time">${esc(c.time||'الآن')}</span></div>
-          <div class="call-duration-line">${c.callType==='video'?'🎥 فيديو':'📞 صوتية'}${duration(c.duration)?' · مدة '+duration(c.duration):''} · السعر: مجاني حاليًا</div>
+          <div class="call-duration-line">${c.callType==='video'?'🎥 فيديو':'📞 صوتية'}${duration(c.duration)?' · مدة '+duration(c.duration):''} · السعر: ${c.price||0} ${c.currency||'دج'}/دقيقة</div>
         </div>
         <div class="call-actions">
           <button type="button" class="call-audio" title="اتصال صوتي"><i class="fa-solid fa-phone"></i></button>
@@ -2356,6 +2367,7 @@
         messages => {
           demoMessages[name] = messages.map(m => ({
             text: m.text || '',
+            html: (window.ANMessageMarkup && m.type !== 'text') ? window.ANMessageMarkup(m) : null,
             out: m.senderId === firebaseUser.uid,
             time: formatFirebaseTime(m.createdAt)
           }));
@@ -2452,9 +2464,8 @@
   document.getElementById('chatMessageInput').addEventListener('keydown', (e)=>{
     if(e.key === 'Enter'){ e.preventDefault(); sendChatMessage(); }
   });
-  document.getElementById('chatWindowCallBtn').addEventListener('click', ()=>{
-    showToast('جارٍ الاتصال بـ ' + (document.getElementById('chatWindowPanel').dataset.name || '') + ' 📞');
-  });
+  // أزرار المكالمات يتم ربطها مرة واحدة في طبقة WebRTC أدناه.
+  // لا نضع هنا أي مستمع تجريبي حتى لا يلغي زر الاتصال الحقيقي.
 
   /* =========================================================
      وظائف عملية إضافية: القصص، المرفقات، الإعدادات، المكالمات
@@ -2469,6 +2480,7 @@
 
   // حالة التطبيق المحلية
   let myStory = null;
+  window.ANSetLocalStory = value => { myStory = value || null; renderStories(); };
   let chatMuted = {};
   let blockedUsers = new Set();
   let selectedWallpaper = '';
@@ -2484,18 +2496,15 @@
     storyFileInput.click();
   }
 
-  storyFileInput.addEventListener('change', ()=>{
+  storyFileInput.addEventListener('change', async ()=>{
     const file = storyFileInput.files && storyFileInput.files[0];
     if(!file) return;
-    const url = URL.createObjectURL(file);
-    myStory = {
-      url,
-      type: file.type.startsWith('video/') ? 'video' : 'image',
-      name: file.name,
-      createdAt: Date.now()
-    };
-    renderStories();
-    showToast('تمت إضافة السطوري بنجاح 🎉');
+    if(window.ANSaveStory){
+      try{ await window.ANSaveStory(file); showToast('تم نشر السطوري وسيبقى 24 ساعة ⏱️'); }
+      catch(e){ showToast(e?.message || 'تعذر حفظ السطوري.'); }
+      return;
+    }
+    showToast('انتظر تهيئة Firebase ثم أعد المحاولة.');
   });
 
   function showStory(story, owner){
@@ -2569,28 +2578,17 @@
     chatFileInput.click();
   });
 
-  chatFileInput.addEventListener('change', ()=>{
+  chatFileInput.addEventListener('change', async ()=>{
     const file = chatFileInput.files && chatFileInput.files[0];
     if(!file) return;
     const name = chatWindowFriendName();
-    if(!name) return;
-    const url = URL.createObjectURL(file);
-    const now = new Date();
-    const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-    const msgs = seedMessages(name);
-    const isImage = file.type.startsWith('image/');
-    const isVideo = file.type.startsWith('video/');
-    const isAudio = file.type.startsWith('audio/');
-    let content = '';
-    if(isImage) content = `<img class="chat-media" src="${url}" alt="صورة مرفقة">`;
-    else if(isVideo) content = `<video class="chat-media" src="${url}" controls playsinline></video>`;
-    else if(isAudio) content = `<audio class="chat-audio" src="${url}" controls></audio>`;
-    else content = `<span><i class="fa-solid fa-file"></i> ${escapeHTML(file.name)}</span>`;
-    msgs.push({ html:content, out:true, time });
     const chat = chats.find(x=>x.name===name);
-    if(chat){ chat.last = isImage ? '📷 صورة' : isVideo ? '🎥 فيديو' : '📎 ملف'; chat.time='الآن'; }
-    renderChatMessages(name);
-    showToast('تم إرفاق الملف وإرساله 📎');
+    if(!name || !chat?.uid){ showToast('افتح محادثة صديق حقيقي أولًا.'); return; }
+    if(!window.ANSendMedia){ showToast('انتظر تهيئة Firebase ثم أعد المحاولة.'); return; }
+    try{
+      await window.ANSendMedia(file, chat.uid);
+      showToast('تم حفظ وإرسال الملف 📎');
+    }catch(e){ showToast(e?.message || 'تعذر حفظ الملف.'); }
   });
 
   // دعم رسائل HTML الآمنة التي ينشئها التطبيق نفسه.
@@ -2762,12 +2760,7 @@
       showToast('لم يتم منح صلاحية ' + (video ? 'الكاميرا/الميكروفون' : 'الميكروفون'));
     }
   }
-  document.getElementById('chatWindowCallBtn').onclick = ()=>requestCallPermission(false);
-  document.getElementById('chatWindowVideoBtn').onclick = ()=>requestCallPermission(true);
-
-  document.getElementById('chatWindowVideoBtn').addEventListener('click', ()=>{
-    showToast('جارٍ بدء مكالمة فيديو 🎥');
-  });
+  // تم حذف ربط أزرار المكالمة التجريبي؛ WebRTC الحقيقي هو المسؤول عنها.
 
   // لا يتم إنشاء أي إشعار أو طلب صداقة وهمي تلقائيًا.
 </script>
@@ -2828,11 +2821,15 @@
   const callRejectBtn=document.getElementById('callRejectBtn');
   const callEndBtn=document.getElementById('callEndBtn');
 
+  // الأسعار قابلة للتعديل من مكان واحد. في النسخة المجانية الحالية المكالمات مجانية.
   const CALL_PRICES={audio:0,video:0,currency:'دج',unit:'دقيقة'};
   const priceText=type=>CALL_PRICES[type]===0?'السعر: مجاني حاليًا':`السعر: ${CALL_PRICES[type]} ${CALL_PRICES.currency}/${CALL_PRICES.unit}`;
   const uid=()=>auth?.currentUser?.uid||null;
   const esc2=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  const friendByUid=peerUid=>(window.chats||[]).find(c=>c.uid===peerUid);
+  const friendByUid=peerUid=>{
+    const list=window.chats||[];
+    return list.find(c=>c.uid===peerUid) || (window.__anFriendsCache||[]).find(c=>c.uid===peerUid) || null;
+  };
   const conversationId=(a,b)=>[a,b].sort().join('_');
   const timeText=ts=>typeof window.formatFirebaseTime==='function'?window.formatFirebaseTime(ts):'الآن';
 
@@ -2881,19 +2878,64 @@
   }
   function startPresenceListener(){
     if(presenceUnsub)presenceUnsub(); if(!db)return;
-    presenceUnsub=fsOnSnapshot(fsCollection(db,'users'),snap=>{presenceCache=new Map(snap.docs.map(d=>[d.id,d.data()||{}]));applyPresenceToUI();},e=>console.warn('presence listener',e));
+    presenceUnsub=fsOnSnapshot(fsCollection(db,'users'),snap=>{
+      presenceCache=new Map(snap.docs.map(d=>[d.id,d.data()||{}]));
+      applyPresenceToUI();
+    },e=>console.warn('presence listener',e));
   }
+  window.ANSetPresence = setPresence;
 
   function startStoriesListener(){
     if(storiesUnsub)storiesUnsub(); if(!db)return;
     storiesUnsub=fsOnSnapshot(fsCollection(db,'stories'),snap=>{
       const now=Date.now(),me=uid();
       const active=snap.docs.map(d=>({id:d.id,...d.data()})).filter(s=>{const ex=s.expiresAt?.toMillis?s.expiresAt.toMillis():new Date(s.expiresAt||0).getTime();return ex>now;});
-      window.myStory=active.find(s=>s.ownerUid===me)||null;
-      window.stories=active.filter(s=>s.ownerUid!==me).map(s=>({id:s.id,ownerUid:s.ownerUid,name:s.ownerName||'مستخدم',media:{url:s.url,type:s.type},expiresAt:s.expiresAt}));
-      if(typeof window.renderStories==='function')window.renderStories();
+      const own=active.find(s=>s.ownerUid===me)||null;
+      window.myStory=own;
+      if(typeof window.ANSetLocalStory==='function') window.ANSetLocalStory(own ? {id:own.id,url:own.url,type:own.type,ownerUid:own.ownerUid,expiresAt:own.expiresAt} : null);
+      const remoteStories=active.filter(s=>s.ownerUid!==me).map(s=>({id:s.id,ownerUid:s.ownerUid,name:s.ownerName||'مستخدم',media:{url:s.url,type:s.type},expiresAt:s.expiresAt}));
+      window.stories=remoteStories;
+      if(typeof window.ANSetStories==='function') window.ANSetStories(remoteStories);
+      else if(typeof window.renderStories==='function') window.renderStories();
     },e=>console.warn('stories listener',e));
   }
+
+  // =========================================================
+  // تخزين الوسائط بدون Firebase Storage: الصور/الملفات الصغيرة فقط.
+  // Firestore لديه حد يقارب 1MiB للوثيقة، لذلك نضغط الصور ونرفض الملفات الكبيرة.
+  // =========================================================
+  function fileToDataURL(file){
+    return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('تعذر قراءة الملف'));r.readAsDataURL(file);});
+  }
+  async function compressImage(file){
+    if(!file.type.startsWith('image/')) return fileToDataURL(file);
+    const data=await fileToDataURL(file);
+    const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=data;});
+    const max=1080,scale=Math.min(1,max/Math.max(img.width,img.height));
+    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));
+    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    let quality=.76,out=canvas.toDataURL('image/jpeg',quality);
+    while(out.length>760000 && quality>.42){quality-=.06;out=canvas.toDataURL('image/jpeg',quality);}
+    if(out.length>900000)throw new Error('الصورة كبيرة جدًا. اختر صورة أصغر.');
+    return out;
+  }
+  async function mediaData(file){
+    if(file.type.startsWith('image/')) return {url:await compressImage(file),type:'image'};
+    if(file.size>700000) throw new Error('هذا الملف كبير على التخزين المجاني. استخدم ملفًا أصغر (أقل من 700KB).');
+    return {url:await fileToDataURL(file),type:file.type.startsWith('video/')?'video':file.type.startsWith('audio/')?'audio':'file'};
+  }
+  window.ANSaveStory=async file=>{
+    const me=uid();if(!db||!me)throw new Error('سجّل الدخول أولًا.');
+    const media=await mediaData(file);
+    const ref=await fsAddDoc(fsCollection(db,'stories'),{ownerUid:me,ownerName:window.currentUser?.name||auth.currentUser?.displayName||'مستخدم',url:media.url,type:media.type,createdAt:fsServerTimestamp(),expiresAt:new Date(Date.now()+24*60*60*1000)});
+    return ref.id;
+  };
+  window.ANSendMedia=async(file,toUid)=>{
+    const me=uid();if(!db||!me||!toUid)throw new Error('المستخدم غير متاح.');
+    const media=await mediaData(file);
+    const cid=conversationId(me,toUid);
+    await fsAddDoc(fsCollection(db,'conversations',cid,'messages'),{senderId:me,receiverId:toUid,type:media.type,url:media.url,fileName:file.name,createdAt:fsServerTimestamp()});
+  };
 
   function clearMedia(){
     if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
@@ -2925,13 +2967,19 @@
     const role=call.role==='caller'?'caller':'callee';
     const label=status==='completed'?'مكالمة مكتملة':status==='declined'?'مكالمة مرفوضة':status==='missed'?'مكالمة فائتة':status==='no_answer'?'لم يرد على المكالمة':'مكالمة منتهية';
     const payload={senderId:call.role==='caller'?uid():call.peerUid,receiverId:call.role==='caller'?call.peerUid:uid(),type:'call',callId:call.id,callType:call.type,createdAt:fsServerTimestamp()};
+    payload.callStatus=status;
+    payload.callText=label;
+    payload.price=CALL_PRICES[call.type] || 0;
+    payload.currency=CALL_PRICES.currency;
     payload[role+'Status']=status; payload[role+'Duration']=Number(duration||0); payload[role+'Text']=label;
     try{await fsSetDoc(ref,payload,{merge:true});}catch(e){console.warn('call chat event',e);}
   }
   async function logCall(call,status){
-    if(!db||!call||callLogged)return;callLogged=true;
+    const me=uid();
+    if(!db||!call||!me)return;
     const duration=callStartMs?Math.max(0,Math.floor((Date.now()-callStartMs)/1000)):0;
-    try{await fsAddDoc(fsCollection(db,'callLogs'),{ownerUid:uid(),peerUid:call.peerUid,peerName:call.name,type:call.type,status,duration,direction:call.role==='caller'?'out':'in',price:CALL_PRICES[call.type],currency:CALL_PRICES.currency,createdAt:fsServerTimestamp()});}catch(e){console.warn('call log',e);}
+    const logId=String(call.id||'call')+'_'+me;
+    try{await fsSetDoc(fsDoc(db,'callLogs',logId),{ownerUid:me,peerUid:call.peerUid,peerName:call.name,type:call.type,status,duration,direction:call.role==='caller'?'out':'in',price:CALL_PRICES[call.type]||0,currency:CALL_PRICES.currency,createdAt:fsServerTimestamp(),callId:call.id},{merge:true});}catch(e){console.warn('call log',e);}
   }
   async function finishCall(status='completed',writeStatus=true){
     if(!currentCall||currentCall.finishing)return;
@@ -2954,7 +3002,8 @@
   async function createCall(peerUid,type){
     if(!db||!auth?.currentUser)return;
     if(currentCall){showToast('لديك مكالمة نشطة بالفعل');return;}
-    const peer=friendByUid(peerUid);if(!peer){showToast('لا يمكن الاتصال بهذا المستخدم');return;}
+    const peer=friendByUid(peerUid);
+    if(!peer){showToast('الصديق غير موجود في قائمة الأصدقاء. حدّث الصفحة ثم جرّب مرة أخرى.');return;}
     clearMedia();callLogged=false;callStartMs=0;
     const ref=fsDoc(fsCollection(db,'calls'));const id=ref.id;
     currentCall={id,peerUid,type,role:'caller',name:peer.name,status:'ringing'};
@@ -3001,7 +3050,16 @@
       const all=snap.docs.map(d=>({id:d.id,...d.data()}));
       const ringing=all.filter(c=>c.status==='ringing'&&c.createdAt?.toMillis&&now-c.createdAt.toMillis()<40000).sort((a,b)=>b.createdAt.toMillis()-a.createdAt.toMillis());
       if(currentCall){const own=all.find(x=>x.id===currentCall.id);if(own&&(own.status==='no_answer'||own.status==='ended'||own.status==='declined')&&!currentCall.finishing){finishCall(own.finalStatus||own.status,false);}return;}
-      const c=ringing[0];if(!c)return;
+      const c=ringing[0];
+      // إذا انتهت مكالمة واردة دون رد، سجّلها كمكالمة فائتة للمستلم.
+      const missed=all.filter(x=>x.calleeId===me && (x.status==='no_answer'||x.finalStatus==='no_answer'));
+      if(missed.length){
+        missed.forEach(x=>{
+          const temp={id:x.id,peerUid:x.callerId,type:x.type||'audio',role:'callee',name:x.callerName||'مستخدم'};
+          if(x.status==='no_answer') { callLogged=false; logCall(temp,'missed'); writeCallChatEvent(temp,'missed',0); }
+        });
+      }
+      if(!c)return;
       currentCall={id:c.id,peerUid:c.callerId,type:c.type||'audio',role:'callee',name:c.callerName||'مستخدم',status:'ringing'};
       showCallUI(currentCall.type,currentCall.name,'يتصل بك… اضغط قبول أو رفض',true);
     },e=>console.warn('incoming calls',e));
@@ -3009,7 +3067,7 @@
   async function loadCallLogs(me){
     if(!db||!me)return;
     const apply=snap=>{
-      window.calls=snap.docs.map(d=>{const x=d.data()||{};const direction=x.direction==='in'?'in':'out';return {name:x.peerName||'مستخدم',peerUid:x.peerUid||'',type:x.status==='missed'||x.status==='no_answer'?'missed':direction,status:x.status||'completed',callType:x.type||'audio',duration:x.duration||0,time:timeText(x.createdAt),createdAt:x.createdAt};}).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+      window.calls=snap.docs.map(d=>{const x=d.data()||{};const direction=x.direction==='in'?'in':'out';return {name:x.peerName||'مستخدم',peerUid:x.peerUid||'',type:x.status==='missed'||x.status==='no_answer'?'missed':direction,status:x.status||'completed',callType:x.type||'audio',duration:x.duration||0,price:x.price||0,currency:x.currency||'دج',time:timeText(x.createdAt),createdAt:x.createdAt};}).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
       if(typeof window.renderCallsList==='function')window.renderCallsList();
     };
     try{const snap=await fsGetDocs(fsQuery(fsCollection(db,'callLogs'),fsWhere('ownerUid','==',me)));apply(snap);}catch(e){console.warn('call logs read',e);}
@@ -3024,7 +3082,8 @@
       const duration=Number(m[role+'Duration']??m.duration??0);
       const cls=status==='missed'?'missed':status==='declined'?'declined':status==='no_answer'?'noanswer':status==='completed'?'completed':'outgoing';
       const icon=m.callType==='video'?'fa-video':'fa-phone';const dur=duration?` · ${Math.floor(duration/60)}:${String(duration%60).padStart(2,'0')}`:'';
-      return `<div class="msg-call ${cls}"><i class="fa-solid ${icon}"></i><strong>${esc2(text)}${esc2(dur)}</strong><small>${esc2(t)}</small></div>`;
+      const price=Number(m.price||0);const priceLine=`السعر: ${price} ${esc2(m.currency||'دج')}/دقيقة`;
+      return `<div class="msg-call ${cls}"><i class="fa-solid ${icon}"></i><strong>${esc2(text)}${esc2(dur)}</strong><small>${esc2(t)} · ${priceLine}</small></div>`;
     }
     if(m.type==='image')return `<img class="chat-media" src="${esc2(m.url)}" alt="صورة">`;
     if(m.type==='video')return `<video class="chat-media" src="${esc2(m.url)}" controls playsinline></video>`;
@@ -3032,16 +3091,22 @@
     if(m.type==='file')return `<a href="${esc2(m.url)}" target="_blank" rel="noopener" style="color:inherit;font-weight:800"><i class="fa-solid fa-file"></i> ${esc2(m.fileName||'ملف')}</a>`;
     return esc2(m.text||'');
   }
+  window.ANMessageMarkup = messageMarkup;
+  window.ANConversationId = conversationId;
+
   function patchPersistentChat(){
     if(typeof window.openChatWindow!=='function')return;
     if(window.__anCallChatPatched)return;window.__anCallChatPatched=true;
     const oldOpen=window.openChatWindow;
-    window.openChatWindow=function(c){oldOpen(c);if(!db||!uid()||!c?.uid)return;const cid=conversationId(uid(),c.uid);if(window.__anMsgUnsub)window.__anMsgUnsub();window.__anMsgUnsub=fsOnSnapshot(fsCollection(db,'conversations',cid,'messages'),snap=>{const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));const box=document.getElementById('chatMessages');if(box){box.innerHTML=msgs.map(m=>`<div class="msg-row ${m.senderId===uid()?'out':'in'}"><div class="msg-bubble">${messageMarkup(m)}<span class="msg-time">${m.type==='call'?'':esc2(timeText(m.createdAt))}</span></div></div>`).join('');box.scrollTop=box.scrollHeight;}const last=msgs[msgs.length-1];if(last){c.last=last.type==='call'?(last.callText||'📞 مكالمة'):last.text||'رسالة';c.time=timeText(last.createdAt);if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');}});};
+    window.openChatWindow=function(c){oldOpen(c);if(!db||!uid()||!c?.uid)return;const cid=conversationId(uid(),c.uid);if(window.__anMsgUnsub)window.__anMsgUnsub();window.__anMsgUnsub=fsOnSnapshot(fsCollection(db,'conversations',cid,'messages'),snap=>{const msgs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.toMillis?.()||0)-(b.createdAt?.toMillis?.()||0));const box=document.getElementById('chatMessages');if(box){box.innerHTML=msgs.map(m=>`<div class="msg-row ${m.senderId===uid()?'out':'in'}"><div class="msg-bubble">${messageMarkup(m)}<span class="msg-time">${m.type==='call'?'':esc2(timeText(m.createdAt))}</span></div></div>`).join('');box.scrollTop=box.scrollHeight;}const last=msgs[msgs.length-1];if(last){c.last=last.type==='call'?(last.callText||last.callText||last.callerText||last.calleeText||'📞 مكالمة'):last.text||'رسالة';c.time=timeText(last.createdAt);if(typeof window.renderChatList==='function')window.renderChatList(document.getElementById('searchFriends')?.value||'');}});};
   }
+  window.openChatWindow = window.openChatWindow || (typeof openChatWindow==='function' ? openChatWindow : null);
+
   function wireCallButtons(){
     document.getElementById('chatWindowCallBtn').onclick=()=>{const name=document.getElementById('chatWindowPanel').dataset.name;const c=(window.chats||[]).find(x=>x.name===name);if(c?.uid)createCall(c.uid,'audio');};
     document.getElementById('chatWindowVideoBtn').onclick=()=>{const name=document.getElementById('chatWindowPanel').dataset.name;const c=(window.chats||[]).find(x=>x.name===name);if(c?.uid)createCall(c.uid,'video');};
     window.ANStartCall=createCall;
+    window.ANCreateCall=createCall;
   }
   callAcceptBtn.onclick=acceptCall;callRejectBtn.onclick=()=>rejectCall('declined');callEndBtn.onclick=()=>finishCall('completed');
   callMuteBtn.onclick=()=>{const t=localStream?.getAudioTracks?.()[0];if(!t)return;t.enabled=!t.enabled;callMuteBtn.classList.toggle('active',!t.enabled);callMuteBtn.innerHTML=t.enabled?'<i class="fa-solid fa-microphone"></i>':'<i class="fa-solid fa-microphone-slash"></i>';};
