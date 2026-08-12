@@ -1402,6 +1402,36 @@
     });
   }
 
+  // مراقبة طلبات الصداقة الواردة لحظيًا من Firestore.
+  function listenFirebaseFriendRequests(uid, onChange, onError) {
+    if (!firebaseAvailable || !uid) return () => {};
+    const q = query(collection(firebaseDb, 'friendRequests'), where('toUid', '==', uid));
+    return onSnapshot(q, snap => {
+      const incoming = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(r => r.status === 'pending')
+        .sort((a,b) => {
+          const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return bt - at;
+        });
+      onChange(incoming);
+    }, error => {
+      console.error('Firebase friend requests listener:', error);
+      if (onError) onError(error);
+    });
+  }
+
+  async function updateFirebaseFriendRequest(requestId, status) {
+    if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
+    if (!requestId || !['accepted','declined'].includes(status)) return;
+    await updateDoc(doc(firebaseDb, 'friendRequests', requestId), {
+      status,
+      respondedAt: serverTimestamp(),
+      respondedBy: firebaseAuth?.currentUser?.uid || ''
+    });
+  }
+
   async function sendFirebaseMessage(fromUid, toUid, text) {
     if (!firebaseAvailable) throw new Error('FIREBASE_CONFIG_MISSING');
     const conversationId = [fromUid, toUid].sort().join('_');
@@ -1427,6 +1457,8 @@
     firebaseLogout,
     searchFirebaseUserByAnId,
     sendFirebaseFriendRequest,
+    listenFirebaseFriendRequests,
+    updateFirebaseFriendRequest,
     sendFirebaseMessage
   };
 
@@ -1483,6 +1515,7 @@
   let firebaseUser = null;
   let firebaseProfile = null;
   let firebaseMessageUnsub = null;
+  let firebaseFriendRequestsUnsub = null;
   let firebaseAuthBooted = false;
 
   function firebaseErrorMessage(error){
@@ -1497,6 +1530,8 @@
       'auth/popup-blocked':'المتصفح منع نافذة Google. اسمح بالنوافذ المنبثقة.',
       'auth/unauthorized-domain':'أضف نطاق GitHub Pages إلى Authorized domains في Firebase Authentication.',
       'permission-denied':'قواعد Firestore تمنع العملية. راجع قواعد Rules.',
+      'FRIEND_REQUEST_ALREADY_SENT':'تم إرسال طلب الصداقة لهذا المستخدم من قبل.',
+      'INVALID_FRIEND_REQUEST':'بيانات طلب الصداقة غير مكتملة.',
       'FIREBASE_CONFIG_MISSING':'أكمل apiKey و appId في إعداد Firebase داخل هذا الملف.'
     };
     return map[code] || ('حدث خطأ: ' + (error?.message || 'غير معروف'));
@@ -1517,6 +1552,38 @@
     renderStories();
     renderNotifications();
     goHome();
+
+    if(firebaseFriendRequestsUnsub) firebaseFriendRequestsUnsub();
+    firebaseFriendRequestsUnsub = window.ANFirebase.listenFirebaseFriendRequests(
+      user.uid,
+      requests => {
+        notifications = requests.map(r => ({
+          id: r.id,
+          type: 'request',
+          requestId: r.id,
+          fromUid: r.fromUid || '',
+          fromAnId: r.fromAnId || '',
+          fromName: r.fromName || 'مستخدم AN chat',
+          text: `${r.fromName || 'مستخدم AN chat'} أرسل لك طلب صداقة`,
+          time: formatFirebaseTime(r.createdAt)
+        }));
+        renderNotifications();
+      },
+      error => showToast(firebaseErrorMessage(error))
+    );
+  }
+
+  function formatFirebaseTime(timestamp){
+    try{
+      if(!timestamp) return 'الآن';
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      if(Number.isNaN(date.getTime())) return 'الآن';
+      const now = new Date();
+      if(date.toDateString() === now.toDateString()){
+        return date.getHours().toString().padStart(2,'0') + ':' + date.getMinutes().toString().padStart(2,'0');
+      }
+      return date.toLocaleDateString('ar-DZ', {day:'numeric', month:'short'});
+    }catch(e){ return 'الآن'; }
   }
 
   function normalizeFirebaseName(v){ return String(v || 'مستخدم').trim() || 'مستخدم'; }
@@ -1540,8 +1607,11 @@
           showToast(firebaseErrorMessage(e));
         }
       } else {
+        if(firebaseFriendRequestsUnsub){ firebaseFriendRequestsUnsub(); firebaseFriendRequestsUnsub = null; }
         firebaseUser = null;
         firebaseProfile = null;
+        notifications = [];
+        renderNotifications();
       }
     });
   }
@@ -1611,7 +1681,9 @@
   // تسجيل الخروج الحقيقي
   document.getElementById('logoutBtn').addEventListener('click', async ()=>{
     try{ await window.ANFirebase.firebaseLogout(); }catch(e){ console.error(e); }
+    if(firebaseFriendRequestsUnsub){ firebaseFriendRequestsUnsub(); firebaseFriendRequestsUnsub = null; }
     firebaseUser = null; firebaseProfile = null;
+    notifications = [];
     homePanel.classList.add('hidden');
     closeOverlays();
     document.querySelector('footer.tag').style.display = '';
@@ -1837,16 +1909,31 @@
       `).join('');
 
       list.querySelectorAll('.btn-accept').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          showToast('تم قبول طلب الصداقة ✅');
-          notifications.splice(Number(btn.getAttribute('data-idx')), 1);
-          renderNotifications();
+        btn.addEventListener('click', async ()=>{
+          const n = notifications[Number(btn.getAttribute('data-idx'))];
+          if(!n?.requestId) return;
+          btn.disabled = true;
+          try{
+            await window.ANFirebase.updateFirebaseFriendRequest(n.requestId, 'accepted');
+            showToast('تم قبول طلب الصداقة ✅');
+          }catch(error){
+            btn.disabled = false;
+            showToast(firebaseErrorMessage(error));
+          }
         });
       });
       list.querySelectorAll('.btn-decline').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          notifications.splice(Number(btn.getAttribute('data-idx')), 1);
-          renderNotifications();
+        btn.addEventListener('click', async ()=>{
+          const n = notifications[Number(btn.getAttribute('data-idx'))];
+          if(!n?.requestId) return;
+          btn.disabled = true;
+          try{
+            await window.ANFirebase.updateFirebaseFriendRequest(n.requestId, 'declined');
+            showToast('تم رفض طلب الصداقة');
+          }catch(error){
+            btn.disabled = false;
+            showToast(firebaseErrorMessage(error));
+          }
         });
       });
     }
