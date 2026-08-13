@@ -2258,6 +2258,10 @@ button{
 }
 </style>
 
+<style>
+.real-empty-state{padding:22px 14px;text-align:center;color:#8f8997;font-size:11px;line-height:1.8;width:100%;box-sizing:border-box}
+.real-empty-state span{font-size:9px;color:#aaa3af}
+</style>
 </head>
 
 
@@ -2877,62 +2881,20 @@ placeholder="ابحث عن شخص أو محادثة">
 
 <div class="stories">
 
-
 <div class="story">
 
 <div class="story-avatar add-story" onclick="openStoryComposer()" role="button" tabindex="0">
 
-<svg width="23"
-height="23"
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="2">
-
+<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 <path d="M12 5V19"/>
 <path d="M5 12H19"/>
-
 </svg>
 
 </div>
 
-<div class="story-name">
-إضافة
-</div>
+<div class="story-name">إضافة</div>
 
 </div>
-
-
-<div class="story">
-<div class="story-avatar purple">A</div>
-<div class="story-name">Ahmed</div>
-</div>
-
-<div class="story">
-<div class="story-avatar pink">S</div>
-<div class="story-name">Sara</div>
-</div>
-
-<div class="story">
-<div class="story-avatar blue">Y</div>
-<div class="story-name">Yacine</div>
-</div>
-
-<div class="story">
-<div class="story-avatar orange">M</div>
-<div class="story-name">Mohamed</div>
-</div>
-
-<div class="story">
-<div class="story-avatar green">L</div>
-<div class="story-name">Lina</div>
-</div>
-
-<div class="story">
-<div class="story-avatar violet">R</div>
-<div class="story-name">Rania</div>
-</div>
-
 
 </div>
 
@@ -2967,228 +2929,10 @@ stroke-width="2">
 </div>
 
 
-<div id="chatList"
-class="chat-list">
-
-
-<div class="chat"
-data-name="Ahmed">
-
-<div class="chat-avatar purple">
-
-A
-
-<div class="online"></div>
-
-</div>
-
-<div class="chat-details">
-
-<div class="chat-top">
-
-<span class="chat-name">
-Ahmed
-</span>
-
-<span class="chat-time">
-10:42
-</span>
-
-</div>
-
-<div class="chat-bottom">
-
-<span class="last-message">
-هل رأيت المشروع الجديد؟
-</span>
-
-<span class="unread">
-2
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="chat"
-data-name="Sara">
-
-<div class="chat-avatar pink">
-
-S
-
-</div>
-
-<div class="chat-details">
-
-<div class="chat-top">
-
-<span class="chat-name">
-Sara
-</span>
-
-<span class="chat-time">
-09:18
-</span>
-
-</div>
-
-<div class="chat-bottom">
-
-<span class="last-message">
-أرسلت لك الصور الجديدة 📷
-</span>
-
-<span class="unread">
-5
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="chat"
-data-name="Yacine">
-
-<div class="chat-avatar blue">
-Y
-</div>
-
-<div class="chat-details">
-
-<div class="chat-top">
-
-<span class="chat-name">
-Yacine
-</span>
-
-<span class="chat-time">
-أمس
-</span>
-
-</div>
-
-<div class="chat-bottom">
-
-<span class="last-message">
-تمام، نتحدث لاحقاً 👍
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="chat"
-data-name="Mohamed">
-
-<div class="chat-avatar orange">
-M
-</div>
-
-<div class="chat-details">
-
-<div class="chat-top">
-
-<span class="chat-name">
-Mohamed
-</span>
-
-<span class="chat-time">
-أمس
-</span>
-
-</div>
-
-<div class="chat-bottom">
-
-<span class="last-message">
-تم إرسال ملف جديد
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="chat"
-data-name="Lina">
-
-<div class="chat-avatar green">
-L
-</div>
-
-<div class="chat-details">
-
-<div class="chat-top">
-
-<span class="chat-name">
-Lina
-</span>
-
-<span class="chat-time">
-الإثنين
-</span>
-
-</div>
-
-<div class="chat-bottom">
-
-<span class="last-message">
-شكراً لك ❤️
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="chat"
-data-name="Rania">
-
-<div class="chat-avatar violet">
-R
-</div>
-
-<div class="chat-details">
-
-<div class="chat-top">
-
-<span class="chat-name">
-Rania
-</span>
-
-<span class="chat-time">
-الأحد
-</span>
-
-</div>
-
-<div class="chat-bottom">
-
-<span class="last-message">
-تصبح على خير 🌙
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-
+<div id="chatList" class="chat-list">
+  <div class="real-empty-state" id="homeEmptyChats">
+    لا توجد محادثات بعد.<br><span>أضف صديقاً باستخدام N-Chat ID الحقيقي لبدء الدردشة.</span>
+  </div>
 </div>
 
 </div>
@@ -3329,31 +3073,9 @@ r="3.5"/>
         <input id="messagesSearch" type="search" placeholder="ابحث في الرسائل..." oninput="filterSectionRows('messagesSearch','messagesList')">
       </div>
       <div id="messagesList" class="section-card">
-        <button class="section-row" data-search="Ahmed هل رأيت المشروع الجديد" onclick="openChat('Ahmed')">
-          <div class="section-avatar purple">A<div class="mini-online"></div></div>
-          <div class="section-row-info"><strong>Ahmed</strong><span>هل رأيت المشروع الجديد؟</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Sara تمام نتحدث لاحقاً" onclick="openChat('Sara')">
-          <div class="section-avatar pink">S</div>
-          <div class="section-row-info"><strong>Sara</strong><span>تمام، نتحدث لاحقاً 👍</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Yacine أين أنت" onclick="openChat('Yacine')">
-          <div class="section-avatar blue">Y</div>
-          <div class="section-row-info"><strong>Yacine</strong><span>أين أنت؟</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Mohamed تم إرسال ملف جديد" onclick="openChat('Mohamed')">
-          <div class="section-avatar orange">M</div>
-          <div class="section-row-info"><strong>Mohamed</strong><span>تم إرسال ملف جديد</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Lina شكراً لك" onclick="openChat('Lina')">
-          <div class="section-avatar green">L</div>
-          <div class="section-row-info"><strong>Lina</strong><span>شكراً لك ❤️</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
+        <div class="real-empty-state">
+          لا توجد رسائل بعد.<br><span>ستظهر هنا محادثاتك الحقيقية بعد إضافة أصدقاء.</span>
+        </div>
       </div>
     </div>
     <div class="section-bottom-nav" data-nav="messages"></div>
@@ -3377,36 +3099,9 @@ r="3.5"/>
         <input id="friendsSearch" type="search" placeholder="ابحث عن صديق..." oninput="filterSectionRows('friendsSearch','friendsList')">
       </div>
       <div id="friendsList" class="section-card">
-        <button class="section-row" data-search="Ahmed متصل الآن" onclick="openChat('Ahmed')">
-          <div class="section-avatar purple">A<div class="mini-online"></div></div>
-          <div class="section-row-info"><strong>Ahmed</strong><span style="color:#28a968">متصل الآن</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11.5C20 16 16.5 19 12 21C7.5 19 4 16 4 11.5V6L12 3L20 6V11.5Z"/><path d="M8.5 12L11 14.5L15.5 9.5"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Sara متصل الآن" onclick="openChat('Sara')">
-          <div class="section-avatar pink">S<div class="mini-online"></div></div>
-          <div class="section-row-info"><strong>Sara</strong><span style="color:#28a968">متصل الآن</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Yacine غير متصل" onclick="openChat('Yacine')">
-          <div class="section-avatar blue">Y</div>
-          <div class="section-row-info"><strong>Yacine</strong><span>آخر ظهور منذ 20 دقيقة</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Mohamed غير متصل" onclick="openChat('Mohamed')">
-          <div class="section-avatar orange">M</div>
-          <div class="section-row-info"><strong>Mohamed</strong><span>آخر ظهور أمس</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Lina غير متصل" onclick="openChat('Lina')">
-          <div class="section-avatar green">L</div>
-          <div class="section-row-info"><strong>Lina</strong><span>آخر ظهور الإثنين</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
-        <button class="section-row" data-search="Rania غير متصل" onclick="openChat('Rania')">
-          <div class="section-avatar violet">R</div>
-          <div class="section-row-info"><strong>Rania</strong><span>آخر ظهور الأحد</span></div>
-          <div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18L9 12L15 6"/></svg></div>
-        </button>
+        <div class="real-empty-state">
+          لا يوجد أصدقاء بعد.<br><span>استخدم زر + لإضافة شخص بواسطة N-Chat ID الحقيقي.</span>
+        </div>
       </div>
     </div>
     <div class="section-bottom-nav" data-nav="friends"></div>
@@ -3460,7 +3155,7 @@ r="3.5"/>
           <div class="qs-text"><strong>مركز المساعدة</strong><span>الأسئلة والمساعدة</span></div>
           <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18L15 12L9 6"/></svg></div>
         </button>
-        <button class="quick-setting" onclick="showLogoutModal()">
+        <button type="button" class="quick-setting" onclick="window.showLogoutModal()">
           <div class="qs-icon" style="color:#d33b56;background:#fff0f2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 4H5V20H10M14 8L18 12L14 16M8 12H18"/></svg></div>
           <div class="qs-text"><strong style="color:#d33b56">تسجيل الخروج</strong><span>الخروج من الحساب على هذا الجهاز</span></div>
           <div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18L15 12L9 6"/></svg></div>
@@ -3492,7 +3187,7 @@ r="3.5"/>
         <path d="M16 16L21 21"/>
       </svg>
       <input id="friendIdInput" maxlength="8" autocomplete="off"
-             placeholder="مثال: A7K4M2Q9"
+             placeholder="أدخل N-Chat ID الحقيقي"
              oninput="normalizeFriendId(this)"
              onkeydown="if(event.key==='Enter') searchFriendById()">
       <button class="id-search-button" type="button" onclick="searchFriendById()">
@@ -3505,10 +3200,10 @@ r="3.5"/>
     <div id="idSearchEmpty" class="id-empty">لم يتم العثور على حساب بهذا المعرّف.</div>
 
     <div id="idSearchResult" class="id-search-result">
-      <div id="idResultAvatar" class="id-result-avatar purple">A</div>
+      <div id="idResultAvatar" class="id-result-avatar purple">?</div>
       <div class="id-result-info">
-        <strong id="idResultName">Ahmed</strong>
-        <span id="idResultId">A7K4M2Q9</span>
+        <strong id="idResultName">—</strong>
+        <span id="idResultId">—</span>
       </div>
       <button class="id-open-button" type="button" onclick="openFoundFriendChat()">فتح الدردشة</button>
     </div>
@@ -3551,13 +3246,13 @@ r="3.5"/>
 
       <div class="chat-person">
         <div id="chatAvatar" class="chat-person-avatar purple">
-          A
+          ?
         </div>
         <div class="chat-person-info">
-          <strong id="chatName">Ahmed</strong>
+          <strong id="chatName">محادثة</strong>
           <div id="chatStatus" class="chat-status">
-            <span class="chat-status-dot"></span>
-            متصل الآن
+            <span class="chat-status-dot offline"></span>
+            —
           </div>
         </div>
       </div>
@@ -4368,7 +4063,8 @@ stroke-width="2">
 
 <button
 class="logout-button"
-onclick="showLogoutModal()">
+type="button"
+onclick="window.showLogoutModal()">
 
 <svg viewBox="0 0 24 24"
 fill="none"
@@ -4389,7 +4085,7 @@ stroke-width="1.8">
 
 
 <div class="app-version">
-N-Chat • الإصدار 1.1.0
+N-Chat • الإصدار 1.2.0
 </div>
 
 
@@ -5334,24 +5030,15 @@ function(event){
 /* =========================================================
    CHAT
    ========================================================= */
-let currentFriend = {name:"Ahmed", initial:"A", color:"purple"};
+let currentFriend = {name:"", initial:"", color:"purple"};
 let replyTarget = null;
 let typingTimer = null;
 let voiceTimerInterval = null;
 let voiceSeconds = 0;
 let isRecording = false;
 
-const friendData = {
-  Ahmed:{initial:"A",color:"purple"},
-  Sara:{initial:"S",color:"pink"},
-  Yacine:{initial:"Y",color:"blue"},
-  Mohamed:{initial:"M",color:"orange"},
-  Lina:{initial:"L",color:"green"},
-  Rania:{initial:"R",color:"violet"}
-};
-
 function openChat(name){
-  currentFriend = {name, ...(friendData[name] || {initial:name.charAt(0).toUpperCase(),color:"purple"})};
+  currentFriend = {name:name || "", initial:(name||"").charAt(0).toUpperCase(), color:"purple"};
   document.getElementById("homeScreen").classList.add("hidden");
   document.getElementById("settingsScreen").classList.add("hidden");
   document.getElementById("chatScreen").classList.remove("hidden");
@@ -5860,15 +5547,6 @@ const NCHAT_MESSAGES_KEY = "nchat_messages_v3";
 let foundFriend = null;
 let incomingRequest = null;
 
-const demoUsers = [
-  {id:"A7K4M2Q9", name:"Ahmed", initial:"A", color:"purple", email:"ahmed@nchat.local"},
-  {id:"S3P8L6X2", name:"Sara", initial:"S", color:"pink", email:"sara@nchat.local"},
-  {id:"Y5D9R2M7", name:"Yacine", initial:"Y", color:"blue", email:"yacine@nchat.local"},
-  {id:"M8Q4T1K6", name:"Mohamed", initial:"M", color:"orange", email:"mohamed@nchat.local"},
-  {id:"L2V7N5C8", name:"Lina", initial:"L", color:"green", email:"lina@nchat.local"},
-  {id:"R6H3B9W4", name:"Rania", initial:"R", color:"violet", email:"rania@nchat.local"}
-];
-
 function nchatRead(key, fallback){
   try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
   catch(e){ return fallback; }
@@ -5890,16 +5568,7 @@ function generateNChatId(){
   return id;
 }
 function getUsers(){
-  const users = nchatRead(NCHAT_USERS_KEY, []);
-  let changed = false;
-  demoUsers.forEach(d=>{
-    if(!users.some(u=>u.id===d.id)){
-      users.push({...d});
-      changed = true;
-    }
-  });
-  if(changed) nchatWrite(NCHAT_USERS_KEY, users);
-  return users;
+  return nchatRead(NCHAT_USERS_KEY, []);
 }
 function getCurrentUser(){
   getUsers();
@@ -6276,17 +5945,6 @@ window.sendMessage = function(){
   updateChatAccessState();
   simulateFriendTyping();
 };
-
-/* Keep selected friend IDs on the visible friend list. */
-const friendIdMap = {
-  Ahmed:"A7K4M2Q9", Sara:"S3P8L6X2", Yacine:"Y5D9R2M7",
-  Mohamed:"M8Q4T1K6", Lina:"L2V7N5C8", Rania:"R6H3B9W4"
-};
-document.querySelectorAll(".chat[data-name]").forEach(item=>{
-  const n=item.getAttribute("data-name");
-  item.dataset.userId=friendIdMap[n] || "";
-  item.onclick=()=>openChat(n,friendIdMap[n]);
-});
 
 /* Update current account data after the existing navigation code runs. */
 const originalOpenHomeForIdentity = window.openHome;
@@ -6783,14 +6441,8 @@ function v5Write(key,value){localStorage.setItem(key,JSON.stringify(value));}
 function v5Me(){return (typeof getCurrentUser==='function'&&getCurrentUser())||(typeof ensureNassimUser==='function'&&ensureNassimUser())||{id:'LOCAL',name:'Nassim',initial:'N',color:'purple'};}
 function v5Now(){return Date.now();}
 function v5Presence(){
-  return {
-    Ahmed:{online:true,lastSeen:v5Now()},
-    Sara:{online:false,lastSeen:v5Now()-17*60*1000},
-    Yacine:{online:false,lastSeen:v5Now()-42*60*1000},
-    Mohamed:{online:false,lastSeen:v5Now()-3*60*60*1000},
-    Lina:{online:true,lastSeen:v5Now()},
-    Rania:{online:false,lastSeen:v5Now()-26*60*60*1000}
-  };
+  // Real presence is supplied by Firebase user profiles. No demo users.
+  return {};
 }
 function formatLastSeen(ts){
   let sec=Math.max(0,Math.floor((v5Now()-Number(ts))/1000));
@@ -6855,16 +6507,11 @@ function getStoriesV5(){
   return list;
 }
 function seedDemoStoriesV5(){
-  let list=v5Read(NCHAT_STORIES_KEY_V5,[]);
-  if(list.length===0){
-    const now=v5Now();
-    list=[
-      {id:'demo-ahmed',ownerId:'A7K4M2Q9',ownerName:'Ahmed',initial:'A',color:'purple',createdAt:now-2*60*60*1000,caption:'',image:''},
-      {id:'demo-sara',ownerId:'S3P8L6X2',ownerName:'Sara',initial:'S',color:'pink',createdAt:now-5*60*60*1000,caption:'',image:''},
-      {id:'demo-yacine',ownerId:'Y5D9R2M7',ownerName:'Yacine',initial:'Y',color:'blue',createdAt:now-8*60*60*1000,caption:'',image:''}
-    ];
-    v5Write(NCHAT_STORIES_KEY_V5,list);
-  }
+  // Purge stories that belonged to the old demo accounts.
+  const demoIds=new Set(["A7K4M2Q9","S3P8L6X2","Y5D9R2M7","M8Q4T1K6","L2V7N5C8","R6H3B9W4"]);
+  const list=v5Read(NCHAT_STORIES_KEY_V5,[]).filter(x=>!demoIds.has(String(x.ownerId||"")) && !String(x.id||"").startsWith("demo-"));
+  v5Write(NCHAT_STORIES_KEY_V5,list);
+  return list;
 }
 function openStoryComposer(){
   pendingStoryFiles=[];
@@ -7193,6 +6840,161 @@ window.addEventListener("nchat-firebase-error", () => {
 </script>
 
 </body>
+
+
+<!-- =========================================================
+     N-CHAT FINAL PATCH — REAL FRIENDS ONLY + ROBUST LOGOUT
+     ========================================================= -->
+<script>
+(function(){
+  const DEMO_IDS=new Set([
+    "A7K4M2Q9","S3P8L6X2","Y5D9R2M7","M8Q4T1K6","L2V7N5C8","R6H3B9W4"
+  ]);
+  const DEMO_NAMES=new Set(["Ahmed","Sara","Yacine","Mohamed","Lina","Rania"]);
+
+  function purgeDemoLocalData(){
+    try{
+      const raw=localStorage.getItem("nchat_users_v3");
+      const users=raw?JSON.parse(raw):[];
+      if(Array.isArray(users)){
+        const clean=users.filter(u=>!DEMO_IDS.has(String(u?.id||"")) && !DEMO_NAMES.has(String(u?.name||"")));
+        localStorage.setItem("nchat_users_v3",JSON.stringify(clean));
+      }
+      const relRaw=localStorage.getItem("nchat_relations_v3");
+      if(relRaw){
+        const rel=JSON.parse(relRaw);
+        for(const k of Object.keys(rel||{})){
+          if(k.split("__").some(id=>DEMO_IDS.has(id))) delete rel[k];
+        }
+        localStorage.setItem("nchat_relations_v3",JSON.stringify(rel));
+      }
+      const msgRaw=localStorage.getItem("nchat_messages_v3");
+      if(msgRaw){
+        const msgs=JSON.parse(msgRaw);
+        for(const k of Object.keys(msgs||{})){
+          if(k.split("__").some(id=>DEMO_IDS.has(id))) delete msgs[k];
+        }
+        localStorage.setItem("nchat_messages_v3",JSON.stringify(msgs));
+      }
+      const storyKey="nchat_stories_v5";
+      const stories=JSON.parse(localStorage.getItem(storyKey)||"[]");
+      if(Array.isArray(stories)){
+        localStorage.setItem(storyKey,JSON.stringify(stories.filter(x=>!DEMO_IDS.has(String(x?.ownerId||"")) && !String(x?.id||"").startsWith("demo-"))));
+      }
+    }catch(e){ console.warn("N-Chat demo cleanup:",e); }
+  }
+
+  function showEmpty(el,msg){
+    if(!el)return;
+    el.innerHTML=msg;
+    el.classList.add("show");
+  }
+
+  // Real Firebase search by N-Chat ID. No local/demo accounts are accepted.
+  window.searchFriendById=async function(){
+    const input=document.getElementById("friendIdInput");
+    const id=String(input?.value||"").replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
+    const result=document.getElementById("idSearchResult");
+    const empty=document.getElementById("idSearchEmpty");
+    window.realFoundFriend=null; window.foundFriend=null;
+    result?.classList.remove("show"); empty?.classList.remove("show");
+    if(id.length!==8){
+      showEmpty(empty,"أدخل N-Chat ID مكوّناً من 8 أحرف أو أرقام."); return;
+    }
+    try{
+      if(!window.NChatFirebase?.db){
+        showEmpty(empty,"Firebase لم يجهز بعد. حاول مرة أخرى."); return;
+      }
+      const me=window.NChatFirebase.auth?.currentUser;
+      if(!me){ showEmpty(empty,"سجّل الدخول أولاً."); return; }
+      const {getDoc,doc}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js");
+      const snap=await getDoc(doc(window.NChatFirebase.db,"nchatIds",id));
+      if(!snap.exists()){ showEmpty(empty,"لم يتم العثور على حساب بهذا N-Chat ID."); return; }
+      const d=snap.data()||{};
+      if(d.uid===me.uid){ showEmpty(empty,"هذا هو N-Chat ID الخاص بحسابك."); return; }
+      const friend={uid:d.uid,id,name:d.name||"مستخدم",email:d.email||"",initial:(d.name||"م").charAt(0).toUpperCase()};
+      window.realFoundFriend=friend; window.foundFriend=friend;
+      const nameEl=document.getElementById("idResultName");
+      const idEl=document.getElementById("idResultId");
+      const avatar=document.getElementById("idResultAvatar");
+      if(nameEl)nameEl.textContent=friend.name;
+      if(idEl)idEl.textContent=friend.id;
+      if(avatar){avatar.textContent=friend.initial;avatar.className="id-result-avatar purple";}
+      result?.classList.add("show");
+    }catch(e){
+      console.error("N-Chat real friend search:",e);
+      showEmpty(empty,"تعذر البحث الآن. تحقق من اتصال Firebase وقواعد Firestore.");
+    }
+  };
+
+  window.openFoundFriendChat=function(){
+    const friend=window.realFoundFriend||window.foundFriend;
+    if(!friend?.uid){
+      if(typeof window.showChatToast==="function")window.showChatToast("ابحث عن N-Chat ID حقيقي أولاً.");
+      return;
+    }
+    if(typeof window.closeAddFriendModal==="function")window.closeAddFriendModal();
+    if(typeof window.openRealChat==="function")window.openRealChat(friend).catch(e=>console.error(e));
+    else if(typeof window.openChat==="function")window.openChat(friend.name,friend.id,friend);
+  };
+
+  // The red settings button always opens the confirmation modal.
+  window.showLogoutModal=function(){
+    const modal=document.getElementById("logoutModal");
+    if(modal)modal.classList.remove("hidden");
+  };
+  window.closeLogoutModal=function(){
+    const modal=document.getElementById("logoutModal");
+    if(modal)modal.classList.add("hidden");
+  };
+  window.logoutUser=async function(){
+    try{
+      if(window.NChatFirebase?.auth?.currentUser){
+        const {signOut}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js");
+        await signOut(window.NChatFirebase.auth);
+      }
+      ["nchat_current_uid","nchat_current_email","nchat_current_id","nchat_current_name","nchat_current_user","nchat_current_user_v3"].forEach(k=>localStorage.removeItem(k));
+      window.currentFriend=null;
+      window.closeLogoutModal();
+      // Always return to the real authentication screen.
+      const app=document.getElementById("app");
+      if(app)app.classList.add("hidden");
+      const login=document.getElementById("loginPage");
+      const register=document.getElementById("registerPage");
+      if(register)register.classList.add("hidden");
+      if(login)login.classList.remove("hidden");
+      if(typeof window.showLogin==="function")window.showLogin();
+      if(typeof window.showChatToast==="function")window.showChatToast("تم تسجيل الخروج بنجاح");
+    }catch(e){
+      console.error("N-Chat logout:",e);
+      window.closeLogoutModal();
+      if(typeof window.showChatToast==="function")window.showChatToast("تعذر تسجيل الخروج. حاول مرة أخرى.");
+    }
+  };
+
+  // Make old hard-coded rows disappear even for an already cached GitHub page.
+  function cleanFakeDom(){
+    document.querySelectorAll('[data-name]').forEach(el=>{
+      if(DEMO_NAMES.has(String(el.getAttribute('data-name')||'')))el.remove();
+    });
+    document.querySelectorAll('#friendsList .section-row,#messagesList .section-row').forEach(el=>{
+      const n=el.querySelector('.section-row-info strong')?.textContent?.trim();
+      if(DEMO_NAMES.has(n))el.remove();
+    });
+    document.querySelectorAll('.story-name').forEach(el=>{
+      if(DEMO_NAMES.has(el.textContent.trim()))el.closest('.story')?.remove();
+    });
+    const chatList=document.getElementById('chatList');
+    if(chatList && !chatList.querySelector('.chat')){
+      chatList.innerHTML='<div class="real-empty-state">لا توجد محادثات بعد.<br><span>أضف صديقاً باستخدام N-Chat ID الحقيقي لبدء الدردشة.</span></div>';
+    }
+  }
+
+  function init(){ purgeDemoLocalData(); cleanFakeDom(); }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+})();
+</script>
+
 </html>
 
 <script>
