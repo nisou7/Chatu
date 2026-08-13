@@ -7129,7 +7129,7 @@ window.addEventListener("nchat-firebase-error", () => {
   function makeHomeRow(p,c){
     const row=document.createElement("div"); row.className="chat real-firebase-chat-row"; row.dataset.uid=p.uid;
     const color=colorForId(p.uid), initial=(p.name||p.username||"م").charAt(0).toUpperCase();
-    row.innerHTML=`<div class="chat-avatar ${color}">${initial}</div><div class="chat-details"><div class="chat-top"><span class="chat-name"></span><span class="chat-time"></span></div><div class="chat-bottom"><span class="last-message"></span></div></div>`;
+    row.innerHTML=`<div class="chat-avatar ${color}"><span class="home-presence-dot offline" title="غير متصل"></span>${initial}</div><div class="chat-details"><div class="chat-top"><span class="chat-name"></span><span class="chat-time"></span></div><div class="chat-bottom"><span class="last-message"></span></div><span class="home-presence-text offline">غير متصل</span></div>`;
     row.querySelector(".chat-name").textContent=p.name||p.username||"مستخدم";
     row.querySelector(".chat-time").textContent=c.updatedAt?.toDate?c.updatedAt.toDate().toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"}):"";
     row.querySelector(".last-message").textContent=c.lastMessage||"ابدأ المحادثة الآن";
@@ -7137,7 +7137,7 @@ window.addEventListener("nchat-firebase-error", () => {
     return row;
   }
   function makeSectionRow(p,c,kind){
-    const row=document.createElement("button");row.type="button";row.className="section-row real-firebase-section-row";row.dataset.search=(p.name||"")+" "+(p.username||"");
+    const row=document.createElement("button");row.type="button";row.className="section-row real-firebase-section-row";row.dataset.uid=p.uid;row.dataset.search=(p.name||"")+" "+(p.username||"");
     row.innerHTML=`<div class="section-avatar ${colorForId(p.uid)}">${(p.name||p.username||"م").charAt(0).toUpperCase()}</div><div class="section-row-info"><strong></strong><span></span></div><div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18L15 12L9 6"/></svg></div>`;
     row.querySelector("strong").textContent=p.name||p.username||"مستخدم";
     row.querySelector("span").textContent="@"+(p.username||p.name||"")+" • "+(kind==="friends"?"صديق":"رسالة");
@@ -9085,6 +9085,26 @@ setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealH
 })();
 </script>
 
+<style id="nchat-presence-typing-fix">
+/* Real-time presence + typing fixes */
+.chat-status-line{display:inline-flex!important;align-items:center;gap:5px;direction:rtl;vertical-align:middle}
+.chat-status-dot{width:8px!important;height:8px!important;border-radius:50%!important;display:inline-block!important;flex:0 0 8px!important;background:#28c76f!important}
+.chat-status-dot.offline{background:#e0445b!important}
+.chat-status-text{font-size:10px!important;line-height:1.2!important;color:#28a968!important;display:inline-block!important}
+.chat-status-text.offline{color:#9a929f!important}
+.chat-status-text.online{color:#28a968!important}
+.real-firebase-chat-row .chat-avatar{position:relative!important;overflow:visible!important}
+.real-firebase-chat-row .home-presence-dot{position:absolute!important;right:-2px!important;bottom:-2px!important;width:12px!important;height:12px!important;border-radius:50%!important;background:#28c76f!important;border:2px solid #faf9fc!important;box-shadow:0 1px 3px rgba(0,0,0,.16)!important;display:block!important}
+.real-firebase-chat-row .home-presence-dot.offline{background:#e0445b!important}
+.real-firebase-chat-row .home-presence-text{display:block!important;margin-top:3px!important;font-size:9px!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:#28a968!important}
+.real-firebase-chat-row .home-presence-text.offline{color:#9a94a1!important}
+#typingIndicator.remote-typing{display:flex!important;align-items:center;gap:5px;margin:4px 10px 8px!important;min-height:18px!important}
+#typingIndicator.remote-typing .typing-dots{display:flex!important;gap:3px!important}
+#typingIndicator.remote-typing .typing-dots i{width:5px!important;height:5px!important;border-radius:50%!important;background:#8d83a0!important;animation:typeDot 1.2s infinite!important}
+#typingIndicator.remote-typing .typing-dots i:nth-child(2){animation-delay:.15s!important}
+#typingIndicator.remote-typing .typing-dots i:nth-child(3){animation-delay:.3s!important}
+</style>
+
 <!-- =========================================================
      N-CHAT ULTIMATE OVERRIDE — must be last
      ========================================================= -->
@@ -9151,4 +9171,211 @@ setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealH
   };
   window.addEventListener("nchat-firebase-auth",()=>setTimeout(boot,300));
   if(window.NChatFirebase?.auth?.currentUser)setTimeout(boot,500);
+</script>
+
+<script type="module">
+/* =========================================================
+   N-CHAT FINAL FIX — REAL PRESENCE + REMOTE TYPING
+   ========================================================= */
+import {doc,getDoc,setDoc,onSnapshot,serverTimestamp,deleteField} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const ncfWait=()=>new Promise((resolve,reject)=>{
+  if(window.NChatFirebase?.auth&&window.NChatFirebase?.db){resolve(window.NChatFirebase);return}
+  const t=setTimeout(()=>reject(new Error("firebase-timeout")),15000);
+  window.addEventListener("nchat-firebase-ready",()=>{
+    clearTimeout(t);
+    if(window.NChatFirebase?.auth&&window.NChatFirebase?.db) resolve(window.NChatFirebase);
+    else reject(new Error("firebase-init-failed"));
+  },{once:true});
+});
+
+const ncfPair=(a,b)=>[String(a),String(b)].sort().join("__");
+let ncfHeartbeat=null;
+let ncfPresenceUnsubs=new Map();
+let ncfTypingUnsub=null;
+let ncfTypingTimer=null;
+let ncfCurrentChatId=null;
+
+function ncfMillis(v){
+  if(!v)return 0;
+  if(typeof v.toMillis==='function')return v.toMillis();
+  if(typeof v.toDate==='function')return v.toDate().getTime();
+  const t=new Date(v).getTime();
+  return Number.isFinite(t)?t:0;
+}
+function ncfOnline(profile){
+  const last=ncfMillis(profile?.lastSeen);
+  return profile?.online===true && last>0 && (Date.now()-last)<25000;
+}
+function ncfElapsed(v){
+  const last=ncfMillis(v);
+  if(!last)return "غير متصل";
+  let sec=Math.max(0,Math.floor((Date.now()-last)/1000));
+  if(sec<60)return "غادر منذ لحظات";
+  const min=Math.floor(sec/60); if(min<60)return `غادر منذ ${min} دقيقة${min===1?'':'ًا'}`;
+  const h=Math.floor(min/60); if(h<24)return `غادر منذ ${h} ساعة${h===1?'':'ً'}`;
+  const d=Math.floor(h/24); return `غادر منذ ${d} يوم${d===1?'':'ًا'}`;
+}
+
+function ncfUpdateRows(uid,profile){
+  const online=ncfOnline(profile);
+  const text=online?"متصل الآن":ncfElapsed(profile?.lastSeen);
+  document.querySelectorAll(`.real-firebase-chat-row[data-uid="${CSS.escape(uid)}"]`).forEach(row=>{
+    const dot=row.querySelector('.home-presence-dot');
+    const label=row.querySelector('.home-presence-text');
+    if(dot){dot.classList.toggle('offline',!online);dot.title=text;dot.setAttribute('aria-label',text)}
+    if(label){label.textContent=text;label.classList.toggle('offline',!online);label.classList.toggle('online',online)}
+  });
+  document.querySelectorAll(`.real-firebase-section-row[data-uid="${CSS.escape(uid)}"]`).forEach(row=>{
+    let sub=row.querySelector('.real-presence-section');
+    if(!sub){
+      sub=document.createElement('span');sub.className='real-presence-section';
+      sub.style.cssText='display:block;font-size:9px;margin-top:2px;color:#9a94a1';
+      row.querySelector('.section-row-info')?.appendChild(sub);
+    }
+    sub.textContent=text;sub.style.color=online?'#28a968':'#9a94a1';
+  });
+}
+
+function ncfWatchHomePresence(uid){
+  if(!uid||ncfPresenceUnsubs.has(uid))return;
+  const db=window.NChatFirebase?.db;if(!db)return;
+  const unsub=onSnapshot(doc(db,'users',uid),snap=>{
+    if(!snap.exists())return;
+    const p={uid,...snap.data()};
+    try{window.realChatProfiles?.set?.(uid,p)}catch(_){}
+    ncfUpdateRows(uid,p);
+  },()=>{});
+  ncfPresenceUnsubs.set(uid,unsub);
+}
+function ncfRefreshPresenceWatchers(){
+  document.querySelectorAll('.real-firebase-chat-row[data-uid],.real-firebase-section-row[data-uid]').forEach(row=>ncfWatchHomePresence(row.dataset.uid));
+}
+
+async function ncfSetOwnPresence(online){
+  try{
+    const fb=await ncfWait(),u=fb.auth.currentUser;if(!u)return;
+    await setDoc(doc(fb.db,'users',u.uid),{online:Boolean(online),lastSeen:serverTimestamp()},{merge:true});
+  }catch(e){console.warn('presence update',e)}
+}
+function ncfStartHeartbeat(){
+  if(ncfHeartbeat)clearInterval(ncfHeartbeat);
+  ncfSetOwnPresence(true);
+  ncfHeartbeat=setInterval(()=>{
+    if(document.visibilityState==='visible')ncfSetOwnPresence(true);
+  },10000);
+}
+function ncfStopHeartbeat(){if(ncfHeartbeat){clearInterval(ncfHeartbeat);ncfHeartbeat=null}}
+
+async function ncfClearTyping(){
+  clearTimeout(ncfTypingTimer);ncfTypingTimer=null;
+  try{
+    const fb=await ncfWait(),u=fb.auth.currentUser;if(!u||!ncfCurrentChatId)return;
+    await setDoc(doc(fb.db,'chats',ncfCurrentChatId),{typing:{[u.uid]:deleteField()}},{merge:true});
+  }catch(_){}
+}
+async function ncfSetTyping(){
+  try{
+    const fb=await ncfWait(),u=fb.auth.currentUser,target=window.currentFriend;if(!u||!target?.uid)return;
+    ncfCurrentChatId=ncfPair(u.uid,target.uid);
+    await setDoc(doc(fb.db,'chats',ncfCurrentChatId),{typing:{[u.uid]:serverTimestamp()}},{merge:true});
+    clearTimeout(ncfTypingTimer);
+    ncfTypingTimer=setTimeout(ncfClearTyping,2500);
+  }catch(e){console.warn('typing update',e)}
+}
+function ncfRenderTyping(show){
+  const el=document.getElementById('typingIndicator');if(!el)return;
+  if(show){
+    el.classList.add('show','remote-typing');
+    el.innerHTML='<div class="typing-dots"><i></i><i></i><i></i></div><span style="font-size:9px;color:#8c8495">يكتب الآن...</span>';
+  }else{
+    el.classList.remove('show','remote-typing');
+  }
+}
+function ncfWatchTyping(fb,chatId,otherUid){
+  if(ncfTypingUnsub){try{ncfTypingUnsub()}catch(_){}ncfTypingUnsub=null}
+  ncfCurrentChatId=chatId;
+  ncfTypingUnsub=onSnapshot(doc(fb.db,'chats',chatId),snap=>{
+    const data=snap.exists()?snap.data():{};
+    const ts=data.typing?.[otherUid];
+    const active=ncfMillis(ts)>0 && (Date.now()-ncfMillis(ts))<5000;
+    ncfRenderTyping(active);
+  },()=>ncfRenderTyping(false));
+}
+
+// Override the old local/demo typing function so it becomes real remote typing.
+window.handleTyping=function(el){
+  if(!el)return;
+  el.style.height='42px';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+  if(String(el.value||'').trim())ncfSetTyping();else ncfClearTyping();
+};
+
+// Refresh presence text every second while offline so "منذ X دقيقة" is accurate.
+const ncfDomObserver=new MutationObserver(()=>ncfRefreshPresenceWatchers());
+function ncfObserveLists(){
+  ['chatList','messagesList','friendsList'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) ncfDomObserver.observe(el,{childList:true,subtree:true});
+  });
+}
+
+setInterval(()=>{
+  ncfObserveLists();
+  // Keep the typing watcher attached even when the chat was opened from a home/friend row.
+  if(window.NChatFirebase?.db&&window.NChatFirebase?.auth?.currentUser&&window.currentFriend?.uid){
+    const id=ncfPair(window.NChatFirebase.auth.currentUser.uid,window.currentFriend.uid);
+    if(ncfCurrentChatId!==id){
+      ncfWatchTyping(window.NChatFirebase,id,window.currentFriend.uid);
+    }
+  }
+  document.querySelectorAll('.real-firebase-chat-row[data-uid],.real-firebase-section-row[data-uid]').forEach(row=>{
+    const uid=row.dataset.uid;
+    // The listener updates the state; this tick only recalculates elapsed text.
+    const p=window.realChatProfiles?.get?.(uid);
+    if(p)ncfUpdateRows(uid,p);
+  });
+  const uid=window.currentFriend?.uid;
+  if(uid&&window.NChatFirebase?.db){
+    getDoc(doc(window.NChatFirebase.db,'users',uid)).then(s=>{if(s.exists()){
+      const p=s.data();
+      const online=ncfOnline(p),text=online?'متصل الآن':ncfElapsed(p.lastSeen);
+      const st=document.getElementById('chatStatus');
+      if(st)st.innerHTML=`<span class="chat-status-line"><span class="chat-status-dot ${online?'':'offline'}"></span><span class="chat-status-text ${online?'online':'offline'}">${text}</span></span>`;
+    }}).catch(()=>{});
+  }
+},1000);
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible')ncfStartHeartbeat();
+  else ncfSetOwnPresence(false);
+});
+window.addEventListener('pagehide',()=>{ncfSetOwnPresence(false);ncfStopHeartbeat();ncfClearTyping()});
+window.addEventListener('beforeunload',()=>{ncfSetOwnPresence(false);ncfClearTyping()});
+
+// Intercept the final social chat opener to attach the typing listener after it opens.
+const ncfOriginalOpen=window.NChatSocialOpenChat;
+if(typeof ncfOriginalOpen==='function')window.NChatSocialOpenChat=async function(target){
+  await ncfOriginalOpen(target);
+  try{
+    const fb=await ncfWait(),u=fb.auth.currentUser;
+    if(u&&target?.uid){
+      const id=ncfPair(u.uid,target.uid);
+      ncfWatchTyping(fb,id,target.uid);
+    }
+  }catch(e){console.warn('typing watcher',e)}
+};
+
+// Also hook the final openRealChat alias used by the search result.
+const ncfOpenReal=window.openRealChat;
+if(typeof ncfOpenReal==='function')window.openRealChat=async function(target){return ncfOpenReal(target)};
+
+function ncfBoot(){
+  ncfStartHeartbeat();
+  ncfRefreshPresenceWatchers();
+  setTimeout(ncfRefreshPresenceWatchers,1000);
+  setTimeout(ncfRefreshPresenceWatchers,3000);
+}
+window.addEventListener('nchat-firebase-auth',()=>setTimeout(ncfBoot,250));
+if(window.NChatFirebase?.auth?.currentUser)setTimeout(ncfBoot,500);
 </script>
