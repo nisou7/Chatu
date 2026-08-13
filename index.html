@@ -2262,6 +2262,31 @@ button{
 .real-empty-state{padding:22px 14px;text-align:center;color:#8f8997;font-size:11px;line-height:1.8;width:100%;box-sizing:border-box}
 .real-empty-state span{font-size:9px;color:#aaa3af}
 </style>
+
+<style id="home-ui-refresh-v9">
+/* Home compact layout: search -> stories -> filters -> conversations */
+.home-content{padding:12px 14px 88px !important;}
+.home-header{margin-bottom:12px !important;}
+.search-box{margin-bottom:10px !important;height:50px !important;}
+.home-stories-label{display:flex;align-items:center;justify-content:flex-start;padding:2px 4px 7px;color:#5f566a;font-size:12px;font-weight:900;}
+.stories{gap:10px !important;margin-bottom:9px !important;min-height:76px;}
+.story{width:60px !important;flex-basis:60px !important;}
+.story-avatar{width:54px !important;height:54px !important;border-radius:19px !important;}
+.story-name{margin-top:4px !important;font-size:9px !important;}
+.filters{gap:7px !important;margin:0 0 8px !important;padding:0 1px;}
+.filter{height:34px !important;padding:0 14px !important;flex:1 1 0 !important;text-align:center;min-width:0;}
+.chat-list{gap:1px !important;}
+.chat{min-height:70px !important;padding:7px 5px !important;}
+.real-firebase-chat-row .chat-avatar{position:relative;}
+.home-presence-dot{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#28c76f;border:2px solid #faf9fc;box-shadow:0 1px 3px rgba(0,0,0,.12);}
+.home-presence-dot.offline{background:#e0445b;}
+.home-presence-text{display:block;margin-top:3px;font-size:9px;color:#28a968;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.home-presence-text.offline{color:#9a94a1;}
+.real-empty-state{margin-top:4px !important;padding:20px 12px !important;}
+/* Remove the old large section spacing on the home page only. */
+.home-content > .section-header{display:none !important;}
+</style>
+
 </head>
 
 
@@ -2866,18 +2891,9 @@ placeholder="ابحث عن شخص أو محادثة">
 </div>
 
 
-<div class="section-header">
-
-<h2>
-الأصدقاء النشطون
-</h2>
-
-<button>
-عرض الكل
-</button>
-
+<div class="home-stories-label">
+  <span>القصص</span>
 </div>
-
 
 <div class="stories">
 
@@ -2895,19 +2911,6 @@ placeholder="ابحث عن شخص أو محادثة">
 <div class="story-name">إضافة</div>
 
 </div>
-
-</div>
-
-
-<div class="section-header">
-
-<h2>
-المحادثات
-</h2>
-
-<button>
-تعديل
-</button>
 
 </div>
 
@@ -2931,7 +2934,7 @@ placeholder="ابحث عن شخص أو محادثة">
 
 <div id="chatList" class="chat-list">
   <div class="real-empty-state" id="homeEmptyChats">
-    لا توجد محادثات بعد.<br><span>أضف صديقاً باستخدام N-Chat ID الحقيقي لبدء الدردشة.</span>
+    لا توجد محادثات بعد.<br><span>ابحث عن صديق باسم المستخدم وابدأ الدردشة.</span>
   </div>
 </div>
 
@@ -7277,6 +7280,11 @@ window.addEventListener("nchat-firebase-error", () => {
   installBlockedComposer();
 })();
 </script>
+
+<script>
+setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealHomePresence();}catch(e){}},30000);
+</script>
+
 </body>
 
 
@@ -8488,8 +8496,10 @@ window.addEventListener("nchat-firebase-error", () => {
     row.className="chat real-firebase-chat-row";
     row.dataset.name=profile.name||profile.username||"مستخدم";
     row.dataset.uid=profile.uid;
-    row.innerHTML='<div class="chat-avatar '+color+'"></div><div class="chat-details"><div class="chat-top"><span class="chat-name"></span><span class="chat-time"></span></div><div class="chat-bottom"><span class="last-message"></span></div></div>';
-    row.querySelector(".chat-avatar").textContent=initial;
+    const online=profile.online===true && profile.lastSeen && (profile.lastSeen.toMillis ? (Date.now()-profile.lastSeen.toMillis()<90000) : (Date.now()-new Date(profile.lastSeen).getTime()<90000));
+    const presenceText=online?'متصل الآن':formatElapsed(profile.lastSeen)||'غادر منذ قليل';
+    row.innerHTML='<div class="chat-avatar '+color+'"><span class="home-presence-dot '+(online?'':'offline')+'" title="'+presenceText+'"></span></div><div class="chat-details"><div class="chat-top"><span class="chat-name"></span><span class="chat-time"></span></div><div class="chat-bottom"><span class="last-message"></span></div><span class="home-presence-text '+(online?'online':'offline')+'">'+presenceText+'</span></div>';
+    row.querySelector(".chat-avatar").insertBefore(document.createTextNode(initial), row.querySelector(".chat-avatar").firstChild);
     row.querySelector(".chat-name").textContent=profile.name||profile.username||"مستخدم";
     row.querySelector(".chat-time").textContent=formatChatTime(chat.updatedAt);
     row.querySelector(".last-message").textContent=chat.lastMessage||"ابدأ المحادثة الآن";
@@ -8542,6 +8552,19 @@ window.addEventListener("nchat-firebase-error", () => {
       if(!ready.length){const e=document.createElement("div");e.className="real-empty-state real-friends-empty";e.innerHTML="لا يوجد أصدقاء بعد.<br><span>ابحث عن شخص باسم المستخدم ثم أرسل له رسالة.</span>";friends.appendChild(e);}
       else ready.forEach(x=>friends.appendChild(makeRealSectionRow(x.profile,x.chat,"friends")));
     }
+  }
+
+  function refreshRealHomePresence(){
+    document.querySelectorAll(".real-firebase-chat-row[data-uid]").forEach(row=>{
+      const uid=row.dataset.uid, profile=realChatProfiles.get(uid);
+      if(!profile)return;
+      const last=profile.lastSeen?.toMillis?profile.lastSeen.toMillis():new Date(profile.lastSeen||0).getTime();
+      const online=profile.online===true && last>0 && (Date.now()-last)<90000;
+      const dot=row.querySelector(".home-presence-dot");
+      const txt=row.querySelector(".home-presence-text");
+      if(dot){dot.classList.toggle("offline",!online);dot.title=online?"متصل الآن":formatElapsed(profile.lastSeen)||"غادر منذ قليل";}
+      if(txt){txt.classList.toggle("offline",!online);txt.classList.toggle("online",online);txt.textContent=online?"متصل الآن":formatElapsed(profile.lastSeen)||"غادر منذ قليل";}
+    });
   }
 
   function startRealChatListListener(fb,me){
