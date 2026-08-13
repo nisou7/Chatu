@@ -1758,7 +1758,7 @@ button{
     color:#fff;background:linear-gradient(145deg,#8052e1,#632dd0);
     box-shadow:0 7px 17px rgba(109,53,217,.24);
 }
-.send-button svg{width:20px;height:20px}\n.send-button:disabled{opacity:.65!important;pointer-events:none!important;transform:none!important}
+.send-button svg{width:20px;height:20px}
 .file-input{display:none}
 .attach-pop{
     position:absolute;bottom:74px;right:9px;display:none;z-index:10;
@@ -6531,16 +6531,14 @@ function seedDemoStoriesV5(){
 }
 function openStoryComposer(){
   pendingStoryFiles=[];
-  window.pendingStoryFiles=pendingStoryFiles;
   const picker=document.getElementById('storyFilePicker'); if(picker)picker.value='';
   document.getElementById('storyPreviewGrid').innerHTML='';
   document.getElementById('storyCaption').value='';
   document.getElementById('storyComposerModal').classList.remove('hidden');
 }
-function closeStoryComposer(){document.getElementById('storyComposerModal').classList.add('hidden');pendingStoryFiles=[];window.pendingStoryFiles=[];}
+function closeStoryComposer(){document.getElementById('storyComposerModal').classList.add('hidden');pendingStoryFiles=[];}
 function previewStoryFiles(input){
   pendingStoryFiles=[...(input.files||[])].filter(f=>f.type.startsWith('image/'));
-  window.pendingStoryFiles=pendingStoryFiles;
   const grid=document.getElementById('storyPreviewGrid');grid.innerHTML='';
   pendingStoryFiles.forEach(file=>{
     const img=document.createElement('img');img.alt=file.name;grid.appendChild(img);
@@ -7248,66 +7246,10 @@ window.addEventListener("nchat-firebase-error", () => {
     await addDoc(collection(fb.db,"chats",chatId,"messages"),{senderId:meProfile.uid,senderNChatId:meProfile.id||meProfile.nchatId||"",receiverId:target.uid,participants:[meProfile.uid,target.uid],text:String(text),createdAt:serverTimestamp(),readBy:[meProfile.uid]});
   }
 
-  let finalMessageSendInFlight=false;
   window.sendMessage=async function(){
-    if(finalMessageSendInFlight)return;
-    const input=document.getElementById("messageInput");
-    const sendButton=document.querySelector(".send-button");
-    const text=String(input?.value||"").trim();
-    if(!text)return;
-
-    finalMessageSendInFlight=true;
-    if(sendButton){
-      sendButton.disabled=true;
-      sendButton.style.opacity=".65";
-      sendButton.style.pointerEvents="none";
-    }
-
-    try{
-      const fb=await wait();
-      const me=fb.auth.currentUser;
-      const target=window.currentFriend;
-      if(!me||!target?.uid)throw new Error("no-chat-target");
-
-      const mySnap=await getDoc(doc(fb.db,"users",me.uid));
-      const my=mySnap.exists()?mySnap.data():null;
-      const otherSnap=await getDoc(doc(fb.db,"users",target.uid));
-      const other=otherSnap.exists()?otherSnap.data():null;
-      if(blocked(my,target.uid))throw new Error("blocked-by-me");
-      if(blocked(other,me.uid))throw new Error("blocked-by-recipient");
-
-      const id=pair(me.uid,target.uid);
-      await setDoc(doc(fb.db,"chats",id),{
-        members:[me.uid,target.uid],memberIds:[me.uid,target.uid],
-        lastMessage:text,updatedAt:serverTimestamp(),lastSenderId:me.uid
-      },{merge:true});
-
-      const messageRef=doc(collection(fb.db,"chats",id,"messages"));
-      await setDoc(messageRef,{
-        senderId:me.uid,
-        senderNChatId:my?.id||my?.nchatId||"",
-        receiverId:target.uid,
-        participants:[me.uid,target.uid],
-        text,createdAt:serverTimestamp(),readBy:[me.uid]
-      });
-
-      if(input){input.value="";input.style.height="42px"}
-      window.cancelReply?.();window.closeAttach?.();window.scrollChatBottom?.();
-    }catch(e){
-      console.error("sendMessage",e);
-      window.showChatToast?.(
-        e.message==="blocked-by-me"?"هذا الحساب محظور. ألغِ الحظر من الإعدادات ← قائمة الحظر.":
-        e.message==="blocked-by-recipient"?"لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.":
-        e.message==="no-chat-target"?"افتح محادثة أولاً":"تعذر إرسال الرسالة"
-      );
-    }finally{
-      finalMessageSendInFlight=false;
-      if(sendButton){
-        sendButton.disabled=false;
-        sendButton.style.opacity="";
-        sendButton.style.pointerEvents="";
-      }
-    }
+    const input=document.getElementById("messageInput");const text=String(input?.value||"").trim();if(!text)return;
+    try{await sendSocialMessage(text);if(input){input.value="";input.style.height="42px"}window.cancelReply?.();window.closeAttach?.();window.scrollChatBottom?.()}
+    catch(e){console.error(e);toast(e.message==="blocked-by-me"?"هذا الحساب محظور. ألغِ الحظر من الإعدادات لإرسال الرسائل.":e.message==="blocked-by-recipient"?"لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.":"تعذر إرسال الرسالة")}
   };
 
   window.chatAction=async function(action){
@@ -7363,6 +7305,9 @@ window.addEventListener("nchat-firebase-error", () => {
 <script>
 setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealHomePresence();}catch(e){}},30000);
 </script>
+
+</body>
+
 
 <!-- =========================================================
      N-CHAT FINAL PATCH — REAL FRIENDS ONLY + ROBUST LOGOUT
@@ -8218,6 +8163,8 @@ setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealH
   setTimeout(install, 1500);
 })();
 </script>
+
+</html>
 
 <script>
 (function(){
@@ -9500,28 +9447,23 @@ let n7SearchTimer=null;
 let n7Recorder=null,n7RecorderStream=null,n7AudioChunks=[],n7RecordStartedAt=0,n7HoldActive=false;
 
 function n7Save(){try{localStorage.setItem('nchat_notifications_v7',JSON.stringify(n7Notifications.slice(-80)));localStorage.setItem('nchat_seen_notification_messages',JSON.stringify([...n7KnownMessages].slice(-500)));localStorage.setItem('nchat_seen_notification_stories',JSON.stringify([...n7KnownStories].slice(-300)));}catch(_) {}}
-async function n7RequestBrowserNotifications(){
-  try{
-    if(!("Notification" in window))return false;
-    if(Notification.permission==="granted")return true;
-    if(Notification.permission==="denied")return false;
-    return (await Notification.requestPermission())==="granted";
-  }catch(e){console.warn("notification permission",e);return false}
-}
-function n7BrowserNotify(item){
-  try{
-    if(!("Notification" in window)||Notification.permission!=="granted")return;
-    const n=new Notification(item?.title||"N-Chat",{body:item?.body||"لديك إشعار جديد",tag:item?.key||"nchat",renotify:true});
-    n.onclick=()=>{try{window.focus()}catch(_){};n.close()};
-  }catch(e){console.warn("browser notification",e)}
-}
 function n7AddNotification(item){
   if(!item?.key)return;
   if(n7Notifications.some(x=>x.key===item.key))return;
   n7Notifications.push({...item,at:Date.now(),read:false});n7Save();n7RenderBell();
   try{toast(item.kind==='story'?item.body:(item.title+' • '+item.body))}catch(_){}
-  n7BrowserNotify(item);
   if(item.kind==='message' && window.NChatUnread?.update)window.NChatUnread.update();
+  /* Browser notification: clicking it opens the exact sender chat. */
+  try{
+    if(item.kind==='message' && item.uid && 'Notification' in window && Notification.permission==='granted'){
+      const note=new Notification(item.title||'رسالة جديدة',{body:item.body||'أرسل لك رسالة',tag:item.key||('message:'+item.uid)});
+      note.onclick=()=>{
+        try{window.focus?.()}catch(_){}
+        try{window.openRealChat?.({uid:item.uid,name:item.name||'صديق',username:item.username||item.name||'',color:item.color||'purple'});}catch(e){console.error(e)}
+        try{note.close()}catch(_){}
+      };
+    }
+  }catch(e){console.warn('browser notification',e)}
 }
 function n7RenderBell(){
   const unread=n7Notifications.filter(x=>!x.read).length;
@@ -9548,13 +9490,7 @@ function n7OpenNotifications(){
   window.openSettingsAction?.('الإشعارات','الرسائل والسطوري الجديدة',body.innerHTML);
 }
 window.openNChatNotifications=n7OpenNotifications;
-function n7HookBell(){
-  const bell=document.querySelector('.home-header .header-button:first-child');
-  if(!bell||bell.dataset.n7Bound)return;
-  bell.dataset.n7Bound='1';
-  bell.onclick=()=>{n7RequestBrowserNotifications();n7OpenNotifications()};
-  n7RenderBell();
-}
+function n7HookBell(){const bell=document.querySelector('.home-header .header-button:first-child');if(!bell||bell.dataset.n7Bound)return;bell.dataset.n7Bound='1';bell.onclick=n7OpenNotifications;n7RenderBell()}
 
 async function n7GetProfile(uid){const fb=n7fb();if(!fb||!uid)return null;try{const s=await getDoc(doc(fb.db,'users',uid));return s.exists()?{uid,...s.data()}:null}catch(_){return null}}
 async function n7StartChatMessageWatch(chat){
@@ -9563,7 +9499,7 @@ async function n7StartChatMessageWatch(chat){
     const first=!n7KnownMessages.has('__chat_initialized__'+chat.id);
     for(const d of snap.docs){
       const m={id:d.id,...d.data()};
-      if(m.receiverId===me && !(Array.isArray(m.readBy) && m.readBy.includes(me)) && !n7KnownMessages.has(d.id)){
+      if(m.receiverId===me && !Array.isArray(m.readBy)?.includes(me) && !n7KnownMessages.has(d.id)){
         n7KnownMessages.add(d.id);
         const p=await n7GetProfile(m.senderId);
         n7AddNotification({key:'message:'+d.id,kind:'message',uid:m.senderId,name:p?.name||'صديق',username:p?.username||p?.name||'',color:p?.color||'purple',title:'رسالة جديدة',body:m.type==='audio'?'🎤 أرسل رسالة صوتية':(m.text||'أرسل لك رسالة')});
@@ -9583,14 +9519,11 @@ async function n7StartMessageNotifications(){
     qs.docs.forEach(d=>n7StartChatMessageWatch({id:d.id,...d.data()}));
   }catch(e){console.warn('message notifications',e)}
 }
-let n7StoryNotificationsInitialized=false;
 async function n7StartStoryNotifications(){
   const fb=n7fb(),me=n7uid();if(!fb||!me)return;
   if(n7StoryUnsub){try{n7StoryUnsub()}catch(_){}n7StoryUnsub=null}
-  n7StoryNotificationsInitialized=false;
   try{
     n7StoryUnsub=onSnapshot(collection(fb.db,'stories'),snap=>{
-      const initial=!n7StoryNotificationsInitialized;
       snap.docs.forEach(d=>{
         const s={id:d.id,...d.data()};
         if(s.ownerId===me)return;
@@ -9598,10 +9531,9 @@ async function n7StartStoryNotifications(){
         if(!created||Date.now()-created>24*60*60*1000)return;
         if(!n7KnownStories.has(d.id)){
           n7KnownStories.add(d.id);
-          if(!initial)n7AddNotification({key:'story:'+d.id,kind:'story',storyId:d.id,uid:s.ownerId,name:s.ownerName||'صديق',color:s.color||'purple',title:'سطوري جديد',body:(s.ownerName||'صديق')+' أضاف سطوري جديداً'});
+          n7AddNotification({key:'story:'+d.id,kind:'story',storyId:d.id,uid:s.ownerId,name:s.ownerName||'صديق',color:s.color||'purple',title:'سطوري جديد',body:(s.ownerName||'صديق')+' أضاف سطوري جديداً'});
         }
-      });
-      n7StoryNotificationsInitialized=true;n7Save();
+      });n7Save();
     },()=>{});
   }catch(e){console.warn('story notifications',e)}
 }
@@ -9634,14 +9566,14 @@ async function n7SearchHome(value){
 function n7HookSearch(){const input=document.getElementById('searchInput');if(!input||input.dataset.n7Bound)return;input.dataset.n7Bound='1';input.addEventListener('input',e=>n7SearchHome(e.target.value));}
 
 /* Voice: robust long-press recording. Release sends automatically. */
-let n7PressReleased=false,n7VoiceStopping=false;
+let n7PressReleased=false;
 async function n7StartVoice(){
-  if(n7HoldActive||n7VoiceStopping||window.currentFriend?.isGroup)return;
+  if(n7HoldActive||window.currentFriend?.isGroup)return;
   const fb=n7fb(),me=n7uid(),target=window.currentFriend;
   if(!fb||!me||!target?.uid){toast('افتح محادثة مع صديق أولاً');return}
-  n7HoldActive=true;n7PressReleased=false;n7VoiceStopping=false;
+  n7HoldActive=true;n7PressReleased=false;
   try{
-    if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)throw new Error('NO_MIC_API');
+    if(!navigator.mediaDevices?.getUserMedia)throw new Error('NO_MIC_API');
     n7RecorderStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     const types=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
     const mime=types.find(x=>window.MediaRecorder?.isTypeSupported?.(x))||'';
@@ -9671,18 +9603,17 @@ async function n7StartVoice(){
 }
 function n7EndVoice(send=true){
   n7PressReleased=true;
-  if(n7VoiceStopping)return;
   if(!n7Recorder||n7Recorder.state==='inactive'){
     if(!send)n7CleanupVoice();
     return;
   }
-  n7VoiceStopping=true;n7HoldActive=false;clearInterval(window.__n7VoiceTimer);
+  n7HoldActive=false;clearInterval(window.__n7VoiceTimer);
   try{
     if(!send){
       const old=n7Recorder.onstop;n7Recorder.onstop=()=>{n7CleanupVoice();old?.()};
       n7Recorder.stop();
     }else n7Recorder.stop();
-  }catch(e){console.error(e);n7CleanupVoice();n7VoiceStopping=false}
+  }catch(e){console.error(e);n7CleanupVoice()}
 }
 async function n7FinishVoice(){
   const duration=Math.max(1,Math.round((Date.now()-n7RecordStartedAt)/1000));
@@ -9716,7 +9647,7 @@ async function n7FinishVoice(){
 function n7CleanupVoice(){
   clearInterval(window.__n7VoiceTimer);
   if(n7RecorderStream){n7RecorderStream.getTracks().forEach(t=>{try{t.stop()}catch(_){}});n7RecorderStream=null}
-  n7Recorder=null;n7AudioChunks=[];n7HoldActive=false;n7VoiceStopping=false;
+  n7Recorder=null;n7AudioChunks=[];n7HoldActive=false;
   document.getElementById('voiceButton')?.classList.remove('nchat-recording');
   document.getElementById('voicePreview')?.classList.remove('show');
 }
@@ -9734,10 +9665,9 @@ function n7BindVoice(){
 let n7PublishingStories=false;
 async function n7PublishStoriesRemote(){
   if(n7PublishingStories)return;
-  const picker=document.getElementById('storyFilePicker');
   const files=[...(window.pendingStoryFiles||[])];
-  const picked=[...(picker?.files||[])].filter(f=>f.type.startsWith('image/'));
-  const selected=files.length?files:picked;
+  const picker=document.getElementById('storyFilePicker');
+  const selected=files.length?files:[...(picker?.files||[])].filter(f=>f.type.startsWith('image/'));
   if(!selected.length){toast('اختر صورة واحدة على الأقل');return;}
   const fb=n7fb(),uid=n7uid();if(!fb||!uid){toast('يجب تسجيل الدخول أولاً');return;}
   n7PublishingStories=true;
@@ -9804,309 +9734,121 @@ setInterval(()=>{if(n7uid()){n7StartMessageNotifications();n7SyncRemoteStories()
 </script>
 
 
-<!-- N-CHAT FINAL PATCH 2026-08-13: message idempotency + story + voice -->
-<style>
-  .send-button.nchat-sending{opacity:.55;pointer-events:none;}
-  .voice-button.nchat-recording{background:#d83c58!important;color:#fff!important;transform:scale(1.03)}
+<!-- N-CHAT USER REQUEST PATCH: ONLINE FRIENDS / REMOVE STORIES & VOICE / CLICKABLE NOTIFICATIONS -->
+<style id="nchat-user-request-patch-style">
+  /* Replace the stories strip with online friends. */
+  .home-content > .home-stories-label,
+  .home-content > .stories { display:none !important; }
+  #nchatOnlineFriendsBar{
+    display:flex;align-items:center;gap:9px;overflow-x:auto;overflow-y:hidden;
+    padding:5px 2px 10px;margin:0 0 8px;scrollbar-width:none;min-height:76px;
+  }
+  #nchatOnlineFriendsBar::-webkit-scrollbar{display:none}
+  .nchat-online-title{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:11px;font-weight:900;color:#5f566a;padding:0 3px}
+  .nchat-online-title .dot{width:8px;height:8px;border-radius:50%;background:#28c76f;box-shadow:0 0 0 3px rgba(40,199,111,.12)}
+  .nchat-online-friend{border:0;background:transparent;padding:0;width:58px;min-width:58px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+  .nchat-online-avatar{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:16px;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .nchat-online-avatar::after{content:"";position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#28c76f;border:2px solid #faf9fc}
+  .nchat-online-name{max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;color:#635b6d;font-weight:800}
+  .nchat-online-empty{font-size:9px;color:#9a94a1;padding:10px 5px;white-space:nowrap}
+  /* Voice messages are intentionally disabled/removed from the composer. */
+  #voiceButton,#voicePreview{display:none !important}
 </style>
-<script type="module">
-import {
-  collection, doc, getDoc, setDoc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import {
-  ref as storageRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+<script>
+(function(){
+  'use strict';
 
-/* =========================================================
-   1) ONE authoritative sender
-   Every click/Enter event shares the same lock. Firestore
-   document IDs are generated before the network request so
-   one logical send can never create multiple documents.
-   ========================================================= */
-let finalSendInFlight = false;
-let finalSendToken = null;
-
-const finalWaitFirebase = () => new Promise((resolve,reject)=>{
-  if(window.NChatFirebase?.auth && window.NChatFirebase?.db){ resolve(window.NChatFirebase); return; }
-  const timer=setTimeout(()=>reject(new Error('firebase-timeout')),15000);
-  window.addEventListener('nchat-firebase-ready',()=>{
-    clearTimeout(timer);
-    if(window.NChatFirebase?.auth && window.NChatFirebase?.db) resolve(window.NChatFirebase);
-    else reject(new Error('firebase-init-failed'));
-  },{once:true});
-});
-
-const finalPair=(a,b)=>[String(a),String(b)].sort().join('__');
-const finalButton=()=>document.querySelector('#chatScreen .send-button');
-
-async function finalSendMessage(){
-  const input=document.getElementById('messageInput');
-  const text=String(input?.value||'').trim();
-  if(!text || finalSendInFlight) return;
-
-  /* Lock BEFORE any await. This is the important fix. */
-  finalSendInFlight=true;
-  finalSendToken=String(Date.now())+'_'+Math.random().toString(36).slice(2);
-  const token=finalSendToken;
-  const button=finalButton();
-  const oldDisabled=button?.disabled;
-  if(button){button.disabled=true;button.classList.add('nchat-sending');}
-
-  try{
-    const fb=await finalWaitFirebase();
-    if(token!==finalSendToken) return;
-    const me=fb.auth.currentUser;
-    const target=window.currentFriend;
-    if(!me || !target?.uid) throw new Error('no-chat-target');
-
-    const mySnap=await getDoc(doc(fb.db,'users',me.uid));
-    const my=mySnap.exists()?mySnap.data():{};
-    const otherSnap=await getDoc(doc(fb.db,'users',target.uid));
-    const other=otherSnap.exists()?otherSnap.data():{};
-    if(Array.isArray(my.blockedUids)&&my.blockedUids.includes(target.uid)) throw new Error('blocked-by-me');
-    if(Array.isArray(other.blockedUids)&&other.blockedUids.includes(me.uid)) throw new Error('blocked-by-recipient');
-
-    const chatId=finalPair(me.uid,target.uid);
-    /* Stable ID for this click. setDoc, NOT addDoc. */
-    const messageId='msg_'+me.uid+'_'+chatId+'_'+token;
-    await setDoc(doc(fb.db,'chats',chatId),{
-      members:[me.uid,target.uid],memberIds:[me.uid,target.uid],
-      lastMessage:text,updatedAt:serverTimestamp(),lastSenderId:me.uid
-    },{merge:true});
-    await setDoc(doc(fb.db,'chats',chatId,'messages',messageId),{
-      senderId:me.uid,
-      senderNChatId:my.id||my.nchatId||'',
-      receiverId:target.uid,
-      participants:[me.uid,target.uid],
-      text,
-      type:'text',
-      createdAt:serverTimestamp(),
-      readBy:[me.uid]
-    },{merge:false});
-
-    if(token===finalSendToken && input){
-      input.value='';
-      input.style.height='42px';
+  function nchatPatchOnlineFriends(){
+    const home=document.querySelector('.home-content');
+    const search=document.querySelector('.home-content .search-box');
+    if(!home||!search)return;
+    let bar=document.getElementById('nchatOnlineFriendsBar');
+    if(!bar){
+      bar=document.createElement('div');
+      bar.id='nchatOnlineFriendsBar';
+      search.insertAdjacentElement('afterend',bar);
     }
-    window.cancelReply?.();
-    window.closeAttach?.();
-    window.scrollChatBottom?.();
-  }catch(e){
-    console.error('FINAL sendMessage',e);
-    const msg=e?.message==='blocked-by-me'?'هذا الحساب محظور. ألغِ الحظر من الإعدادات ← قائمة الحظر.':
-      e?.message==='blocked-by-recipient'?'لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.':
-      e?.message==='no-chat-target'?'افتح محادثة أولاً.':'تعذر إرسال الرسالة. تحقق من اتصال الإنترنت وقواعد Firebase.';
-    (window.showChatToast||window.toast||alert)(msg);
-  }finally{
-    if(token===finalSendToken){
-      finalSendInFlight=false;
-      finalSendToken=null;
-      if(button){button.disabled=!!oldDisabled;button.classList.remove('nchat-sending');}
+    bar.innerHTML='';
+    const title=document.createElement('div');
+    title.className='nchat-online-title';
+    title.innerHTML='<span class="dot"></span><span>الأصدقاء المتصلون</span>';
+    bar.appendChild(title);
+
+    const rows=[...document.querySelectorAll('#chatList .real-firebase-chat-row[data-uid]')];
+    const seen=new Set();
+    let online=[];
+    for(const row of rows){
+      const uid=row.dataset.uid;
+      if(!uid||seen.has(uid))continue;
+      const dot=row.querySelector('.home-presence-dot');
+      const isOnline=dot && !dot.classList.contains('offline');
+      if(!isOnline)continue;
+      seen.add(uid);
+      const name=row.querySelector('.chat-name')?.textContent?.trim()||row.dataset.name||'صديق';
+      const color=(row.querySelector('.chat-avatar')?.className||'').split(/\s+/).find(x=>['purple','pink','blue','orange','green','violet'].includes(x))||'purple';
+      online.push({uid,name,color,row});
+    }
+    if(!online.length){
+      const empty=document.createElement('div');empty.className='nchat-online-empty';empty.textContent='لا يوجد أصدقاء متصلون الآن';bar.appendChild(empty);return;
+    }
+    for(const f of online){
+      const b=document.createElement('button');b.type='button';b.className='nchat-online-friend';b.title='فتح محادثة '+f.name;
+      const av=document.createElement('div');av.className='nchat-online-avatar '+f.color;av.textContent=f.name.charAt(0).toUpperCase();
+      const nm=document.createElement('div');nm.className='nchat-online-name';nm.textContent=f.name;
+      b.append(av,nm);
+      b.addEventListener('click',()=>{
+        const target={uid:f.uid,name:f.name,username:f.name,color:f.color};
+        if(typeof window.openRealChat==='function')window.openRealChat(target).catch?.(console.error);
+      });
+      bar.appendChild(b);
     }
   }
-}
-window.sendMessage=finalSendMessage;
 
-/* Remove inline send handlers from the actual button. */
-function bindFinalSendButton(){
-  const b=finalButton();
-  if(!b || b.dataset.finalSendBound==='1') return;
-  b.dataset.finalSendBound='1';
-  b.removeAttribute('onclick');
-  b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();finalSendMessage();},true);
-}
-function bindFinalEnter(){
-  const input=document.getElementById('messageInput');
-  if(!input || input.dataset.finalEnterBound==='1') return;
-  input.dataset.finalEnterBound='1';
-  input.addEventListener('keydown',e=>{
-    if(e.key==='Enter' && !e.shiftKey){
-      e.preventDefault();e.stopImmediatePropagation();finalSendMessage();
-    }
-  },true);
-}
-
-/* =========================================================
-   2) REAL STORY PUBLISHER
-   Never reads window.pendingStoryFiles. It reads the file
-   input directly, so the classic-script/module scope issue
-   cannot break publishing.
-   ========================================================= */
-let finalStoryBusy=false;
-async function finalPublishStories(){
-  if(finalStoryBusy) return;
-  const picker=document.getElementById('storyFilePicker');
-  const selected=[...(picker?.files||[])].filter(f=>f && f.type.startsWith('image/'));
-  if(!selected.length){(window.toast||window.showChatToast||alert)('اختر صورة واحدة على الأقل');return;}
-
-  finalStoryBusy=true;
-  const button=document.querySelector('#storyComposerModal button[onclick*="publishStories"]');
-  const old=button?.textContent;
-  if(button){button.disabled=true;button.textContent='جاري النشر...';button.removeAttribute('onclick');}
-  try{
-    const fb=await finalWaitFirebase();
-    const me=fb.auth.currentUser;
-    if(!me) throw new Error('not-authenticated');
-    const profileSnap=await getDoc(doc(fb.db,'users',me.uid));
-    const profile=profileSnap.exists()?profileSnap.data():{};
-    const caption=String(document.getElementById('storyCaption')?.value||'').trim();
-
-    for(let i=0;i<selected.length;i++){
-      const file=selected[i];
-      const id='story_'+me.uid+'_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2);
-      const ext=(file.type.split('/')[1]||'jpg').replace(/[^a-z0-9]/gi,'')||'jpg';
-      const sr=storageRef(fb.storage,`stories/${me.uid}/${id}.${ext}`);
-      await uploadBytes(sr,file,{contentType:file.type||'image/jpeg',cacheControl:'public,max-age=3600'});
-      const imageUrl=await getDownloadURL(sr);
-      await setDoc(doc(fb.db,'stories',id),{
-        ownerId:me.uid,
-        ownerName:profile.name||profile.username||'مستخدم',
-        ownerNChatId:profile.id||profile.nchatId||'',
-        color:profile.color||'purple',
-        caption,
-        imageUrl,
-        createdAt:serverTimestamp(),
-        expiresAt:new Date(Date.now()+24*60*60*1000)
-      },{merge:false});
-    }
-    document.getElementById('storyCaption').value='';
-    if(picker) picker.value='';
-    window.pendingStoryFiles=[];
-    if(typeof window.closeStoryComposer==='function') window.closeStoryComposer();
-    if(typeof window.n7SyncRemoteStories==='function') window.n7SyncRemoteStories();
-    (window.toast||window.showChatToast||alert)('تم نشر السطوري بنجاح لمدة 24 ساعة');
-  }catch(e){
-    console.error('FINAL story publish',e);
-    const msg=e?.code==='storage/unauthorized'?'ليس لديك صلاحية رفع الصور. تحقق من Firebase Storage Rules.':
-      e?.code==='permission-denied'?'تم رفض نشر السطوري. تحقق من Firestore Rules.':
-      'تعذر نشر السطوري. تحقق من اتصال الإنترنت وصلاحيات Firebase.';
-    (window.toast||window.showChatToast||alert)(msg);
-  }finally{
-    finalStoryBusy=false;
-    if(button){button.disabled=false;button.textContent=old||'نشر السطوري';button.setAttribute('onclick','publishStories()');}
+  function nchatRemoveVoiceButton(){
+    const b=document.getElementById('voiceButton');
+    if(b){b.removeAttribute('onpointerdown');b.removeAttribute('onpointerup');b.removeAttribute('ontouchstart');b.removeAttribute('ontouchend');b.remove();}
+    const p=document.getElementById('voicePreview');if(p)p.remove();
+    try{if(window.__n7VoiceTimer)clearInterval(window.__n7VoiceTimer)}catch(_){}
+    try{if(window.n7RecorderStream)window.n7RecorderStream.getTracks().forEach(t=>t.stop())}catch(_){}
   }
-}
-window.publishStories=finalPublishStories;
 
-/* =========================================================
-   3) REAL VOICE MESSAGE
-   Replace the old pointer handlers with one guarded recorder.
-   ========================================================= */
-let finalRecorder=null;
-let finalStream=null;
-let finalChunks=[];
-let finalVoiceStarting=false;
-let finalVoiceStopping=false;
-let finalVoiceStartedAt=0;
-
-function finalVoiceButton(){return document.getElementById('voiceButton');}
-function finalVoiceCleanup(){
-  try{finalStream?.getTracks().forEach(t=>t.stop());}catch(_){ }
-  finalStream=null;finalRecorder=null;finalChunks=[];
-  finalVoiceStarting=false;finalVoiceStopping=false;
-  finalVoiceButton()?.classList.remove('nchat-recording');
-  document.getElementById('voicePreview')?.classList.remove('show');
-  clearInterval(window.__finalVoiceTimer);
-}
-async function finalVoiceStart(){
-  if(finalVoiceStarting||finalRecorder||finalVoiceStopping)return;
-  const fb=window.NChatFirebase,me=fb?.auth?.currentUser,target=window.currentFriend;
-  if(!fb||!me||!target?.uid){(window.toast||window.showChatToast||alert)('افتح محادثة أولاً');return;}
-  if(!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder){(window.toast||window.showChatToast||alert)('تسجيل الصوت غير مدعوم في هذا المتصفح. افتح الموقع عبر HTTPS.');return;}
-  finalVoiceStarting=true;
-  try{
-    finalStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-    const candidates=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
-    const mime=candidates.find(x=>MediaRecorder.isTypeSupported(x))||'';
-    finalRecorder=new MediaRecorder(finalStream,mime?{mimeType:mime}:undefined);
-    finalChunks=[];finalVoiceStartedAt=Date.now();finalVoiceStopping=false;
-    finalRecorder.ondataavailable=e=>{if(e.data?.size)finalChunks.push(e.data)};
-    finalRecorder.onerror=e=>{console.error('FINAL recorder',e);finalVoiceCleanup();(window.toast||window.showChatToast||alert)('حدث خطأ أثناء تسجيل الصوت');};
-    finalRecorder.onstop=()=>finalVoiceFinish();
-    finalRecorder.start(250);
-    finalVoiceButton()?.classList.add('nchat-recording');
-    document.getElementById('voicePreview')?.classList.add('show');
-    const timer=document.getElementById('voiceTimer');
-    clearInterval(window.__finalVoiceTimer);
-    window.__finalVoiceTimer=setInterval(()=>{
-      const sec=Math.floor((Date.now()-finalVoiceStartedAt)/1000);
-      if(timer)timer.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
-    },250);
-  }catch(e){
-    console.error('FINAL voice start',e);
-    finalVoiceCleanup();
-    (window.toast||window.showChatToast||alert)(e?.name==='NotAllowedError'?'اسمح بالوصول إلى الميكروفون لإرسال رسالة صوتية.':'تعذر تشغيل الميكروفون. استخدم HTTPS واسمح للميكروفون.');
-  }finally{finalVoiceStarting=false;}
-}
-function finalVoiceStop(){
-  if(finalVoiceStopping)return;
-  finalVoiceStopping=true;
-  const r=finalRecorder;
-  if(!r){finalVoiceCleanup();return;}
-  try{
-    if(r.state!=='inactive') r.stop();
-  }catch(e){console.error('FINAL voice stop',e);finalVoiceCleanup();}
-}
-async function finalVoiceFinish(){
-  const chunks=finalChunks.slice();
-  const r=finalRecorder;
-  const stream=finalStream;
-  const mime=r?.mimeType||'audio/webm';
-  const duration=Math.max(1,Math.round((Date.now()-finalVoiceStartedAt)/1000));
-  const fb=window.NChatFirebase,me=fb?.auth?.currentUser,target=window.currentFriend;
-  try{stream?.getTracks().forEach(t=>t.stop());}catch(_){ }
-  finalStream=null;finalRecorder=null;finalChunks=[];finalVoiceButton()?.classList.remove('nchat-recording');
-  document.getElementById('voicePreview')?.classList.remove('show');clearInterval(window.__finalVoiceTimer);
-  finalVoiceStopping=false;
-  if(!chunks.length||!fb||!me||!target?.uid)return;
-  try{
-    const blob=new Blob(chunks,{type:mime});
-    if(blob.size<100)throw new Error('EMPTY_AUDIO');
-    const chatId=finalPair(me.uid,target.uid);
-    const voiceId='voice_'+me.uid+'_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const ext=mime.includes('mp4')?'m4a':mime.includes('ogg')?'ogg':'webm';
-    const sr=storageRef(fb.storage,`voiceMessages/${me.uid}/${chatId}/${voiceId}.${ext}`);
-    await uploadBytes(sr,blob,{contentType:mime,cacheControl:'public,max-age=3600'});
-    const url=await getDownloadURL(sr);
-    await setDoc(doc(fb.db,'chats',chatId),{
-      members:[me.uid,target.uid],memberIds:[me.uid,target.uid],lastMessage:'🎤 رسالة صوتية',updatedAt:serverTimestamp(),lastSenderId:me.uid
-    },{merge:true});
-    await setDoc(doc(fb.db,'chats',chatId,'messages',voiceId),{
-      senderId:me.uid,receiverId:target.uid,participants:[me.uid,target.uid],
-      type:'audio',audioUrl:url,duration,createdAt:serverTimestamp(),readBy:[me.uid],text:'🎤 رسالة صوتية'
-    },{merge:false});
-    (window.toast||window.showChatToast||alert)('تم إرسال الرسالة الصوتية');
-  }catch(e){
-    console.error('FINAL voice upload/send',e);
-    (window.toast||window.showChatToast||alert)(e?.code==='storage/unauthorized'?'ليس لديك صلاحية رفع الصوت. تحقق من Firebase Storage Rules.':'تعذر إرسال التسجيل الصوتي. تحقق من اتصال الإنترنت وقواعد Firebase Storage.');
+  function nchatHookNotifications(){
+    /* Existing in-app notification rows already open the exact chat. Add the same behavior to browser notifications. */
+    if(typeof window.n7AddNotification!=='function')return;
   }
-}
 
-function bindFinalVoice(){
-  const old=finalVoiceButton();
-  if(!old || old.dataset.finalVoiceBound==='1')return;
-  /* Clone removes ALL old listeners installed by previous versions. */
-  const b=old.cloneNode(true);
-  old.replaceWith(b);
-  b.dataset.finalVoiceBound='1';
-  b.removeAttribute('onclick');
-  b.addEventListener('contextmenu',e=>e.preventDefault());
-  b.addEventListener('pointerdown',e=>{
-    if(e.button!==undefined && e.button!==0)return;
-    e.preventDefault();e.stopImmediatePropagation();
-    try{b.setPointerCapture?.(e.pointerId)}catch(_){ }
-    finalVoiceStart();
-  },true);
-  b.addEventListener('pointerup',e=>{e.preventDefault();e.stopImmediatePropagation();finalVoiceStop();},true);
-  b.addEventListener('pointercancel',e=>{e.preventDefault();e.stopImmediatePropagation();finalVoiceStop();},true);
-  b.addEventListener('lostpointercapture',()=>{if(finalRecorder&&!finalVoiceStopping)finalVoiceStop();},true);
-}
+  function nchatRefresh(){
+    nchatRemoveVoiceButton();
+    nchatPatchOnlineFriends();
+  }
 
-function finalBindAll(){bindFinalSendButton();bindFinalEnter();bindFinalVoice();}
-finalBindAll();
-setInterval(finalBindAll,500);
-window.addEventListener('nchat-firebase-auth',()=>setTimeout(finalBindAll,100));
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(nchatRefresh,700);setTimeout(nchatRefresh,1800);});
+  else {setTimeout(nchatRefresh,700);setTimeout(nchatRefresh,1800);}
+  setInterval(nchatRefresh,5000);
+
+  /* Browser notification click routing. We wrap the final notification creator if it exists. */
+  function installNotificationClickPatch(){
+    const fn=window.n7AddNotification;
+    if(typeof fn!=='function'||fn.__clickPatched)return;
+    function wrapped(item){
+      const result=fn(item);
+      try{
+        if(item?.kind==='message' && item.uid && 'Notification' in window && Notification.permission==='granted'){
+          const note=new Notification(item.title||'رسالة جديدة',{body:item.body||'أرسل لك رسالة',tag:item.key||('message:'+item.uid)});
+          note.onclick=()=>{
+            try{window.focus?.()}catch(_){}
+            try{window.openRealChat?.({uid:item.uid,name:item.name||'صديق',username:item.username||item.name||'',color:item.color||'purple'});}catch(e){console.error(e)}
+            try{note.close()}catch(_){}
+          };
+        }
+      }catch(e){console.warn('browser notification',e)}
+      return result;
+    }
+    wrapped.__clickPatched=true;
+    window.n7AddNotification=wrapped;
+  }
+  setTimeout(installNotificationClickPatch,2500);
+  setTimeout(installNotificationClickPatch,5000);
+})();
 </script>
 
-</body>
-</html>
