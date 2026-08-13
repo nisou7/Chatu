@@ -7275,21 +7275,31 @@ window.addEventListener("nchat-firebase-error", () => {
   };
 
   window.createAccount = async function(){
-    const inputs=[...document.querySelectorAll('#createPage input')];
-    const nameEl=inputs.find(x=>x.type!=="email" && x.type!=="password") || inputs[0];
-    const emailEl=document.querySelector('#createPage input[type="email"]') || inputs[1];
-    const passEl=document.querySelector('#createPage input[type="password"]') || inputs[2];
+    // Registration screen in this HTML is #registerPage (not #createPage).
+    const nameEl=document.getElementById("registerName");
+    const emailEl=document.getElementById("registerEmail");
+    const passEl=document.getElementById("registerPassword");
+    const confirmEl=document.getElementById("registerConfirm");
 
     const name=String(nameEl ? nameEl.value : "").trim();
-    const email=String(emailEl ? emailEl.value : "").trim();
+    const email=String(emailEl ? emailEl.value : "").trim().toLowerCase();
     const password=String(passEl ? passEl.value : "");
+    const confirm=String(confirmEl ? confirmEl.value : "");
 
-    if(!name || !email || !password){
+    if(!name || !email || !password || !confirm){
       if(typeof showChatToast==="function") showChatToast("أكمل بيانات إنشاء الحساب.");
       return;
     }
+    if(password.length < 6){
+      if(typeof showChatToast==="function") showChatToast("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+      return;
+    }
+    if(password !== confirm){
+      if(typeof showChatToast==="function") showChatToast("كلمتا المرور غير متطابقتين.");
+      return;
+    }
 
-    const button=document.querySelector('#createPage .main-button');
+    const button=document.querySelector('#registerPage .main-button');
     const old=button ? button.textContent : "إنشاء حساب";
     if(button){button.disabled=true;button.textContent="جارٍ إنشاء الحساب...";}
 
@@ -7336,4 +7346,339 @@ window.addEventListener("nchat-firebase-error", () => {
     }
   };
 })();
+</script>
+
+<!-- =========================================================
+     N-CHAT REAL FIRESTORE CHAT LAYER
+     This layer replaces localStorage chat data with Firestore.
+     Designed for Firebase + GitHub Pages.
+     ========================================================= -->
+<script type="module">
+  import {
+    collection,
+    doc,
+    getDoc,
+    setDoc,
+    addDoc,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const waitFirebase = () => new Promise((resolve, reject) => {
+    if (window.NChatFirebase?.auth && window.NChatFirebase?.db) {
+      resolve(window.NChatFirebase);
+      return;
+    }
+    const timer = setTimeout(() => reject(new Error("firebase-timeout")), 15000);
+    window.addEventListener("nchat-firebase-ready", () => {
+      clearTimeout(timer);
+      if (window.NChatFirebase?.auth && window.NChatFirebase?.db) resolve(window.NChatFirebase);
+      else reject(new Error("firebase-init-failed"));
+    }, {once:true});
+  });
+
+  let realProfile = null;
+  let messageUnsubscribe = null;
+  let currentRealChatId = null;
+
+  const colors = ["purple","pink","blue","orange","green","violet"];
+  function colorForId(id){
+    let n=0;
+    for(const c of String(id||"")) n=(n+c.charCodeAt(0))%colors.length;
+    return colors[n];
+  }
+
+  function toast(message){
+    if(typeof window.showChatToast === "function") window.showChatToast(message);
+    else console.log(message);
+  }
+
+  function setCurrentLocalProfile(profile){
+    try{
+      localStorage.setItem("nchat_current_uid", profile.uid || "");
+      localStorage.setItem("nchat_current_email", profile.email || "");
+      localStorage.setItem("nchat_current_id", profile.id || "");
+      localStorage.setItem("nchat_current_name", profile.name || "N-Chat");
+      localStorage.setItem("nchat_current_user", JSON.stringify({
+        uid:profile.uid,id:profile.id,name:profile.name,email:profile.email,
+        initial:(profile.name||"N").charAt(0).toUpperCase(),
+        color:colorForId(profile.uid)
+      }));
+    }catch(e){ console.warn(e); }
+  }
+
+  async function getMyProfile(fb){
+    const user = fb.auth.currentUser;
+    if(!user) return null;
+    const snap = await getDoc(doc(fb.db,"users",user.uid));
+    if(!snap.exists()) return null;
+    realProfile = {uid:user.uid,...snap.data()};
+    setCurrentLocalProfile(realProfile);
+    return realProfile;
+  }
+
+  function chatIdFor(a,b){
+    return [String(a),String(b)].sort().join("__");
+  }
+
+  function clearMessageListener(){
+    if(messageUnsubscribe){
+      try{ messageUnsubscribe(); }catch(e){}
+      messageUnsubscribe=null;
+    }
+    currentRealChatId=null;
+  }
+
+  function renderRealMessages(messages){
+    const box=document.getElementById("chatMessages");
+    if(!box) return;
+    const typing=document.getElementById("typingIndicator");
+    [...box.querySelectorAll(".message-row")].forEach(row=>row.remove());
+
+    const myUid=realProfile?.uid || window.NChatFirebase?.auth?.currentUser?.uid;
+    for(const msg of messages){
+      const row=document.createElement("div");
+      row.className="message-row " + (msg.senderId===myUid ? "me" : "them");
+      const bubble=document.createElement("div");
+      bubble.className="message-bubble";
+      bubble.dataset.message=msg.text || "";
+      bubble.dataset.messageId=msg.id || "";
+      bubble.ondblclick=()=>{ if(typeof window.toggleReaction==='function') window.toggleReaction(bubble); };
+
+      let date = msg.createdAt?.toDate ? msg.createdAt.toDate() : new Date(msg.createdAt || Date.now());
+      const time=date.toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"});
+      bubble.innerHTML='<div class="message-text"></div><div class="message-meta">'+time+
+        (msg.senderId===myUid?' <span class="message-check">✓✓</span>':'')+
+        '</div><div class="message-reaction">❤️</div>';
+      bubble.querySelector(".message-text").textContent=msg.text || "";
+      bubble.addEventListener("contextmenu",e=>{
+        e.preventDefault();
+        if(typeof window.openMessageMenu==='function') window.openMessageMenu(e,bubble);
+      });
+      row.appendChild(bubble);
+      box.insertBefore(row,typing);
+    }
+    if(typeof window.scrollChatBottom==='function') window.scrollChatBottom();
+  }
+
+  async function openRealChat(target){
+    const fb=await waitFirebase();
+    const me=await getMyProfile(fb);
+    if(!me){ toast("سجّل الدخول أولاً."); return; }
+    if(!target?.uid){ toast("لم يتم العثور على حساب الصديق."); return; }
+    if(target.uid===me.uid){ toast("لا يمكنك فتح محادثة مع حسابك."); return; }
+
+    clearMessageListener();
+    const chatId=chatIdFor(me.uid,target.uid);
+    currentRealChatId=chatId;
+
+    await setDoc(doc(fb.db,"chats",chatId),{
+      members:[me.uid,target.uid],
+      memberIds:[me.uid,target.uid],
+      updatedAt:serverTimestamp()
+    },{merge:true});
+
+    window.currentFriend={
+      id:target.id || target.nchatId || "",
+      uid:target.uid,
+      name:target.name || "صديق",
+      initial:(target.name||"ص").charAt(0).toUpperCase(),
+      color:target.color || colorForId(target.uid),
+      email:target.email || ""
+    };
+
+    document.getElementById("homeScreen")?.classList.add("hidden");
+    document.getElementById("settingsScreen")?.classList.add("hidden");
+    document.getElementById("chatScreen")?.classList.remove("hidden");
+
+    const avatar=document.getElementById("chatAvatar");
+    if(avatar){
+      avatar.className="chat-person-avatar "+window.currentFriend.color;
+      avatar.textContent=window.currentFriend.initial;
+    }
+    const nameEl=document.getElementById("chatName");
+    if(nameEl) nameEl.textContent=window.currentFriend.name;
+    const status=document.getElementById("chatStatus");
+    if(status) status.innerHTML='<span class="chat-status-dot"></span> محادثة حقيقية';
+
+    const q=query(collection(fb.db,"chats",chatId,"messages"),orderBy("createdAt","asc"));
+    messageUnsubscribe=onSnapshot(q,(snap)=>{
+      const messages=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderRealMessages(messages);
+    },(error)=>{
+      console.error("Firestore messages listener:",error);
+      toast("تعذر قراءة الرسائل. تحقق من Firestore Rules.");
+    });
+
+    if(typeof window.closeMessageMenu==='function') window.closeMessageMenu();
+    if(typeof window.scrollChatBottom==='function') window.scrollChatBottom();
+  }
+
+  async function sendRealMessage(text){
+    const fb=await waitFirebase();
+    const me=await getMyProfile(fb);
+    const target=window.currentFriend;
+    if(!me || !target?.uid) throw new Error("no-chat-target");
+
+    const chatId=chatIdFor(me.uid,target.uid);
+    await setDoc(doc(fb.db,"chats",chatId),{
+      members:[me.uid,target.uid],
+      memberIds:[me.uid,target.uid],
+      lastMessage:String(text),
+      updatedAt:serverTimestamp(),
+      lastSenderId:me.uid
+    },{merge:true});
+
+    await addDoc(collection(fb.db,"chats",chatId,"messages"),{
+      senderId:me.uid,
+      senderNChatId:me.id || "",
+      receiverId:target.uid,
+      participants:[me.uid,target.uid],
+      text:String(text),
+      createdAt:serverTimestamp()
+    });
+  }
+
+  // Search a real Firebase account by its 8-character N-Chat ID.
+  window.searchNChatId = async function(){
+    const input=document.getElementById("idSearchInput");
+    const id=String(input?.value || "").trim().toUpperCase();
+    const result=document.getElementById("idSearchResult");
+    const empty=document.getElementById("idSearchEmpty");
+    if(result) result.classList.remove("show");
+    if(empty) empty.classList.remove("show");
+
+    if(id.length!==8){
+      if(empty){empty.textContent="أدخل ID مكوّناً من 8 أحرف أو أرقام.";empty.classList.add("show");}
+      return;
+    }
+
+    try{
+      const fb=await waitFirebase();
+      const me=await getMyProfile(fb);
+      if(me?.id===id){
+        if(empty){empty.textContent="هذا هو ID الخاص بحسابك.";empty.classList.add("show");}
+        return;
+      }
+      const snap=await getDoc(doc(fb.db,"nchatIds",id));
+      if(!snap.exists()){
+        if(empty){empty.textContent="لم يتم العثور على حساب بهذا المعرّف.";empty.classList.add("show");}
+        return;
+      }
+      const data=snap.data();
+      const friend={uid:data.uid,id,name:data.name || "مستخدم",initial:(data.name||"م").charAt(0).toUpperCase(),color:colorForId(data.uid)};
+      window.realFoundFriend=friend;
+      window.foundFriend=friend;
+      const n=document.getElementById("idResultName");
+      const i=document.getElementById("idResultId");
+      const a=document.getElementById("idResultAvatar");
+      if(n) n.textContent=friend.name;
+      if(i) i.textContent=friend.id;
+      if(a){a.textContent=friend.initial;a.className="id-result-avatar "+friend.color;}
+      if(result) result.classList.add("show");
+    }catch(error){
+      console.error(error);
+      if(empty){empty.textContent="تعذر البحث الآن. تحقق من اتصال Firebase وقواعد Firestore.";empty.classList.add("show");}
+    }
+  };
+
+  window.openFoundFriendChat = function(){
+    const friend=window.realFoundFriend || window.foundFriend;
+    if(!friend) return;
+    if(typeof window.closeAddFriendModal==='function') window.closeAddFriendModal();
+    openRealChat(friend).catch(error=>{
+      console.error(error);
+      toast("تعذر فتح المحادثة.");
+    });
+  };
+
+  // Final, authoritative openChat: accepts the real Firebase UID/object when available.
+  window.openChat = function(name,id,userObj){
+    if(userObj?.isGroup || (id && String(id).startsWith("group_"))){
+      if(typeof window.openNChatGroup==='function') return window.openNChatGroup(id);
+      return;
+    }
+
+    const known=userObj || window.realFoundFriend || null;
+    if(known?.uid){
+      openRealChat({...known,name:name || known.name,id:id || known.id}).catch(error=>{
+        console.error(error); toast("تعذر فتح المحادثة.");
+      });
+      return;
+    }
+
+    // If an 8-character N-Chat ID is supplied, resolve it from Firestore.
+    if(id && String(id).length===8){
+      waitFirebase().then(async fb=>{
+        const snap=await getDoc(doc(fb.db,"nchatIds",String(id).toUpperCase()));
+        if(!snap.exists()){toast("لم يتم العثور على هذا الحساب.");return;}
+        const d=snap.data();
+        await openRealChat({uid:d.uid,id:String(id).toUpperCase(),name:d.name || name || "مستخدم",initial:(d.name||name||"م").charAt(0).toUpperCase(),color:colorForId(d.uid)});
+      }).catch(error=>{console.error(error);toast("تعذر الاتصال بـ Firebase.");});
+      return;
+    }
+
+    // Demo names cannot become real chats without a real Firebase UID.
+    toast("أضف الصديق بواسطة N-Chat ID الحقيقي أولاً.");
+  };
+
+  // Final sendMessage: messages go to Firestore, never localStorage.
+  window.sendMessage = async function(){
+    const input=document.getElementById("messageInput");
+    const text=String(input?.value || "").trim();
+    if(!text) return;
+    if(!window.currentFriend?.uid){
+      toast("افتح محادثة مع حساب حقيقي أولاً.");
+      return;
+    }
+
+    const button=document.querySelector("#chatScreen .send-button");
+    if(button) button.disabled=true;
+    try{
+      await sendRealMessage(text);
+      if(input){input.value="";input.style.height="42px";}
+      if(typeof window.cancelReply==='function') window.cancelReply();
+      if(typeof window.closeAttach==='function') window.closeAttach();
+      if(typeof window.scrollChatBottom==='function') window.scrollChatBottom();
+    }catch(error){
+      console.error("N-Chat Firestore send:",error);
+      toast("لم تُرسل الرسالة. تحقق من Firestore Rules وتسجيل الدخول.");
+    }finally{
+      if(button) button.disabled=false;
+    }
+  };
+
+  // Keep the real profile in sync after Firebase authentication.
+  async function syncAuthUser(){
+    try{
+      const fb=await waitFirebase();
+      const profile=await getMyProfile(fb);
+      if(profile && typeof window.updateIdentityUI==='function') window.updateIdentityUI({
+        id:profile.id,name:profile.name,email:profile.email,
+        initial:(profile.name||"N").charAt(0).toUpperCase(),color:colorForId(profile.uid)
+      });
+    }catch(error){
+      console.warn("N-Chat profile sync:",error);
+    }
+  }
+
+  window.addEventListener("nchat-firebase-auth",syncAuthUser);
+  if(window.NChatFirebaseAuthReady) syncAuthUser();
+
+  // Stop the listener when leaving a chat.
+  const originalCloseChat=window.closeChat;
+  window.closeChat=function(){
+    clearMessageListener();
+    if(typeof originalCloseChat==='function') originalCloseChat();
+  };
+
+  // Expose a tiny API for debugging from the browser console.
+  window.NChatRealFirestore={
+    openRealChat,
+    sendRealMessage,
+    clearMessageListener,
+    getProfile:()=>realProfile
+  };
 </script>
