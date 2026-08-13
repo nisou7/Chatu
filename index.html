@@ -7930,6 +7930,7 @@ window.addEventListener("nchat-firebase-error", () => {
     onSnapshot,
     orderBy,
     query,
+    where,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -7949,6 +7950,8 @@ window.addEventListener("nchat-firebase-error", () => {
   let realProfile = null;
   let messageUnsubscribe = null;
   let currentRealChatId = null;
+  let chatListUnsubscribe = null;
+  let realChatProfiles = new Map();
 
   const colors = ["purple","pink","blue","orange","green","violet"];
   function colorForId(id){
@@ -8003,9 +8006,13 @@ window.addEventListener("nchat-firebase-error", () => {
     if(!box) return;
     const typing=document.getElementById("typingIndicator");
     [...box.querySelectorAll(".message-row")].forEach(row=>row.remove());
-
     const myUid=realProfile?.uid || window.NChatFirebase?.auth?.currentUser?.uid;
-    for(const msg of messages){
+    const sorted=[...messages].sort((a,b)=>{
+      const ta=a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+      const tb=b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+      return ta-tb;
+    });
+    for(const msg of sorted){
       const row=document.createElement("div");
       row.className="message-row " + (msg.senderId===myUid ? "me" : "them");
       const bubble=document.createElement("div");
@@ -8013,21 +8020,103 @@ window.addEventListener("nchat-firebase-error", () => {
       bubble.dataset.message=msg.text || "";
       bubble.dataset.messageId=msg.id || "";
       bubble.ondblclick=()=>{ if(typeof window.toggleReaction==='function') window.toggleReaction(bubble); };
-
-      let date = msg.createdAt?.toDate ? msg.createdAt.toDate() : new Date(msg.createdAt || Date.now());
+      let date=msg.createdAt?.toDate ? msg.createdAt.toDate() : (msg.createdAt ? new Date(msg.createdAt) : new Date());
       const time=date.toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"});
-      bubble.innerHTML='<div class="message-text"></div><div class="message-meta">'+time+
-        (msg.senderId===myUid?' <span class="message-check">✓✓</span>':'')+
-        '</div><div class="message-reaction">❤️</div>';
+      bubble.innerHTML='<div class="message-text"></div><div class="message-meta">'+time+(msg.senderId===myUid?' <span class="message-check">✓✓</span>':'')+'</div><div class="message-reaction">❤️</div>';
       bubble.querySelector(".message-text").textContent=msg.text || "";
-      bubble.addEventListener("contextmenu",e=>{
-        e.preventDefault();
-        if(typeof window.openMessageMenu==='function') window.openMessageMenu(e,bubble);
-      });
+      bubble.addEventListener("contextmenu",e=>{e.preventDefault();if(typeof window.openMessageMenu==='function')window.openMessageMenu(e,bubble);});
       row.appendChild(bubble);
-      box.insertBefore(row,typing);
+      if(typing && typing.parentNode===box) box.insertBefore(row,typing); else box.appendChild(row);
     }
     if(typeof window.scrollChatBottom==='function') window.scrollChatBottom();
+  }
+
+  function formatChatTime(value){
+    if(!value) return "";
+    const d=value?.toDate ? value.toDate() : new Date(value);
+    if(Number.isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"});
+  }
+
+  async function loadRealProfiles(uids,fb){
+    const missing=uids.filter(uid=>!realChatProfiles.has(uid));
+    await Promise.all(missing.map(async uid=>{
+      try{const snap=await getDoc(doc(fb.db,"users",uid));if(snap.exists())realChatProfiles.set(uid,{uid,...snap.data()});}
+      catch(e){console.warn("profile load failed",uid,e);}
+    }));
+  }
+
+  function makeRealHomeRow(profile,chat){
+    const row=document.createElement("div");
+    const color=profile.color||colorForId(profile.uid);
+    const initial=(profile.name||profile.username||"م").charAt(0).toUpperCase();
+    row.className="chat real-firebase-chat-row";
+    row.dataset.name=profile.name||profile.username||"مستخدم";
+    row.dataset.uid=profile.uid;
+    row.innerHTML='<div class="chat-avatar '+color+'"></div><div class="chat-details"><div class="chat-top"><span class="chat-name"></span><span class="chat-time"></span></div><div class="chat-bottom"><span class="last-message"></span></div></div>';
+    row.querySelector(".chat-avatar").textContent=initial;
+    row.querySelector(".chat-name").textContent=profile.name||profile.username||"مستخدم";
+    row.querySelector(".chat-time").textContent=formatChatTime(chat.updatedAt);
+    row.querySelector(".last-message").textContent=chat.lastMessage||"ابدأ المحادثة الآن";
+    row.onclick=()=>openRealChat({uid:profile.uid,id:profile.id||profile.nchatId||"",nchatId:profile.nchatId||profile.id||"",username:profile.username||profile.name||"",name:profile.name||profile.username||"مستخدم",email:profile.email||"",color});
+    return row;
+  }
+
+  function makeRealSectionRow(profile,chat,kind){
+    const row=document.createElement("button");
+    const color=profile.color||colorForId(profile.uid);
+    const initial=(profile.name||profile.username||"م").charAt(0).toUpperCase();
+    row.type="button"; row.className="section-row "+(kind==="friends"?"real-firebase-friend-row":"real-firebase-section-row");
+    row.dataset.search=(profile.name||"")+" "+(profile.username||"");
+    row.innerHTML='<div class="section-avatar '+color+'"></div><div class="section-row-info"><strong></strong><span></span></div><div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18L15 12L9 6"/></svg></div>';
+    row.querySelector(".section-avatar").textContent=initial;
+    row.querySelector("strong").textContent=profile.name||profile.username||"مستخدم";
+    row.querySelector("span").textContent="@"+(profile.username||profile.name||"")+" • محادثة";
+    row.onclick=()=>openRealChat({uid:profile.uid,id:profile.id||profile.nchatId||"",nchatId:profile.nchatId||profile.id||"",username:profile.username||profile.name||"",name:profile.name||profile.username||"مستخدم",email:profile.email||"",color});
+    return row;
+  }
+
+  async function renderRealChatLists(chats,fb){
+    const me=realProfile||await getMyProfile(fb); if(!me)return;
+    const rows=chats.filter(c=>Array.isArray(c.members)&&c.members.includes(me.uid)).map(c=>({chat:c,uid:c.members.find(x=>x!==me.uid)})).filter(x=>x.uid);
+    await loadRealProfiles([...new Set(rows.map(x=>x.uid))],fb);
+    const ready=rows.map(x=>({chat:x.chat,profile:realChatProfiles.get(x.uid)})).filter(x=>x.profile).sort((a,b)=>{
+      const ta=a.chat.updatedAt?.toMillis?a.chat.updatedAt.toMillis():0, tb=b.chat.updatedAt?.toMillis?b.chat.updatedAt.toMillis():0; return tb-ta;
+    });
+
+    const home=document.getElementById("chatList");
+    if(home){
+      home.querySelectorAll(".real-firebase-chat-row").forEach(x=>x.remove());
+      home.querySelectorAll("#homeEmptyChats,#realHomeEmptyChats").forEach(x=>x.remove());
+      if(!ready.length){const e=document.createElement("div");e.id="realHomeEmptyChats";e.className="real-empty-state";e.innerHTML="لا توجد محادثات بعد.<br><span>ابحث عن صديق باسم المستخدم وابدأ المحادثة.</span>";home.appendChild(e);}
+      else ready.forEach(x=>home.appendChild(makeRealHomeRow(x.profile,x.chat)));
+    }
+
+    const messages=document.getElementById("messagesList");
+    if(messages){
+      messages.querySelectorAll(".real-firebase-section-row").forEach(x=>x.remove());
+      messages.querySelectorAll(".real-messages-empty").forEach(x=>x.remove());
+      if(!ready.length){const e=document.createElement("div");e.className="real-empty-state real-messages-empty";e.innerHTML="لا توجد رسائل بعد.<br><span>ستظهر هنا محادثاتك الحقيقية.</span>";messages.appendChild(e);}
+      else ready.forEach(x=>messages.appendChild(makeRealSectionRow(x.profile,x.chat,"messages")));
+    }
+
+    const friends=document.getElementById("friendsList");
+    if(friends){
+      friends.querySelectorAll(".real-firebase-friend-row").forEach(x=>x.remove());
+      friends.querySelectorAll(".real-friends-empty").forEach(x=>x.remove());
+      if(!ready.length){const e=document.createElement("div");e.className="real-empty-state real-friends-empty";e.innerHTML="لا يوجد أصدقاء بعد.<br><span>ابحث عن شخص باسم المستخدم ثم أرسل له رسالة.</span>";friends.appendChild(e);}
+      else ready.forEach(x=>friends.appendChild(makeRealSectionRow(x.profile,x.chat,"friends")));
+    }
+  }
+
+  function startRealChatListListener(fb,me){
+    if(chatListUnsubscribe){try{chatListUnsubscribe();}catch(_){ }chatListUnsubscribe=null;}
+    if(!me?.uid)return;
+    const q=query(collection(fb.db,"chats"),where("members","array-contains",me.uid));
+    chatListUnsubscribe=onSnapshot(q,snap=>{
+      const chats=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderRealChatLists(chats,fb).catch(console.error);
+    },error=>{console.error("chat list listener",error);if(error?.code==="permission-denied")toast("تم رفض قراءة قائمة المحادثات. تحقق من Firestore Rules.");});
   }
 
   async function openRealChat(target){
@@ -8070,7 +8159,7 @@ window.addEventListener("nchat-firebase-error", () => {
     const status=document.getElementById("chatStatus");
     if(status) status.innerHTML='<span class="chat-status-dot"></span> محادثة حقيقية';
 
-    const q=query(collection(fb.db,"chats",chatId,"messages"),orderBy("createdAt","asc"));
+    const q=query(collection(fb.db,"chats",chatId,"messages"));
     messageUnsubscribe=onSnapshot(q,(snap)=>{
       const messages=snap.docs.map(d=>({id:d.id,...d.data()}));
       renderRealMessages(messages);
@@ -8233,6 +8322,7 @@ window.addEventListener("nchat-firebase-error", () => {
         id:profile.id,name:profile.name,email:profile.email,
         initial:(profile.name||"N").charAt(0).toUpperCase(),color:colorForId(profile.uid)
       });
+      if(profile) startRealChatListListener(fb,profile);
     }catch(error){
       console.warn("N-Chat profile sync:",error);
     }
@@ -8240,6 +8330,7 @@ window.addEventListener("nchat-firebase-error", () => {
 
   window.addEventListener("nchat-firebase-auth",syncAuthUser);
   if(window.NChatFirebaseAuthReady) syncAuthUser();
+  else if(window.NChatFirebase?.auth?.currentUser) syncAuthUser();
 
   // Stop the listener when leaving a chat.
   const originalCloseChat=window.closeChat;
