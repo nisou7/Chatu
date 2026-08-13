@@ -5107,17 +5107,15 @@ function scrollChatBottom(force=true){
   const box = document.getElementById("chatMessages");
   if(!box) return;
   if(force===false) return;
-  window.__nchatUserScrolledUp=false;
   setTimeout(()=>{box.scrollTop = box.scrollHeight;},30);
 }
 function shouldStickToBottom(box,threshold=90){
   if(!box) return true;
-  if(window.__nchatUserScrolledUp) return false;
   return (box.scrollHeight - box.scrollTop - box.clientHeight) <= threshold;
 }
 function scrollChatBottomIfNeeded(box,wasNearBottom){
-  if(!box || !wasNearBottom || window.__nchatUserScrolledUp) return;
-  requestAnimationFrame(()=>{if(!window.__nchatUserScrolledUp) box.scrollTop=box.scrollHeight;});
+  if(!box || !wasNearBottom) return;
+  requestAnimationFrame(()=>{box.scrollTop=box.scrollHeight;});
 }
 
 function toggleReaction(bubble){
@@ -9724,107 +9722,116 @@ setInterval(()=>{if(n7uid()){n7StartMessageNotifications();n7SyncRemoteStories()
 </script>
 
 
-<!-- =========================================================
-     N-CHAT FIREBASE STABLE PATCH — FINAL
-     Firestore/Auth/Realtime remain active.
-     Story + voice are disabled because this project is using
-     the Firebase free Firestore setup without Cloud Storage.
-     ========================================================= -->
-<style id="nchat-firebase-stable-patch">
-  .home-stories-label,
-  .home-screen .stories,
-  #storyComposerModal,
-  #storyViewerModal,
-  #voiceButton,
-  #voicePreview{display:none !important}
-</style>
-<script>
-(function(){
-  'use strict';
+<!-- N-CHAT MESSAGE SEND FINAL PATCH -->
+<script type="module">
+(() => {
+  const FIRESTORE = 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+  const waitFirebase = () => new Promise((resolve, reject) => {
+    if (window.NChatFirebase?.auth && window.NChatFirebase?.db) return resolve(window.NChatFirebase);
+    const timer = setTimeout(() => reject(new Error('لم يتم الاتصال بقاعدة البيانات')), 15000);
+    window.addEventListener('nchat-firebase-ready', () => {
+      clearTimeout(timer);
+      if (window.NChatFirebase?.auth && window.NChatFirebase?.db) resolve(window.NChatFirebase);
+      else reject(new Error('تعذر تهيئة Firebase'));
+    }, { once:true });
+  });
 
-  /* Remove old story notifications from the local notification cache. */
-  try{
-    localStorage.removeItem('nchat_seen_notification_stories');
-    const ns=JSON.parse(localStorage.getItem('nchat_notifications_v7')||'[]');
-    if(Array.isArray(ns)){
-      localStorage.setItem('nchat_notifications_v7',JSON.stringify(ns.filter(x=>x?.kind!=='story')));
-    }
-    localStorage.removeItem('nchat_stories_v5');
-  }catch(_){ }
+  let sending = false;
 
-  /* Story is intentionally disabled in this stable Firebase-only version. */
-  window.openStoryComposer=function(){
-    window.showChatToast?.('السطوري متوقف حالياً لأنه يحتاج Firebase Storage.');
-  };
-  window.publishStories=function(){
-    window.showChatToast?.('السطوري متوقف حالياً لأنه يحتاج Firebase Storage.');
-  };
-  window.openStoryViewer=function(){};
-  window.closeStoryComposer=function(){document.getElementById('storyComposerModal')?.classList.add('hidden')};
-  window.closeStoryViewer=function(){document.getElementById('storyViewerModal')?.classList.add('hidden')};
+  window.sendMessage = async function() {
+    if (sending) return;
+    const input = document.getElementById('messageInput');
+    const text = String(input?.value || '').trim();
+    if (!text) return;
 
-  /* Voice is intentionally disabled because uploading audio requires Storage. */
-  window.toggleVoiceRecording=function(){};
-  window.startVoiceRecording=function(){};
-  window.stopVoiceRecording=function(){};
-  window.cancelVoice=function(){document.getElementById('voicePreview')?.classList.remove('show')};
-  window.addVoiceMessage=function(){
-    window.showChatToast?.('الرسائل الصوتية متوقفة حالياً لأنها تحتاج Firebase Storage.');
-  };
+    const button = document.querySelector('.send-button');
+    sending = true;
+    if (button) { button.disabled = true; button.style.opacity = '.65'; }
 
-  /* Prevent old Story notification handlers from displaying notifications. */
-  const oldOpenNotifications=window.openNChatNotifications;
-  if(typeof oldOpenNotifications==='function'){
-    window.openNChatNotifications=function(){
-      try{
-        const raw=localStorage.getItem('nchat_notifications_v7');
-        const arr=JSON.parse(raw||'[]');
-        if(Array.isArray(arr)) localStorage.setItem('nchat_notifications_v7',JSON.stringify(arr.filter(x=>x?.kind!=='story')));
-      }catch(_){ }
-      return oldOpenNotifications();
-    };
-  }
+    try {
+      const fb = await waitFirebase();
+      const user = fb.auth?.currentUser;
+      if (!user) throw new Error('يجب تسجيل الدخول أولاً');
 
-  /* Stable chat scrolling: when the user scrolls upward, realtime snapshots
-     are not allowed to pull the conversation back to the bottom. */
-  window.__nchatUserScrolledUp=false;
-  function bindChatScroll(){
-    const box=document.getElementById('chatMessages');
-    if(!box || box.dataset.stableScrollBound==='1') return;
-    box.dataset.stableScrollBound='1';
-    box.addEventListener('scroll',function(){
-      const distance=this.scrollHeight-this.scrollTop-this.clientHeight;
-      window.__nchatUserScrolledUp=distance>100;
-      if(distance<=40) window.__nchatUserScrolledUp=false;
-    },{passive:true});
-  }
-  bindChatScroll();
-  new MutationObserver(bindChatScroll).observe(document.body,{childList:true,subtree:true});
+      const { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } = await import(FIRESTORE);
+      const target = window.currentFriend || window.activeTarget;
+      if (!target?.uid) throw new Error('لم يتم تحديد الصديق');
+      if (target.uid === user.uid) throw new Error('لا يمكنك إرسال رسالة إلى حسابك');
 
-  /* Search fallback for the home search box. */
-  function bindSearchFallback(){
-    const input=document.getElementById('searchInput');
-    if(!input || input.dataset.stableSearchBound==='1') return;
-    input.dataset.stableSearchBound='1';
-    input.addEventListener('input',function(){
-      const q=String(this.value||'').trim().toLowerCase();
-      document.querySelectorAll('#chatList .real-firebase-chat-row,#chatList .chat').forEach(row=>{
-        const hay=((row.dataset.name||'')+' '+(row.dataset.username||'')+' '+(row.textContent||'')).toLowerCase();
-        row.style.display=(!q||hay.includes(q))?'flex':'none';
+      const myRef = doc(fb.db, 'users', user.uid);
+      const targetRef = doc(fb.db, 'users', target.uid);
+      const [mySnap, targetSnap] = await Promise.all([getDoc(myRef), getDoc(targetRef)]);
+      if (!mySnap.exists()) throw new Error('بيانات حسابك غير موجودة في قاعدة البيانات');
+      if (!targetSnap.exists()) throw new Error('حساب الصديق غير موجود');
+
+      const my = mySnap.data() || {};
+      const other = targetSnap.data() || {};
+      const blocked = p => Array.isArray(p?.blockedUids) && p.blockedUids.includes(user.uid);
+      if (Array.isArray(my.blockedUids) && my.blockedUids.includes(target.uid)) {
+        throw new Error('هذا الحساب محظور. ألغِ الحظر من الإعدادات ← قائمة الحظر.');
+      }
+      if (blocked(other)) {
+        throw new Error('لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.');
+      }
+
+      const chatId = [String(user.uid), String(target.uid)].sort().join('__');
+      const chatRef = doc(fb.db, 'chats', chatId);
+      const messageRef = collection(fb.db, 'chats', chatId, 'messages');
+      const now = serverTimestamp();
+
+      // Create/update the conversation first, then add the actual message.
+      await setDoc(chatRef, {
+        members: [user.uid, target.uid],
+        memberIds: [user.uid, target.uid],
+        lastMessage: text,
+        updatedAt: now,
+        lastSenderId: user.uid
+      }, { merge:true });
+
+      await addDoc(messageRef, {
+        senderId: user.uid,
+        senderNChatId: my.id || my.nchatId || my.username || '',
+        receiverId: target.uid,
+        participants: [user.uid, target.uid],
+        text: text,
+        type: 'text',
+        createdAt: serverTimestamp(),
+        readBy: [user.uid]
       });
-    },{passive:true});
-  }
-  bindSearchFallback();
-  new MutationObserver(bindSearchFallback).observe(document.body,{childList:true,subtree:true});
 
-  function cleanDisabledUi(){
-    document.querySelectorAll('.home-stories-label,.home-screen .stories,#storyComposerModal,#storyViewerModal,#voiceButton,#voicePreview').forEach(el=>{
-      el.style.setProperty('display','none','important');
-    });
-  }
-  cleanDisabledUi();
-  setTimeout(cleanDisabledUi,500);
-  setTimeout(cleanDisabledUi,1500);
-  setTimeout(cleanDisabledUi,3000);
+      // Only clear the composer AFTER Firestore confirms the write.
+      if (input) {
+        input.value = '';
+        input.style.height = '42px';
+        input.dispatchEvent(new Event('input', { bubbles:true }));
+      }
+      try { window.cancelReply?.(); } catch(_) {}
+      try { window.closeAttach?.(); } catch(_) {}
+      try { window.scrollChatBottom?.(); } catch(_) {}
+
+    } catch (error) {
+      console.error('N-Chat sendMessage error:', error);
+      const code = error?.code || '';
+      let msg = error?.message || 'تعذر إرسال الرسالة';
+      if (code === 'permission-denied') msg = 'تم رفض إرسال الرسالة من Firestore Rules. تحقق من قواعد Firestore.';
+      else if (code === 'failed-precondition') msg = 'قاعدة Firestore غير جاهزة أو تحتاج فهرسًا.';
+      else if (code === 'unavailable') msg = 'لا يوجد اتصال حاليًا بـ Firebase. حاول مرة أخرى.';
+      if (typeof window.showChatToast === 'function') window.showChatToast(msg);
+      else alert(msg);
+      // Keep the text in the composer so the user does not lose it after a failed send.
+    } finally {
+      sending = false;
+      if (button) { button.disabled = false; button.style.opacity = ''; }
+    }
+  };
+
+  // Reliable Enter-to-send without relying on an older handler.
+  document.addEventListener('keydown', e => {
+    const input = e.target;
+    if (input?.id === 'messageInput' && e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      window.sendMessage();
+    }
+  });
 })();
 </script>
