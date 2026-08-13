@@ -5464,13 +5464,21 @@ function setActiveNav(active){
   if(homeNav && active==="home") homeNav.querySelector(".nav-item")?.classList.add("active");
 }
 
+function updateMessagesNavBadge(count){
+  const n=Math.max(0,Number(count)||0);
+  document.querySelectorAll(".nav-badge").forEach(b=>{
+    b.textContent=n>99?"99+":String(n);
+    b.style.display=n>0?"flex":"none";
+  });
+}
+
 function buildSectionNavs(){
   const makeNav=(active)=>`
     <button class="nav-item ${active==="home"?"active":""}" type="button" onclick="showHome()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11L12 3L21 11V20H14V14H10V20H3V11Z"/></svg>الرئيسية
     </button>
     <button class="nav-item ${active==="messages"?"active":""}" type="button" onclick="showMessages()">
-      <span class="nav-badge">3</span>
+      <span class="nav-badge" style="display:none">0</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5H20V16H13L8 20V16H4V5Z"/></svg>الرسائل
     </button>
     <button class="nav-center" type="button" onclick="openAddFriendModal()" aria-label="إضافة">
@@ -5487,6 +5495,7 @@ function buildSectionNavs(){
   });
 }
 buildSectionNavs();
+updateMessagesNavBadge(0);
 
 function showCreateAction(){
   showChatToast("يمكنك إضافة صديق جديد من قسم الأصدقاء");
@@ -7225,6 +7234,8 @@ window.addEventListener("nchat-firebase-error", () => {
     onSnapshot,
     orderBy,
     query,
+    where,
+    increment,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -7244,6 +7255,8 @@ window.addEventListener("nchat-firebase-error", () => {
   let realProfile = null;
   let messageUnsubscribe = null;
   let currentRealChatId = null;
+  let unreadChatsUnsubscribe = null;
+  let unreadByChat = new Map();
 
   const colors = ["purple","pink","blue","orange","green","violet"];
   function colorForId(id){
@@ -7283,6 +7296,55 @@ window.addEventListener("nchat-firebase-error", () => {
 
   function chatIdFor(a,b){
     return [String(a),String(b)].sort().join("__");
+  }
+
+  function stopUnreadListener(){
+    if(unreadChatsUnsubscribe){
+      try{ unreadChatsUnsubscribe(); }catch(e){}
+      unreadChatsUnsubscribe=null;
+    }
+    unreadByChat.clear();
+    if(typeof window.updateMessagesNavBadge==='function') window.updateMessagesNavBadge(0);
+  }
+
+  async function startUnreadListener(fb){
+    stopUnreadListener();
+    const me=fb.auth.currentUser;
+    if(!me) return;
+
+    const chatsQuery=query(
+      collection(fb.db,"chats"),
+      where("memberIds","array-contains",me.uid)
+    );
+
+    unreadChatsUnsubscribe=onSnapshot(chatsQuery,(snap)=>{
+      let total=0;
+      snap.docs.forEach(d=>{
+        const data=d.data()||{};
+        const count=Math.max(0,Number(data.unreadCounts?.[me.uid]||0));
+        unreadByChat.set(d.id,count);
+        total+=count;
+      });
+      if(typeof window.updateMessagesNavBadge==='function') window.updateMessagesNavBadge(total);
+    },(error)=>{
+      console.error("Firestore unread listener:",error);
+      if(typeof window.updateMessagesNavBadge==='function') window.updateMessagesNavBadge(0);
+    });
+  }
+
+  async function markChatRead(chatId){
+    if(!chatId) return;
+    try{
+      const fb=window.NChatFirebase;
+      const uid=fb?.auth?.currentUser?.uid;
+      if(!fb?.db || !uid) return;
+      await setDoc(doc(fb.db,"chats",chatId),{
+        unreadCounts:{[uid]:0}
+      },{merge:true});
+      unreadByChat.set(chatId,0);
+    }catch(error){
+      console.warn("N-Chat mark read:",error);
+    }
   }
 
   function clearMessageListener(){
@@ -7339,6 +7401,7 @@ window.addEventListener("nchat-firebase-error", () => {
     await setDoc(doc(fb.db,"chats",chatId),{
       members:[me.uid,target.uid],
       memberIds:[me.uid,target.uid],
+      unreadCounts:{[me.uid]:0},
       updatedAt:serverTimestamp()
     },{merge:true});
 
@@ -7390,7 +7453,8 @@ window.addEventListener("nchat-firebase-error", () => {
       memberIds:[me.uid,target.uid],
       lastMessage:String(text),
       updatedAt:serverTimestamp(),
-      lastSenderId:me.uid
+      lastSenderId:me.uid,
+      unreadCounts:{[target.uid]:increment(1)}
     },{merge:true});
 
     await addDoc(collection(fb.db,"chats",chatId,"messages"),{
@@ -7517,6 +7581,7 @@ window.addEventListener("nchat-firebase-error", () => {
     try{
       const fb=await waitFirebase();
       const profile=await getMyProfile(fb);
+      await startUnreadListener(fb);
       if(profile && typeof window.updateIdentityUI==='function') window.updateIdentityUI({
         id:profile.id,name:profile.name,email:profile.email,
         initial:(profile.name||"N").charAt(0).toUpperCase(),color:colorForId(profile.uid)
@@ -7528,6 +7593,7 @@ window.addEventListener("nchat-firebase-error", () => {
 
   window.addEventListener("nchat-firebase-auth",syncAuthUser);
   if(window.NChatFirebaseAuthReady) syncAuthUser();
+  window.addEventListener("nchat-firebase-logout",()=>stopUnreadListener());
 
   // Stop the listener when leaving a chat.
   const originalCloseChat=window.closeChat;
@@ -7537,6 +7603,8 @@ window.addEventListener("nchat-firebase-error", () => {
   };
 
   // Expose a tiny API for debugging from the browser console.
+  window.updateMessagesNavBadge=updateMessagesNavBadge;
+
   window.NChatRealFirestore={
     openRealChat,
     sendRealMessage,
