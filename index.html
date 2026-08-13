@@ -7201,6 +7201,318 @@ window.addEventListener("nchat-firebase-error", () => {
 })();
 </script>
 
+
+<script>
+/*
+  N-CHAT FINAL REAL ACCOUNT / ID SYNC
+  Fixes the root cause of the "ID not found" problem:
+  older UI code could display a local/demo ID instead of the Firebase
+  profile ID. This layer synchronizes the visible ID with Firestore and
+  makes ID lookup work with both users.id and users.nchatId.
+*/
+(function () {
+  const FIRESTORE = "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  const USERS_KEY = "nchat_users_v3";
+  const CURRENT_KEY = "nchat_current_user_v3";
+
+  function cleanId(value) {
+    return String(value || "")
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .toUpperCase();
+  }
+
+  async function waitForRealFirebase(timeout = 15000) {
+    const start = Date.now();
+    while (Date.now() - start < timeout) {
+      if (window.NChatFirebase?.db && window.NChatFirebase?.auth) {
+        return window.NChatFirebase;
+      }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    throw new Error("firebase-timeout");
+  }
+
+  async function getRealProfile(fb, uid) {
+    const { doc, getDoc } = await import(FIRESTORE);
+    const snap = await getDoc(doc(fb.db, "users", uid));
+    return snap.exists() ? { uid, ...snap.data() } : null;
+  }
+
+  async function ensureDirectory(fb, profile) {
+    const id = cleanId(profile?.id || profile?.nchatId);
+    if (!profile?.uid || id.length !== 8) return null;
+
+    const { doc, getDoc, setDoc } = await import(FIRESTORE);
+    const ref = doc(fb.db, "nchatIds", id);
+    const old = await getDoc(ref);
+
+    await setDoc(ref, {
+      uid: profile.uid,
+      name: profile.name || "مستخدم",
+      createdAt: old.exists()
+        ? (old.data()?.createdAt || Date.now())
+        : (profile.createdAt || Date.now())
+    }, { merge: true });
+
+    return id;
+  }
+
+  function syncLocalMirror(profile) {
+    if (!profile?.uid) return;
+    const id = cleanId(profile.id || profile.nchatId);
+    if (id.length !== 8) return;
+
+    const user = {
+      uid: profile.uid,
+      id,
+      nchatId: id,
+      name: profile.name || "مستخدم",
+      email: profile.email || "",
+      initial: (profile.name || "م").charAt(0).toUpperCase(),
+      color: "purple"
+    };
+
+    try {
+      let users = [];
+      try {
+        users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+        if (!Array.isArray(users)) users = [];
+      } catch (_) {}
+
+      users = users.filter(u => u?.uid !== profile.uid && u?.id !== id);
+      users.push(user);
+
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      localStorage.setItem(CURRENT_KEY, id);
+      localStorage.setItem("nchat_current_user", JSON.stringify(user));
+      localStorage.setItem("nchat_current_uid", profile.uid);
+      localStorage.setItem("nchat_current_id", id);
+      localStorage.setItem("nchat_current_name", user.name);
+      localStorage.setItem("nchat_current_email", user.email);
+
+      // Update the visible account/settings ID immediately.
+      const accountId = document.getElementById("accountUserId");
+      const settingsId = document.getElementById("settingsUserId");
+      const accountEmail = document.getElementById("accountEmail");
+
+      if (accountId) accountId.textContent = id;
+      if (settingsId) settingsId.textContent = "ID: " + id;
+      if (accountEmail) accountEmail.textContent = "N-Chat ID: " + id;
+    } catch (e) {
+      console.warn("N-Chat local ID sync:", e);
+    }
+  }
+
+  async function syncAuthenticatedUser() {
+    try {
+      const fb = await waitForRealFirebase();
+      const authUser = fb.auth.currentUser;
+      if (!authUser) return;
+
+      const profile = await getRealProfile(fb, authUser.uid);
+      if (!profile) return;
+
+      const id = cleanId(profile.id || profile.nchatId);
+      if (id.length === 8) {
+        await ensureDirectory(fb, profile);
+        syncLocalMirror(profile);
+      }
+    } catch (e) {
+      console.warn("N-Chat authenticated ID sync:", e);
+    }
+  }
+
+  async function findRealFriend(id) {
+    const fb = await waitForRealFirebase();
+    const me = fb.auth.currentUser;
+    if (!me) throw new Error("not-authenticated");
+
+    const {
+      doc, getDoc, collection, query, where, getDocs, setDoc
+    } = await import(FIRESTORE);
+
+    // 1. Direct directory lookup.
+    const directory = await getDoc(doc(fb.db, "nchatIds", id));
+    if (directory.exists()) {
+      const d = directory.data() || {};
+      if (d.uid && d.uid !== me.uid) {
+        const profile = await getRealProfile(fb, d.uid);
+        return {
+          uid: d.uid,
+          id,
+          nchatId: id,
+          name: profile?.name || d.name || "مستخدم",
+          email: profile?.email || d.email || "",
+          initial: (profile?.name || d.name || "م").charAt(0).toUpperCase(),
+          color: "purple"
+        };
+      }
+    }
+
+    // 2. Search the real users collection using BOTH field names used
+    // by different versions of the app.
+    const usersRef = collection(fb.db, "users");
+    const [byId, byNchatId] = await Promise.all([
+      getDocs(query(usersRef, where("id", "==", id))),
+      getDocs(query(usersRef, where("nchatId", "==", id)))
+    ]);
+
+    const snap = byId.docs[0] || byNchatId.docs[0];
+
+    if (!snap) return null;
+
+    const d = snap.data() || {};
+    const uid = d.uid || snap.id;
+    if (uid === me.uid) return null;
+
+    const realId = cleanId(d.id || d.nchatId || id);
+
+    // Repair the directory so future searches are immediate.
+    await setDoc(doc(fb.db, "nchatIds", realId), {
+      uid,
+      name: d.name || "مستخدم",
+      createdAt: d.createdAt || Date.now()
+    }, { merge: true });
+
+    return {
+      uid,
+      id: realId,
+      nchatId: realId,
+      name: d.name || "مستخدم",
+      email: d.email || "",
+      initial: (d.name || "م").charAt(0).toUpperCase(),
+      color: "purple"
+    };
+  }
+
+  window.nchatFinalSearchFriendById = async function () {
+    const input = document.getElementById("friendIdInput");
+    const result = document.getElementById("idSearchResult");
+    const empty = document.getElementById("idSearchEmpty");
+
+    const id = cleanId(input?.value);
+
+    if (result) result.classList.remove("show");
+    if (empty) empty.classList.remove("show");
+    window.realFoundFriend = null;
+    window.foundFriend = null;
+
+    if (input) input.value = id;
+
+    if (id.length !== 8) {
+      if (empty) {
+        empty.textContent = "أدخل N-Chat ID مكوّناً من 8 أحرف أو أرقام.";
+        empty.classList.add("show");
+      }
+      return;
+    }
+
+    try {
+      const fb = await waitForRealFirebase();
+      const me = fb.auth.currentUser;
+
+      if (!me) {
+        if (empty) {
+          empty.textContent = "سجّل الدخول أولاً.";
+          empty.classList.add("show");
+        }
+        return;
+      }
+
+      // First make sure the currently logged-in account itself is using
+      // the real Firebase ID, not an old local/demo ID.
+      await syncAuthenticatedUser();
+
+      const friend = await findRealFriend(id);
+
+      if (!friend) {
+        if (empty) {
+          empty.textContent =
+            "لم يتم العثور على حساب بهذا N-Chat ID. تأكد من كتابة الـID كما يظهر في حساب صديقك.";
+          empty.classList.add("show");
+        }
+        return;
+      }
+
+      window.realFoundFriend = friend;
+      window.foundFriend = friend;
+
+      const nameEl = document.getElementById("idResultName");
+      const idEl = document.getElementById("idResultId");
+      const avatar = document.getElementById("idResultAvatar");
+
+      if (nameEl) nameEl.textContent = friend.name;
+      if (idEl) idEl.textContent = friend.id;
+      if (avatar) {
+        avatar.textContent = friend.initial;
+        avatar.className = "id-result-avatar purple";
+      }
+
+      if (result) result.classList.add("show");
+
+    } catch (error) {
+      console.error("N-Chat FINAL REAL ID SEARCH:", error);
+
+      if (empty) {
+        empty.textContent =
+          error?.code === "permission-denied"
+            ? "Firebase رفض البحث. تأكد من نشر Firestore Rules."
+            : "تعذر البحث الآن. تحقق من اتصال Firebase ثم حاول مرة أخرى.";
+        empty.classList.add("show");
+      }
+    }
+  };
+
+  // Make the purple search button use ONLY the authoritative function.
+  function installRealIdSearchButton() {
+    const input = document.getElementById("friendIdInput");
+    const button = document.querySelector(".id-search-button");
+
+    if (input) {
+      input.oninput = function () {
+        this.value = cleanId(this.value).slice(0, 8);
+      };
+
+      input.onkeydown = function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          window.nchatFinalSearchFriendById();
+        }
+      };
+    }
+
+    if (button) {
+      button.onclick = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.nchatFinalSearchFriendById();
+      };
+    }
+  }
+
+  // Keep the displayed ID and Firestore directory synchronized whenever
+  // Firebase reports a signed-in user.
+  window.addEventListener("nchat-firebase-auth", () => {
+    setTimeout(syncAuthenticatedUser, 50);
+  });
+
+  // Also sync immediately if Firebase is already authenticated.
+  setTimeout(syncAuthenticatedUser, 500);
+  setTimeout(syncAuthenticatedUser, 1800);
+
+  // Re-install after DOM is ready and after UI transitions.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", installRealIdSearchButton);
+  } else {
+    installRealIdSearchButton();
+  }
+
+  setTimeout(installRealIdSearchButton, 500);
+  setTimeout(installRealIdSearchButton, 1500);
+
+})();
+</script>
+
 </html>
 
 <script>
