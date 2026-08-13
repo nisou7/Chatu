@@ -1758,7 +1758,7 @@ button{
     color:#fff;background:linear-gradient(145deg,#8052e1,#632dd0);
     box-shadow:0 7px 17px rgba(109,53,217,.24);
 }
-.send-button svg{width:20px;height:20px}
+.send-button svg{width:20px;height:20px}\n.send-button:disabled{opacity:.65!important;pointer-events:none!important;transform:none!important}
 .file-input{display:none}
 .attach-pop{
     position:absolute;bottom:74px;right:9px;display:none;z-index:10;
@@ -6531,14 +6531,16 @@ function seedDemoStoriesV5(){
 }
 function openStoryComposer(){
   pendingStoryFiles=[];
+  window.pendingStoryFiles=pendingStoryFiles;
   const picker=document.getElementById('storyFilePicker'); if(picker)picker.value='';
   document.getElementById('storyPreviewGrid').innerHTML='';
   document.getElementById('storyCaption').value='';
   document.getElementById('storyComposerModal').classList.remove('hidden');
 }
-function closeStoryComposer(){document.getElementById('storyComposerModal').classList.add('hidden');pendingStoryFiles=[];}
+function closeStoryComposer(){document.getElementById('storyComposerModal').classList.add('hidden');pendingStoryFiles=[];window.pendingStoryFiles=[];}
 function previewStoryFiles(input){
   pendingStoryFiles=[...(input.files||[])].filter(f=>f.type.startsWith('image/'));
+  window.pendingStoryFiles=pendingStoryFiles;
   const grid=document.getElementById('storyPreviewGrid');grid.innerHTML='';
   pendingStoryFiles.forEach(file=>{
     const img=document.createElement('img');img.alt=file.name;grid.appendChild(img);
@@ -7246,10 +7248,66 @@ window.addEventListener("nchat-firebase-error", () => {
     await addDoc(collection(fb.db,"chats",chatId,"messages"),{senderId:meProfile.uid,senderNChatId:meProfile.id||meProfile.nchatId||"",receiverId:target.uid,participants:[meProfile.uid,target.uid],text:String(text),createdAt:serverTimestamp(),readBy:[meProfile.uid]});
   }
 
+  let finalMessageSendInFlight=false;
   window.sendMessage=async function(){
-    const input=document.getElementById("messageInput");const text=String(input?.value||"").trim();if(!text)return;
-    try{await sendSocialMessage(text);if(input){input.value="";input.style.height="42px"}window.cancelReply?.();window.closeAttach?.();window.scrollChatBottom?.()}
-    catch(e){console.error(e);toast(e.message==="blocked-by-me"?"هذا الحساب محظور. ألغِ الحظر من الإعدادات لإرسال الرسائل.":e.message==="blocked-by-recipient"?"لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.":"تعذر إرسال الرسالة")}
+    if(finalMessageSendInFlight)return;
+    const input=document.getElementById("messageInput");
+    const sendButton=document.querySelector(".send-button");
+    const text=String(input?.value||"").trim();
+    if(!text)return;
+
+    finalMessageSendInFlight=true;
+    if(sendButton){
+      sendButton.disabled=true;
+      sendButton.style.opacity=".65";
+      sendButton.style.pointerEvents="none";
+    }
+
+    try{
+      const fb=await wait();
+      const me=fb.auth.currentUser;
+      const target=window.currentFriend;
+      if(!me||!target?.uid)throw new Error("no-chat-target");
+
+      const mySnap=await getDoc(doc(fb.db,"users",me.uid));
+      const my=mySnap.exists()?mySnap.data():null;
+      const otherSnap=await getDoc(doc(fb.db,"users",target.uid));
+      const other=otherSnap.exists()?otherSnap.data():null;
+      if(blocked(my,target.uid))throw new Error("blocked-by-me");
+      if(blocked(other,me.uid))throw new Error("blocked-by-recipient");
+
+      const id=pair(me.uid,target.uid);
+      await setDoc(doc(fb.db,"chats",id),{
+        members:[me.uid,target.uid],memberIds:[me.uid,target.uid],
+        lastMessage:text,updatedAt:serverTimestamp(),lastSenderId:me.uid
+      },{merge:true});
+
+      const messageRef=doc(collection(fb.db,"chats",id,"messages"));
+      await setDoc(messageRef,{
+        senderId:me.uid,
+        senderNChatId:my?.id||my?.nchatId||"",
+        receiverId:target.uid,
+        participants:[me.uid,target.uid],
+        text,createdAt:serverTimestamp(),readBy:[me.uid]
+      });
+
+      if(input){input.value="";input.style.height="42px"}
+      window.cancelReply?.();window.closeAttach?.();window.scrollChatBottom?.();
+    }catch(e){
+      console.error("sendMessage",e);
+      window.showChatToast?.(
+        e.message==="blocked-by-me"?"هذا الحساب محظور. ألغِ الحظر من الإعدادات ← قائمة الحظر.":
+        e.message==="blocked-by-recipient"?"لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.":
+        e.message==="no-chat-target"?"افتح محادثة أولاً":"تعذر إرسال الرسالة"
+      );
+    }finally{
+      finalMessageSendInFlight=false;
+      if(sendButton){
+        sendButton.disabled=false;
+        sendButton.style.opacity="";
+        sendButton.style.pointerEvents="";
+      }
+    }
   };
 
   window.chatAction=async function(action){
@@ -9447,10 +9505,27 @@ let n7SearchTimer=null;
 let n7Recorder=null,n7RecorderStream=null,n7AudioChunks=[],n7RecordStartedAt=0,n7HoldActive=false;
 
 function n7Save(){try{localStorage.setItem('nchat_notifications_v7',JSON.stringify(n7Notifications.slice(-80)));localStorage.setItem('nchat_seen_notification_messages',JSON.stringify([...n7KnownMessages].slice(-500)));localStorage.setItem('nchat_seen_notification_stories',JSON.stringify([...n7KnownStories].slice(-300)));}catch(_) {}}
+async function n7RequestBrowserNotifications(){
+  try{
+    if(!("Notification" in window))return false;
+    if(Notification.permission==="granted")return true;
+    if(Notification.permission==="denied")return false;
+    return (await Notification.requestPermission())==="granted";
+  }catch(e){console.warn("notification permission",e);return false}
+}
+function n7BrowserNotify(item){
+  try{
+    if(!("Notification" in window)||Notification.permission!=="granted")return;
+    const n=new Notification(item?.title||"N-Chat",{body:item?.body||"لديك إشعار جديد",tag:item?.key||"nchat",renotify:true});
+    n.onclick=()=>{try{window.focus()}catch(_){};n.close()};
+  }catch(e){console.warn("browser notification",e)}
+}
 function n7AddNotification(item){
   if(!item?.key)return;
   if(n7Notifications.some(x=>x.key===item.key))return;
-  n7Notifications.push({...item,at:Date.now(),read:false});n7Save();n7RenderBell();try{toast(item.kind==='story'?item.body:(item.title+' • '+item.body))}catch(_){}
+  n7Notifications.push({...item,at:Date.now(),read:false});n7Save();n7RenderBell();
+  try{toast(item.kind==='story'?item.body:(item.title+' • '+item.body))}catch(_){}
+  n7BrowserNotify(item);
   if(item.kind==='message' && window.NChatUnread?.update)window.NChatUnread.update();
 }
 function n7RenderBell(){
@@ -9478,7 +9553,13 @@ function n7OpenNotifications(){
   window.openSettingsAction?.('الإشعارات','الرسائل والسطوري الجديدة',body.innerHTML);
 }
 window.openNChatNotifications=n7OpenNotifications;
-function n7HookBell(){const bell=document.querySelector('.home-header .header-button:first-child');if(!bell||bell.dataset.n7Bound)return;bell.dataset.n7Bound='1';bell.onclick=n7OpenNotifications;n7RenderBell()}
+function n7HookBell(){
+  const bell=document.querySelector('.home-header .header-button:first-child');
+  if(!bell||bell.dataset.n7Bound)return;
+  bell.dataset.n7Bound='1';
+  bell.onclick=()=>{n7RequestBrowserNotifications();n7OpenNotifications()};
+  n7RenderBell();
+}
 
 async function n7GetProfile(uid){const fb=n7fb();if(!fb||!uid)return null;try{const s=await getDoc(doc(fb.db,'users',uid));return s.exists()?{uid,...s.data()}:null}catch(_){return null}}
 async function n7StartChatMessageWatch(chat){
@@ -9507,11 +9588,14 @@ async function n7StartMessageNotifications(){
     qs.docs.forEach(d=>n7StartChatMessageWatch({id:d.id,...d.data()}));
   }catch(e){console.warn('message notifications',e)}
 }
+let n7StoryNotificationsInitialized=false;
 async function n7StartStoryNotifications(){
   const fb=n7fb(),me=n7uid();if(!fb||!me)return;
   if(n7StoryUnsub){try{n7StoryUnsub()}catch(_){}n7StoryUnsub=null}
+  n7StoryNotificationsInitialized=false;
   try{
     n7StoryUnsub=onSnapshot(collection(fb.db,'stories'),snap=>{
+      const initial=!n7StoryNotificationsInitialized;
       snap.docs.forEach(d=>{
         const s={id:d.id,...d.data()};
         if(s.ownerId===me)return;
@@ -9519,9 +9603,10 @@ async function n7StartStoryNotifications(){
         if(!created||Date.now()-created>24*60*60*1000)return;
         if(!n7KnownStories.has(d.id)){
           n7KnownStories.add(d.id);
-          n7AddNotification({key:'story:'+d.id,kind:'story',storyId:d.id,uid:s.ownerId,name:s.ownerName||'صديق',color:s.color||'purple',title:'سطوري جديد',body:(s.ownerName||'صديق')+' أضاف سطوري جديداً'});
+          if(!initial)n7AddNotification({key:'story:'+d.id,kind:'story',storyId:d.id,uid:s.ownerId,name:s.ownerName||'صديق',color:s.color||'purple',title:'سطوري جديد',body:(s.ownerName||'صديق')+' أضاف سطوري جديداً'});
         }
-      });n7Save();
+      });
+      n7StoryNotificationsInitialized=true;n7Save();
     },()=>{});
   }catch(e){console.warn('story notifications',e)}
 }
@@ -9554,14 +9639,14 @@ async function n7SearchHome(value){
 function n7HookSearch(){const input=document.getElementById('searchInput');if(!input||input.dataset.n7Bound)return;input.dataset.n7Bound='1';input.addEventListener('input',e=>n7SearchHome(e.target.value));}
 
 /* Voice: robust long-press recording. Release sends automatically. */
-let n7PressReleased=false;
+let n7PressReleased=false,n7VoiceStopping=false;
 async function n7StartVoice(){
-  if(n7HoldActive||window.currentFriend?.isGroup)return;
+  if(n7HoldActive||n7VoiceStopping||window.currentFriend?.isGroup)return;
   const fb=n7fb(),me=n7uid(),target=window.currentFriend;
   if(!fb||!me||!target?.uid){toast('افتح محادثة مع صديق أولاً');return}
-  n7HoldActive=true;n7PressReleased=false;
+  n7HoldActive=true;n7PressReleased=false;n7VoiceStopping=false;
   try{
-    if(!navigator.mediaDevices?.getUserMedia)throw new Error('NO_MIC_API');
+    if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)throw new Error('NO_MIC_API');
     n7RecorderStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     const types=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
     const mime=types.find(x=>window.MediaRecorder?.isTypeSupported?.(x))||'';
@@ -9591,17 +9676,18 @@ async function n7StartVoice(){
 }
 function n7EndVoice(send=true){
   n7PressReleased=true;
+  if(n7VoiceStopping)return;
   if(!n7Recorder||n7Recorder.state==='inactive'){
     if(!send)n7CleanupVoice();
     return;
   }
-  n7HoldActive=false;clearInterval(window.__n7VoiceTimer);
+  n7VoiceStopping=true;n7HoldActive=false;clearInterval(window.__n7VoiceTimer);
   try{
     if(!send){
       const old=n7Recorder.onstop;n7Recorder.onstop=()=>{n7CleanupVoice();old?.()};
       n7Recorder.stop();
     }else n7Recorder.stop();
-  }catch(e){console.error(e);n7CleanupVoice()}
+  }catch(e){console.error(e);n7CleanupVoice();n7VoiceStopping=false}
 }
 async function n7FinishVoice(){
   const duration=Math.max(1,Math.round((Date.now()-n7RecordStartedAt)/1000));
@@ -9635,7 +9721,7 @@ async function n7FinishVoice(){
 function n7CleanupVoice(){
   clearInterval(window.__n7VoiceTimer);
   if(n7RecorderStream){n7RecorderStream.getTracks().forEach(t=>{try{t.stop()}catch(_){}});n7RecorderStream=null}
-  n7Recorder=null;n7AudioChunks=[];n7HoldActive=false;
+  n7Recorder=null;n7AudioChunks=[];n7HoldActive=false;n7VoiceStopping=false;
   document.getElementById('voiceButton')?.classList.remove('nchat-recording');
   document.getElementById('voicePreview')?.classList.remove('show');
 }
@@ -9653,9 +9739,10 @@ function n7BindVoice(){
 let n7PublishingStories=false;
 async function n7PublishStoriesRemote(){
   if(n7PublishingStories)return;
-  const files=[...(window.pendingStoryFiles||[])];
   const picker=document.getElementById('storyFilePicker');
-  const selected=files.length?files:[...(picker?.files||[])].filter(f=>f.type.startsWith('image/'));
+  const files=[...(window.pendingStoryFiles||[])];
+  const picked=[...(picker?.files||[])].filter(f=>f.type.startsWith('image/'));
+  const selected=files.length?files:picked;
   if(!selected.length){toast('اختر صورة واحدة على الأقل');return;}
   const fb=n7fb(),uid=n7uid();if(!fb||!uid){toast('يجب تسجيل الدخول أولاً');return;}
   n7PublishingStories=true;
