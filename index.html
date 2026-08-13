@@ -4430,12 +4430,21 @@ onclick="closeLanguage()">
     }
 
     const profile = snap.data();
+    const nchatId = String(profile.id || profile.nchatId || "").trim().toUpperCase();
+    if (nchatId.length === 8) {
+      await setDoc(doc(db, "nchatIds", nchatId), {
+        uid: user.uid,
+        name: profile.name || user.displayName || "مستخدم",
+        email: profile.email || user.email || "",
+        createdAt: profile.createdAt || Date.now(),
+        updatedAt: Date.now()
+      }, {merge: true});
+    }
     await setDoc(doc(db, "users", user.uid), {
-      lastSeen: Date.now(),
-      online: true
+      lastSeen: Date.now(), online: true, id: nchatId || profile.id || ""
     }, {merge: true});
 
-    return {user, profile};
+    return {user, profile: {...profile, id: nchatId || profile.id || ""}};
   };
 
   window.NChatFirebase.logoutRealAccount = async function() {
@@ -5464,21 +5473,13 @@ function setActiveNav(active){
   if(homeNav && active==="home") homeNav.querySelector(".nav-item")?.classList.add("active");
 }
 
-function updateMessagesNavBadge(count){
-  const n=Math.max(0,Number(count)||0);
-  document.querySelectorAll(".nav-badge").forEach(b=>{
-    b.textContent=n>99?"99+":String(n);
-    b.style.display=n>0?"flex":"none";
-  });
-}
-
 function buildSectionNavs(){
   const makeNav=(active)=>`
     <button class="nav-item ${active==="home"?"active":""}" type="button" onclick="showHome()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11L12 3L21 11V20H14V14H10V20H3V11Z"/></svg>الرئيسية
     </button>
     <button class="nav-item ${active==="messages"?"active":""}" type="button" onclick="showMessages()">
-      <span class="nav-badge" style="display:none">0</span>
+      <span class="nav-badge">3</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5H20V16H13L8 20V16H4V5Z"/></svg>الرسائل
     </button>
     <button class="nav-center" type="button" onclick="openAddFriendModal()" aria-label="إضافة">
@@ -5495,7 +5496,6 @@ function buildSectionNavs(){
   });
 }
 buildSectionNavs();
-updateMessagesNavBadge(0);
 
 function showCreateAction(){
   showChatToast("يمكنك إضافة صديق جديد من قسم الأصدقاء");
@@ -6916,10 +6916,23 @@ window.addEventListener("nchat-firebase-error", () => {
       }
       const me=window.NChatFirebase.auth?.currentUser;
       if(!me){ showEmpty(empty,"سجّل الدخول أولاً."); return; }
-      const {getDoc,doc}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js");
-      const snap=await getDoc(doc(window.NChatFirebase.db,"nchatIds",id));
-      if(!snap.exists()){ showEmpty(empty,"لم يتم العثور على حساب بهذا N-Chat ID."); return; }
-      const d=snap.data()||{};
+      const {getDoc,doc,collection,query,where,getDocs,setDoc}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js");
+      let snap=await getDoc(doc(window.NChatFirebase.db,"nchatIds",id));
+      let d=snap.exists() ? (snap.data()||{}) : null;
+      if(!d){
+        const qs=query(collection(window.NChatFirebase.db,"users"),where("id","==",id));
+        const us=await getDocs(qs);
+        if(!us.empty){
+          d=us.docs[0].data()||{};
+          if(d.uid){
+            await setDoc(doc(window.NChatFirebase.db,"nchatIds",id),{
+              uid:d.uid,name:d.name||"مستخدم",email:d.email||"",
+              createdAt:d.createdAt||Date.now(),updatedAt:Date.now()
+            },{merge:true});
+          }
+        }
+      }
+      if(!d || !d.uid){ showEmpty(empty,"لم يتم العثور على حساب بهذا N-Chat ID."); return; }
       if(d.uid===me.uid){ showEmpty(empty,"هذا هو N-Chat ID الخاص بحسابك."); return; }
       const friend={uid:d.uid,id,name:d.name||"مستخدم",email:d.email||"",initial:(d.name||"م").charAt(0).toUpperCase()};
       window.realFoundFriend=friend; window.foundFriend=friend;
@@ -7234,8 +7247,6 @@ window.addEventListener("nchat-firebase-error", () => {
     onSnapshot,
     orderBy,
     query,
-    where,
-    increment,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -7255,8 +7266,6 @@ window.addEventListener("nchat-firebase-error", () => {
   let realProfile = null;
   let messageUnsubscribe = null;
   let currentRealChatId = null;
-  let unreadChatsUnsubscribe = null;
-  let unreadByChat = new Map();
 
   const colors = ["purple","pink","blue","orange","green","violet"];
   function colorForId(id){
@@ -7296,55 +7305,6 @@ window.addEventListener("nchat-firebase-error", () => {
 
   function chatIdFor(a,b){
     return [String(a),String(b)].sort().join("__");
-  }
-
-  function stopUnreadListener(){
-    if(unreadChatsUnsubscribe){
-      try{ unreadChatsUnsubscribe(); }catch(e){}
-      unreadChatsUnsubscribe=null;
-    }
-    unreadByChat.clear();
-    if(typeof window.updateMessagesNavBadge==='function') window.updateMessagesNavBadge(0);
-  }
-
-  async function startUnreadListener(fb){
-    stopUnreadListener();
-    const me=fb.auth.currentUser;
-    if(!me) return;
-
-    const chatsQuery=query(
-      collection(fb.db,"chats"),
-      where("memberIds","array-contains",me.uid)
-    );
-
-    unreadChatsUnsubscribe=onSnapshot(chatsQuery,(snap)=>{
-      let total=0;
-      snap.docs.forEach(d=>{
-        const data=d.data()||{};
-        const count=Math.max(0,Number(data.unreadCounts?.[me.uid]||0));
-        unreadByChat.set(d.id,count);
-        total+=count;
-      });
-      if(typeof window.updateMessagesNavBadge==='function') window.updateMessagesNavBadge(total);
-    },(error)=>{
-      console.error("Firestore unread listener:",error);
-      if(typeof window.updateMessagesNavBadge==='function') window.updateMessagesNavBadge(0);
-    });
-  }
-
-  async function markChatRead(chatId){
-    if(!chatId) return;
-    try{
-      const fb=window.NChatFirebase;
-      const uid=fb?.auth?.currentUser?.uid;
-      if(!fb?.db || !uid) return;
-      await setDoc(doc(fb.db,"chats",chatId),{
-        unreadCounts:{[uid]:0}
-      },{merge:true});
-      unreadByChat.set(chatId,0);
-    }catch(error){
-      console.warn("N-Chat mark read:",error);
-    }
   }
 
   function clearMessageListener(){
@@ -7401,7 +7361,6 @@ window.addEventListener("nchat-firebase-error", () => {
     await setDoc(doc(fb.db,"chats",chatId),{
       members:[me.uid,target.uid],
       memberIds:[me.uid,target.uid],
-      unreadCounts:{[me.uid]:0},
       updatedAt:serverTimestamp()
     },{merge:true});
 
@@ -7453,8 +7412,7 @@ window.addEventListener("nchat-firebase-error", () => {
       memberIds:[me.uid,target.uid],
       lastMessage:String(text),
       updatedAt:serverTimestamp(),
-      lastSenderId:me.uid,
-      unreadCounts:{[target.uid]:increment(1)}
+      lastSenderId:me.uid
     },{merge:true});
 
     await addDoc(collection(fb.db,"chats",chatId,"messages"),{
@@ -7581,7 +7539,6 @@ window.addEventListener("nchat-firebase-error", () => {
     try{
       const fb=await waitFirebase();
       const profile=await getMyProfile(fb);
-      await startUnreadListener(fb);
       if(profile && typeof window.updateIdentityUI==='function') window.updateIdentityUI({
         id:profile.id,name:profile.name,email:profile.email,
         initial:(profile.name||"N").charAt(0).toUpperCase(),color:colorForId(profile.uid)
@@ -7593,7 +7550,6 @@ window.addEventListener("nchat-firebase-error", () => {
 
   window.addEventListener("nchat-firebase-auth",syncAuthUser);
   if(window.NChatFirebaseAuthReady) syncAuthUser();
-  window.addEventListener("nchat-firebase-logout",()=>stopUnreadListener());
 
   // Stop the listener when leaving a chat.
   const originalCloseChat=window.closeChat;
@@ -7603,170 +7559,10 @@ window.addEventListener("nchat-firebase-error", () => {
   };
 
   // Expose a tiny API for debugging from the browser console.
-  window.updateMessagesNavBadge=updateMessagesNavBadge;
-
   window.NChatRealFirestore={
     openRealChat,
     sendRealMessage,
     clearMessageListener,
     getProfile:()=>realProfile
   };
-</script>
-
-<!-- =========================================================
-     N-CHAT FINAL PATCH — REAL ID SEARCH FIX
-     Ensures every authenticated user's N-Chat ID has a Firestore
-     lookup document, then searches that index from the purple button.
-     ========================================================= -->
-<script type="module">
-(function(){
-  const FIREBASE_TIMEOUT = 15000;
-
-  function waitFirebase(){
-    return new Promise((resolve,reject)=>{
-      if(window.NChatFirebase?.auth && window.NChatFirebase?.db){
-        resolve(window.NChatFirebase); return;
-      }
-      let done=false;
-      const finish=(fn,v)=>{ if(done)return; done=true; fn(v); };
-      const timer=setTimeout(()=>finish(reject,new Error("firebase-timeout")),FIREBASE_TIMEOUT);
-      window.addEventListener("nchat-firebase-ready",()=>{
-        clearTimeout(timer);
-        if(window.NChatFirebase?.auth && window.NChatFirebase?.db) finish(resolve,window.NChatFirebase);
-        else finish(reject,new Error("firebase-init-failed"));
-      },{once:true});
-    });
-  }
-
-  function showSearchMessage(text){
-    const empty=document.getElementById("idSearchEmpty");
-    if(!empty)return;
-    empty.textContent=text;
-    empty.classList.add("show");
-  }
-
-  function showFriend(friend){
-    window.realFoundFriend=friend;
-    window.foundFriend=friend;
-    const result=document.getElementById("idSearchResult");
-    const empty=document.getElementById("idSearchEmpty");
-    const n=document.getElementById("idResultName");
-    const i=document.getElementById("idResultId");
-    const a=document.getElementById("idResultAvatar");
-    if(empty)empty.classList.remove("show");
-    if(n)n.textContent=friend.name || "مستخدم";
-    if(i)i.textContent=friend.id;
-    if(a){
-      a.textContent=friend.initial || (friend.name||"م").charAt(0).toUpperCase();
-      a.className="id-result-avatar " + (friend.color || "purple");
-    }
-    if(result)result.classList.add("show");
-  }
-
-  // Create/repair the public N-Chat ID index for the currently signed-in user.
-  // This fixes older accounts whose /users document exists but /nchatIds did not.
-  async function ensureMyNChatIndex(){
-    try{
-      const fb=await waitFirebase();
-      const user=fb.auth?.currentUser;
-      if(!user)return;
-
-      const {doc,getDoc,setDoc}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js");
-      const profileSnap=await getDoc(doc(fb.db,"users",user.uid));
-      if(!profileSnap.exists())return;
-
-      const p=profileSnap.data()||{};
-      const id=String(p.id || p.nchatId || "").replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
-      if(id.length!==8)return;
-
-      const indexRef=doc(fb.db,"nchatIds",id);
-      const indexSnap=await getDoc(indexRef);
-      if(!indexSnap.exists()){
-        await setDoc(indexRef,{
-          uid:user.uid,
-          name:p.name || user.displayName || "مستخدم",
-          email:p.email || user.email || "",
-          createdAt:p.createdAt || Date.now()
-        },{merge:true});
-      }
-    }catch(error){
-      // Do not block the application if this repair is rejected by Firestore Rules.
-      console.warn("N-Chat ID index repair:",error);
-    }
-  }
-
-  // Override the older localStorage search. The purple bottom-button flow now
-  // always searches the real Firebase nchatIds collection.
-  window.searchFriendById = async function(){
-    const input=document.getElementById("friendIdInput");
-    const id=String(input?.value || "").replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
-    const result=document.getElementById("idSearchResult");
-    const empty=document.getElementById("idSearchEmpty");
-
-    window.realFoundFriend=null;
-    window.foundFriend=null;
-    if(result)result.classList.remove("show");
-    if(empty)empty.classList.remove("show");
-
-    if(id.length!==8){
-      showSearchMessage("أدخل N-Chat ID مكوّناً من 8 أحرف أو أرقام.");
-      return;
-    }
-
-    try{
-      const fb=await waitFirebase();
-      const me=fb.auth?.currentUser;
-      if(!me){
-        showSearchMessage("سجّل الدخول أولاً.");
-        return;
-      }
-
-      // Repair this user's index first; useful for accounts created before the fix.
-      await ensureMyNChatIndex();
-
-      const {doc,getDoc}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js");
-      const snap=await getDoc(doc(fb.db,"nchatIds",id));
-
-      if(!snap.exists()){
-        showSearchMessage("لم يتم العثور على حساب بهذا N-Chat ID. تأكد من كتابة الـ ID الصحيح.");
-        return;
-      }
-
-      const data=snap.data()||{};
-      if(!data.uid){
-        showSearchMessage("بيانات هذا الحساب غير مكتملة. اطلب من صاحب الحساب تسجيل الدخول مرة أخرى.");
-        return;
-      }
-
-      if(data.uid===me.uid){
-        showSearchMessage("هذا هو N-Chat ID الخاص بحسابك.");
-        return;
-      }
-
-      showFriend({
-        uid:data.uid,
-        id:id,
-        nchatId:id,
-        name:data.name || "مستخدم",
-        email:data.email || "",
-        initial:(data.name || "م").charAt(0).toUpperCase(),
-        color:(typeof colorForId === "function" ? colorForId(data.uid) : "purple")
-      });
-    }catch(error){
-      console.error("N-Chat ID search:",error);
-      const code=error?.code || "";
-      if(code.includes("permission-denied")){
-        showSearchMessage("لا يمكن البحث لأن Firestore Rules لا تسمح بقراءة nchatIds. حدّث القواعد التي أرسلتها لك.");
-      }else{
-        showSearchMessage("تعذر البحث الآن. تحقق من اتصال Firebase وقواعد Firestore.");
-      }
-    }
-  };
-
-  // Make sure an already-created account gets an index entry after login.
-  window.addEventListener("nchat-firebase-auth",()=>{
-    setTimeout(ensureMyNChatIndex,300);
-  });
-  setTimeout(ensureMyNChatIndex,1000);
-})();
 </script>
