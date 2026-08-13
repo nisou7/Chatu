@@ -7128,23 +7128,83 @@ window.addEventListener("nchat-firebase-error", () => {
     }
   };
 
+  // FINAL LOGOUT HANDLER — works on GitHub Pages even if the Firebase-ready
+  // event was emitted before this script attached its listener.
   window.logoutUser = async function(){
+    const modal = document.getElementById("logoutModal");
+    const confirmButton = modal ? modal.querySelector(".modal-confirm") : null;
+
     try{
-      await waitForFirebase();
-      await window.NChatFirebase.logoutRealAccount();
+      if(confirmButton){
+        confirmButton.disabled = true;
+        confirmButton.textContent = "جارٍ تسجيل الخروج...";
+      }
+
+      // Do NOT wait for the custom firebase-ready event here. Firebase may
+      // already be initialized and the event may have happened earlier.
+      const fb = window.NChatFirebase;
+      if(fb && fb.logoutRealAccount){
+        await fb.logoutRealAccount();
+      }else if(fb && fb.auth){
+        const { signOut } = await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js");
+        await signOut(fb.auth);
+      }
+
+      // Remove all local session markers.
       try{
-        localStorage.removeItem("nchat_current_uid");
-        localStorage.removeItem("nchat_current_email");
-        localStorage.removeItem("nchat_current_id");
-        localStorage.removeItem("nchat_current_name");
+        [
+          "nchat_current_uid",
+          "nchat_current_email",
+          "nchat_current_id",
+          "nchat_current_name",
+          "nchat_current_user",
+          "nchat_current_user_v3",
+          "nchat_current_user_v4"
+        ].forEach(k => localStorage.removeItem(k));
       }catch(_){}
-      // Return to login only after Firebase signs out.
-      if(typeof showAuthScreen==="function") showAuthScreen();
-      else if(typeof showLogin==="function") showLogin();
-      else location.reload();
+
+      window.currentFriend = null;
+      window.realFoundFriend = null;
+      window.foundFriend = null;
+
+      // Close the modal.
+      if(modal) modal.classList.add("hidden");
+
+      // Always show the real Firebase login page.
+      document.querySelectorAll(
+        "#homeScreen,#settingsScreen,#friendsScreen,#chatScreen,#searchScreen,#profileScreen,#appScreen"
+      ).forEach(el => el.classList.add("hidden"));
+
+      const authScreen = document.getElementById("authScreen");
+      const loginPage = document.getElementById("loginPage");
+      const registerPage = document.getElementById("registerPage");
+
+      if(registerPage) registerPage.classList.add("hidden");
+      if(loginPage) loginPage.classList.remove("hidden");
+      if(authScreen) authScreen.classList.remove("hidden");
+
+      // Reset login form fields if present.
+      const emailInput = document.getElementById("loginEmail");
+      const passwordInput = document.getElementById("loginPassword");
+      if(emailInput) emailInput.value = "";
+      if(passwordInput) passwordInput.value = "";
+
+      if(typeof showLogin === "function") showLogin();
+
+      if(typeof showChatToast === "function") {
+        setTimeout(() => showChatToast("تم تسجيل الخروج بنجاح ✓"), 150);
+      }
     }catch(error){
       console.error("N-Chat Firebase logout:",error);
-      if(typeof showChatToast==="function") showChatToast("تعذر تسجيل الخروج.");
+      if(typeof showChatToast === "function")
+        showChatToast("تعذر تسجيل الخروج: " + (error?.message || "حاول مرة أخرى"));
+      else
+        alert("تعذر تسجيل الخروج. حاول مرة أخرى.");
+    }finally{
+      if(confirmButton){
+        confirmButton.disabled = false;
+        confirmButton.textContent = "تسجيل الخروج";
+      }
     }
   };
 })();
