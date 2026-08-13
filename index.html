@@ -4430,21 +4430,12 @@ onclick="closeLanguage()">
     }
 
     const profile = snap.data();
-    const nchatId = String(profile.id || profile.nchatId || "").trim().toUpperCase();
-    if (nchatId.length === 8) {
-      await setDoc(doc(db, "nchatIds", nchatId), {
-        uid: user.uid,
-        name: profile.name || user.displayName || "مستخدم",
-        email: profile.email || user.email || "",
-        createdAt: profile.createdAt || Date.now(),
-        updatedAt: Date.now()
-      }, {merge: true});
-    }
     await setDoc(doc(db, "users", user.uid), {
-      lastSeen: Date.now(), online: true, id: nchatId || profile.id || ""
+      lastSeen: Date.now(),
+      online: true
     }, {merge: true});
 
-    return {user, profile: {...profile, id: nchatId || profile.id || ""}};
+    return {user, profile};
   };
 
   window.NChatFirebase.logoutRealAccount = async function() {
@@ -6916,23 +6907,10 @@ window.addEventListener("nchat-firebase-error", () => {
       }
       const me=window.NChatFirebase.auth?.currentUser;
       if(!me){ showEmpty(empty,"سجّل الدخول أولاً."); return; }
-      const {getDoc,doc,collection,query,where,getDocs,setDoc}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js");
-      let snap=await getDoc(doc(window.NChatFirebase.db,"nchatIds",id));
-      let d=snap.exists() ? (snap.data()||{}) : null;
-      if(!d){
-        const qs=query(collection(window.NChatFirebase.db,"users"),where("id","==",id));
-        const us=await getDocs(qs);
-        if(!us.empty){
-          d=us.docs[0].data()||{};
-          if(d.uid){
-            await setDoc(doc(window.NChatFirebase.db,"nchatIds",id),{
-              uid:d.uid,name:d.name||"مستخدم",email:d.email||"",
-              createdAt:d.createdAt||Date.now(),updatedAt:Date.now()
-            },{merge:true});
-          }
-        }
-      }
-      if(!d || !d.uid){ showEmpty(empty,"لم يتم العثور على حساب بهذا N-Chat ID."); return; }
+      const {getDoc,doc}=await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js");
+      const snap=await getDoc(doc(window.NChatFirebase.db,"nchatIds",id));
+      if(!snap.exists()){ showEmpty(empty,"لم يتم العثور على حساب بهذا N-Chat ID."); return; }
+      const d=snap.data()||{};
       if(d.uid===me.uid){ showEmpty(empty,"هذا هو N-Chat ID الخاص بحسابك."); return; }
       const friend={uid:d.uid,id,name:d.name||"مستخدم",email:d.email||"",initial:(d.name||"م").charAt(0).toUpperCase()};
       window.realFoundFriend=friend; window.foundFriend=friend;
@@ -7014,6 +6992,212 @@ window.addEventListener("nchat-firebase-error", () => {
 
   function init(){ purgeDemoLocalData(); cleanFakeDom(); }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+})();
+</script>
+
+
+<!-- =========================================================
+     N-CHAT FINAL ID RESOLUTION PATCH
+     - Every Firebase account has a searchable N-Chat ID.
+     - Repairs old accounts that have only users.nchatId/users.id.
+     - Search works from the actual purple bottom-button modal.
+     ========================================================= -->
+<script type="module">
+(() => {
+  let readyPromise = null;
+  function waitFirebase(){
+    if(window.NChatFirebase?.auth && window.NChatFirebase?.db) return Promise.resolve(window.NChatFirebase);
+    if(!readyPromise){
+      readyPromise = new Promise((resolve,reject)=>{
+        const timer=setTimeout(()=>reject(new Error('firebase-timeout')),15000);
+        window.addEventListener('nchat-firebase-ready',()=>{
+          clearTimeout(timer);
+          if(window.NChatFirebase?.auth && window.NChatFirebase?.db) resolve(window.NChatFirebase);
+          else reject(new Error('firebase-init-failed'));
+        },{once:true});
+      });
+    }
+    return readyPromise;
+  }
+
+  function normalizeId(v){
+    return String(v||'').replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,8);
+  }
+
+  function showResultMessage(message){
+    const result=document.getElementById('idSearchResult');
+    const empty=document.getElementById('idSearchEmpty');
+    if(result) result.classList.remove('show');
+    if(empty){ empty.textContent=message; empty.classList.add('show'); }
+  }
+
+  function showFriend(friend){
+    const result=document.getElementById('idSearchResult');
+    const empty=document.getElementById('idSearchEmpty');
+    if(empty) empty.classList.remove('show');
+    const n=document.getElementById('idResultName');
+    const i=document.getElementById('idResultId');
+    const a=document.getElementById('idResultAvatar');
+    if(n) n.textContent=friend.name || 'مستخدم';
+    if(i) i.textContent=friend.id;
+    if(a){
+      a.textContent=(friend.name||'م').charAt(0).toUpperCase();
+      a.className='id-result-avatar purple';
+    }
+    window.realFoundFriend=friend;
+    window.foundFriend=friend;
+    if(result) result.classList.add('show');
+  }
+
+  async function ensureNChatIdDirectory(fb, profile){
+    if(!profile?.uid) return profile;
+    const id=normalizeId(profile.id || profile.nchatId);
+    if(id.length!==8) return profile;
+    try{
+      const {doc,setDoc,getDoc}=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+      const ref=doc(fb.db,'nchatIds',id);
+      const existing=await getDoc(ref);
+      if(!existing.exists() || existing.data()?.uid!==profile.uid){
+        await setDoc(ref,{
+          uid:profile.uid,
+          name:profile.name || 'مستخدم',
+          createdAt:existing.exists() ? (existing.data()?.createdAt || Date.now()) : Date.now()
+        },{merge:true});
+      }
+    }catch(e){
+      console.warn('N-Chat ID directory repair:',e);
+    }
+    return profile;
+  }
+
+  // Repair the directory immediately after login for old accounts.
+  window.addEventListener('nchat-firebase-auth', async (event)=>{
+    const user=event.detail?.user;
+    if(!user) return;
+    try{
+      const fb=await waitFirebase();
+      const {doc,getDoc}=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+      const snap=await getDoc(doc(fb.db,'users',user.uid));
+      if(snap.exists()) await ensureNChatIdDirectory(fb,{uid:user.uid,...snap.data()});
+    }catch(e){ console.warn('N-Chat ID login repair:',e); }
+  });
+
+  // Wrap account creation so the directory is ALWAYS created, including new accounts.
+  function installCreateAccountRepair(){
+    const original=window.NChatFirebase?.createRealAccount;
+    if(typeof original!=='function' || original.__nchatDirectoryWrapped) return false;
+    const wrapped=async function(name,email,password){
+      const result=await original.call(this,name,email,password);
+      const fb=window.NChatFirebase;
+      let profile=result?.profile;
+      if(!profile && result?.user){
+        const {doc,getDoc}=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+        const snap=await getDoc(doc(fb.db,'users',result.user.uid));
+        if(snap.exists()) profile={uid:result.user.uid,...snap.data()};
+      }
+      if(profile) await ensureNChatIdDirectory(fb,profile);
+      return result;
+    };
+    wrapped.__nchatDirectoryWrapped=true;
+    window.NChatFirebase.createRealAccount=wrapped;
+    return true;
+  }
+  if(!installCreateAccountRepair()){
+    const timer=setInterval(()=>{ if(installCreateAccountRepair()) clearInterval(timer); },200);
+    setTimeout(()=>clearInterval(timer),15000);
+  }
+
+  // IMPORTANT: this is the function used by the actual purple Add button.
+  window.searchFriendById=async function(){
+    const input=document.getElementById('friendIdInput');
+    const id=normalizeId(input?.value);
+    window.realFoundFriend=null;
+    window.foundFriend=null;
+    document.getElementById('idSearchResult')?.classList.remove('show');
+    document.getElementById('idSearchEmpty')?.classList.remove('show');
+
+    if(id.length!==8){
+      showResultMessage('أدخل N-Chat ID مكوّناً من 8 أحرف أو أرقام.');
+      return;
+    }
+
+    try{
+      const fb=await waitFirebase();
+      const authUser=fb.auth?.currentUser;
+      if(!authUser){ showResultMessage('سجّل الدخول أولاً.'); return; }
+
+      const {doc,getDoc,collection,query,where,getDocs,setDoc}=await import(
+        'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js'
+      );
+
+      // 1) Fast lookup through the directory.
+      let target=null;
+      const directorySnap=await getDoc(doc(fb.db,'nchatIds',id));
+      if(directorySnap.exists()){
+        const d=directorySnap.data()||{};
+        if(d.uid) target={uid:d.uid,id,name:d.name||'مستخدم',email:d.email||''};
+      }
+
+      // 2) Fallback: search the real users collection by BOTH possible field names.
+      // This fixes accounts created by older versions of the app.
+      if(!target){
+        const usersRef=collection(fb.db,'users');
+        const [byId,byNchatId]=await Promise.all([
+          getDocs(query(usersRef,where('id','==',id))),
+          getDocs(query(usersRef,where('nchatId','==',id)))
+        ]);
+        const first=byId.docs[0] || byNchatId.docs[0];
+        if(first){
+          const d=first.data()||{};
+          target={uid:first.id,id:normalizeId(d.id||d.nchatId||id),name:d.name||'مستخدم',email:d.email||''};
+          // Repair the directory for future searches.
+          await setDoc(doc(fb.db,'nchatIds',id),{
+            uid:target.uid,
+            name:target.name,
+            createdAt:d.createdAt || Date.now()
+          },{merge:true});
+        }
+      }
+
+      if(!target){
+        showResultMessage('لم يتم العثور على حساب بهذا N-Chat ID. تأكد من كتابة الـID كما يظهر في حساب صديقك.');
+        return;
+      }
+
+      if(target.uid===authUser.uid){
+        showResultMessage('هذا هو N-Chat ID الخاص بحسابك.');
+        return;
+      }
+
+      target.initial=(target.name||'م').charAt(0).toUpperCase();
+      target.color='purple';
+      showFriend(target);
+    }catch(error){
+      console.error('N-Chat ID search FINAL:',error);
+      if(error?.code==='permission-denied'){
+        showResultMessage('Firebase رفض البحث. تأكد من نشر Firestore Rules التي تسمح للمستخدم المسجل بقراءة users و nchatIds.');
+      }else{
+        showResultMessage('تعذر البحث الآن. تحقق من اتصال Firebase ثم حاول مرة أخرى.');
+      }
+    }
+  };
+
+  // Also repair the alternate search function used by some older UI code.
+  window.searchNChatId=async function(){
+    const input=document.getElementById('idSearchInput') || document.getElementById('friendIdInput');
+    const id=normalizeId(input?.value);
+    const realInput=document.getElementById('friendIdInput');
+    if(realInput) realInput.value=id;
+    return window.searchFriendById();
+  };
+
+  // Ensure pressing Enter in the ID field uses the corrected function.
+  document.addEventListener('DOMContentLoaded',()=>{
+    const input=document.getElementById('friendIdInput');
+    if(input){
+      input.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();window.searchFriendById();} });
+    }
+  });
 })();
 </script>
 
