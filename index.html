@@ -4538,13 +4538,13 @@ onclick="closeLanguage()">
   import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyDHeW0RjNCV6Il2kAIkqePcJ3-ZK5V7vUs",
-    authDomain: "an-chat-be69c.firebaseapp.com",
-    projectId: "an-chat-be69c",
-    storageBucket: "an-chat-be69c.firebasestorage.app",
-    messagingSenderId: "155400574971",
-    appId: "1:155400574971:web:831900ce50c97587941d5e",
-    measurementId: "G-9Z8HK20E7D"
+    apiKey: "AIzaSyAMsKcSMpIz3p2ufg3y7AhfbJ-KPb5TltI",
+    authDomain: "nchat-app-663e4.firebaseapp.com",
+    projectId: "nchat-app-663e4",
+    storageBucket: "nchat-app-663e4.firebasestorage.app",
+    messagingSenderId: "744710571184",
+    appId: "1:744710571184:web:127f9b1531094712172775",
+    measurementId: "G-F20ZRWPP2C"
   };
 
   try {
@@ -4627,7 +4627,7 @@ onclick="closeLanguage()">
      N-CHAT FIREBASE AUTH — SINGLE AUTHORITATIVE AUTH LAYER
      ========================================================= -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import {
     getAuth,
     onAuthStateChanged,
@@ -4645,16 +4645,16 @@ onclick="closeLanguage()">
   import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyDHeW0RjNCV6Il2kAIkqePcJ3-ZK5V7vUs",
-    authDomain: "an-chat-be69c.firebaseapp.com",
-    projectId: "an-chat-be69c",
-    storageBucket: "an-chat-be69c.firebasestorage.app",
-    messagingSenderId: "155400574971",
-    appId: "1:155400574971:web:831900ce50c97587941d5e",
-    measurementId: "G-9Z8HK20E7D"
+    apiKey: "AIzaSyAMsKcSMpIz3p2ufg3y7AhfbJ-KPb5TltI",
+    authDomain: "nchat-app-663e4.firebaseapp.com",
+    projectId: "nchat-app-663e4",
+    storageBucket: "nchat-app-663e4.firebasestorage.app",
+    messagingSenderId: "744710571184",
+    appId: "1:744710571184:web:127f9b1531094712172775",
+    measurementId: "G-F20ZRWPP2C"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);
