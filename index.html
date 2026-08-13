@@ -7364,9 +7364,6 @@ window.addEventListener("nchat-firebase-error", () => {
 setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealHomePresence();}catch(e){}},30000);
 </script>
 
-</body>
-
-
 <!-- =========================================================
      N-CHAT FINAL PATCH — REAL FRIENDS ONLY + ROBUST LOGOUT
      ========================================================= -->
@@ -8221,8 +8218,6 @@ setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealH
   setTimeout(install, 1500);
 })();
 </script>
-
-</html>
 
 <script>
 (function(){
@@ -9568,7 +9563,7 @@ async function n7StartChatMessageWatch(chat){
     const first=!n7KnownMessages.has('__chat_initialized__'+chat.id);
     for(const d of snap.docs){
       const m={id:d.id,...d.data()};
-      if(m.receiverId===me && !Array.isArray(m.readBy)?.includes(me) && !n7KnownMessages.has(d.id)){
+      if(m.receiverId===me && !(Array.isArray(m.readBy) && m.readBy.includes(me)) && !n7KnownMessages.has(d.id)){
         n7KnownMessages.add(d.id);
         const p=await n7GetProfile(m.senderId);
         n7AddNotification({key:'message:'+d.id,kind:'message',uid:m.senderId,name:p?.name||'صديق',username:p?.username||p?.name||'',color:p?.color||'purple',title:'رسالة جديدة',body:m.type==='audio'?'🎤 أرسل رسالة صوتية':(m.text||'أرسل لك رسالة')});
@@ -10112,3 +10107,6 @@ finalBindAll();
 setInterval(finalBindAll,500);
 window.addEventListener('nchat-firebase-auth',()=>setTimeout(finalBindAll,100));
 </script>
+
+</body>
+</html>
