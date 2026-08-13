@@ -4622,6 +4622,156 @@ onclick="closeLanguage()">
   }
 </script>
 
+
+<!-- =========================================================
+     N-CHAT FIREBASE AUTH — SINGLE AUTHORITATIVE AUTH LAYER
+     ========================================================= -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    updateProfile
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDHeW0RjNCV6Il2kAIkqePcJ3-ZK5V7vUs",
+    authDomain: "an-chat-be69c.firebaseapp.com",
+    projectId: "an-chat-be69c",
+    storageBucket: "an-chat-be69c.firebasestorage.app",
+    messagingSenderId: "155400574971",
+    appId: "1:155400574971:web:831900ce50c97587941d5e",
+    measurementId: "G-9Z8HK20E7D"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  window.NChatFirebase = window.NChatFirebase || {};
+  Object.assign(window.NChatFirebase, {app, auth, db, storage, firebaseConfig});
+
+  window.NChatFirebaseReady = false;
+  window.NChatFirebaseAuthReady = false;
+
+  window.NChatFirebase.createRealAccount = async function(name, email, password) {
+    const cleanName = String(name || "").trim();
+    const cleanEmail = String(email || "").trim().toLowerCase();
+
+    if (!cleanName) throw new Error("auth/invalid-display-name");
+    if (!cleanEmail) throw new Error("auth/invalid-email");
+    if (!password || String(password).length < 6) {
+      throw new Error("auth/weak-password");
+    }
+
+    const credential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+    const user = credential.user;
+
+    try {
+      await updateProfile(user, {displayName: cleanName});
+    } catch (_) {}
+
+    // Generate a unique 8-character N-Chat ID.
+    let nchatId = "";
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    for (let attempt = 0; attempt < 20; attempt++) {
+      let id = "";
+      for (let i = 0; i < 8; i++) {
+        id += alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+      const existing = await getDoc(doc(db, "nchatIds", id));
+      if (!existing.exists()) {
+        nchatId = id;
+        break;
+      }
+    }
+    if (!nchatId) throw new Error("nchat/id-generation-failed");
+
+    const profile = {
+      uid: user.uid,
+      id: nchatId,
+      name: cleanName,
+      email: cleanEmail,
+      createdAt: Date.now(),
+      online: true,
+      lastSeen: Date.now()
+    };
+
+    await setDoc(doc(db, "users", user.uid), profile);
+    await setDoc(doc(db, "nchatIds", nchatId), {
+      uid: user.uid,
+      name: cleanName,
+      createdAt: Date.now()
+    });
+
+    return {user, profile};
+  };
+
+  window.NChatFirebase.loginRealAccount = async function(email, password) {
+    const cleanEmail = String(email || "").trim().toLowerCase();
+    if (!cleanEmail) throw new Error("auth/invalid-email");
+    if (!password) throw new Error("auth/invalid-credential");
+
+    // IMPORTANT: this is the only path that can authenticate the user.
+    // A random password will be rejected by Firebase.
+    const credential = await signInWithEmailAndPassword(auth, cleanEmail, password);
+    const user = credential.user;
+
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (!snap.exists()) {
+      throw new Error("nchat/profile-missing");
+    }
+
+    const profile = snap.data();
+    await setDoc(doc(db, "users", user.uid), {
+      lastSeen: Date.now(),
+      online: true
+    }, {merge: true});
+
+    return {user, profile};
+  };
+
+  window.NChatFirebase.logoutRealAccount = async function() {
+    if (auth.currentUser) await signOut(auth);
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    window.NChatFirebase.currentUser = user || null;
+    window.NChatFirebaseAuthReady = true;
+
+    if (user) {
+      try {
+        await setDoc(doc(db, "users", user.uid), {
+          online: true,
+          lastSeen: Date.now()
+        }, {merge: true});
+      } catch (e) {
+        console.warn("تعذر تحديث حالة المستخدم:", e);
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent("nchat-firebase-auth", {
+      detail: {user: user || null}
+    }));
+  });
+
+  window.NChatFirebaseReady = true;
+  window.dispatchEvent(new CustomEvent("nchat-firebase-ready", {
+    detail: {app, auth, db, storage}
+  }));
+</script>
+
 <script>
 
 /* =========================================================
@@ -4658,7 +4808,7 @@ function showLogin(){
    LOGIN
 ========================================================= */
 
-async function loginUser(){
+async function legacyLoginUserDisabled(){
 
     const email = document.getElementById("loginEmail").value.trim().toLowerCase();
     const password = document.getElementById("loginPassword").value;
@@ -4727,7 +4877,7 @@ async function loginUser(){
    CREATE REAL FIREBASE ACCOUNT
 ========================================================= */
 
-async function createAccount(){
+async function legacyCreateAccountDisabled(){
 
     const name = document.getElementById("registerName").value.trim();
     const email = document.getElementById("registerEmail").value.trim().toLowerCase();
@@ -7044,3 +7194,146 @@ window.addEventListener("nchat-firebase-error", () => {
 
 </body>
 </html>
+
+<script>
+(function(){
+  const waitForFirebase = (timeoutMs=12000) => new Promise((resolve,reject)=>{
+    if(window.NChatFirebase && window.NChatFirebaseReady){
+      resolve(window.NChatFirebase); return;
+    }
+    let done=false;
+    const finish=(fn,v)=>{if(done)return;done=true;fn(v)};
+    const timer=setTimeout(()=>finish(reject,new Error("firebase-timeout")),timeoutMs);
+    window.addEventListener("nchat-firebase-ready",()=>{
+      clearTimeout(timer);
+      finish(resolve,window.NChatFirebase);
+    },{once:true});
+  });
+
+  function authMessage(error){
+    const code=error && error.code ? error.code : String(error && error.message || error);
+    const map={
+      "auth/invalid-credential":"البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "auth/invalid-login-credentials":"البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "auth/wrong-password":"البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "auth/user-not-found":"لا يوجد حساب بهذا البريد الإلكتروني.",
+      "auth/invalid-email":"البريد الإلكتروني غير صحيح.",
+      "auth/email-already-in-use":"هذا البريد الإلكتروني مستخدم بالفعل.",
+      "auth/weak-password":"كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
+      "auth/too-many-requests":"تمت محاولات كثيرة. حاول لاحقًا.",
+      "auth/network-request-failed":"تحقق من اتصال الإنترنت.",
+      "auth/operation-not-allowed":"تسجيل الدخول بالبريد وكلمة المرور غير مفعّل في Firebase.",
+      "nchat/profile-missing":"تم تسجيل الدخول ولكن ملف المستخدم غير موجود في Firestore.",
+      "nchat/id-generation-failed":"تعذر إنشاء N-Chat ID. حاول مرة أخرى.",
+      "firebase-timeout":"لم يتم الاتصال بـ Firebase. افتح التطبيق من GitHub Pages أو خادم ويب."
+    };
+    return map[code] || "تعذر تسجيل الدخول. تحقق من بيانات الحساب واتصال Firebase.";
+  }
+
+  window.loginUser = async function(){
+    const emailEl=document.querySelector('#loginPage input[type="email"]') ||
+                  document.querySelector('#loginPage input');
+    const passEl=document.querySelector('#loginPage input[type="password"]');
+    const email=String(emailEl ? emailEl.value : "").trim();
+    const password=String(passEl ? passEl.value : "");
+
+    if(!email || !password){
+      if(typeof showChatToast==="function") showChatToast("أدخل البريد الإلكتروني وكلمة المرور.");
+      return;
+    }
+
+    const button=document.querySelector('#loginPage .main-button');
+    const old=button ? button.textContent : "دخول";
+    if(button){button.disabled=true;button.textContent="جارٍ التحقق...";}
+
+    try{
+      const fb=await waitForFirebase();
+      const result=await fb.loginRealAccount(email,password);
+      const profile=result.profile || {};
+      const name=profile.name || result.user.displayName || email.split("@")[0] || "Nassim";
+
+      // Local UI state is only a mirror of the authenticated Firebase account.
+      try{
+        localStorage.setItem("nchat_current_uid",result.user.uid);
+        localStorage.setItem("nchat_current_email",result.user.email || email);
+        localStorage.setItem("nchat_current_id",profile.id || "");
+        localStorage.setItem("nchat_current_name",name);
+      }catch(_){}
+
+      // CRITICAL: open the app ONLY after Firebase authentication succeeds.
+      if(typeof openHome==="function") openHome(name);
+      else if(typeof hideAuthShowApp==="function") hideAuthShowApp();
+      if(typeof showChatToast==="function") showChatToast("تم تسجيل الدخول بنجاح ✓");
+    }catch(error){
+      console.error("N-Chat Firebase login:",error);
+      if(typeof showChatToast==="function") showChatToast(authMessage(error));
+      else alert(authMessage(error));
+      // Never call openHome here.
+    }finally{
+      if(button){button.disabled=false;button.textContent=old;}
+    }
+  };
+
+  window.createAccount = async function(){
+    const inputs=[...document.querySelectorAll('#createPage input')];
+    const nameEl=inputs.find(x=>x.type!=="email" && x.type!=="password") || inputs[0];
+    const emailEl=document.querySelector('#createPage input[type="email"]') || inputs[1];
+    const passEl=document.querySelector('#createPage input[type="password"]') || inputs[2];
+
+    const name=String(nameEl ? nameEl.value : "").trim();
+    const email=String(emailEl ? emailEl.value : "").trim();
+    const password=String(passEl ? passEl.value : "");
+
+    if(!name || !email || !password){
+      if(typeof showChatToast==="function") showChatToast("أكمل بيانات إنشاء الحساب.");
+      return;
+    }
+
+    const button=document.querySelector('#createPage .main-button');
+    const old=button ? button.textContent : "إنشاء حساب";
+    if(button){button.disabled=true;button.textContent="جارٍ إنشاء الحساب...";}
+
+    try{
+      const fb=await waitForFirebase();
+      const result=await fb.createRealAccount(name,email,password);
+      const profile=result.profile;
+
+      try{
+        localStorage.setItem("nchat_current_uid",result.user.uid);
+        localStorage.setItem("nchat_current_email",email);
+        localStorage.setItem("nchat_current_id",profile.id);
+        localStorage.setItem("nchat_current_name",name);
+      }catch(_){}
+
+      if(typeof openHome==="function") openHome(name);
+      if(typeof showChatToast==="function") showChatToast("تم إنشاء الحساب بنجاح ✓");
+    }catch(error){
+      console.error("N-Chat Firebase registration:",error);
+      if(typeof showChatToast==="function") showChatToast(authMessage(error));
+      else alert(authMessage(error));
+    }finally{
+      if(button){button.disabled=false;button.textContent=old;}
+    }
+  };
+
+  window.logoutUser = async function(){
+    try{
+      await waitForFirebase();
+      await window.NChatFirebase.logoutRealAccount();
+      try{
+        localStorage.removeItem("nchat_current_uid");
+        localStorage.removeItem("nchat_current_email");
+        localStorage.removeItem("nchat_current_id");
+        localStorage.removeItem("nchat_current_name");
+      }catch(_){}
+      // Return to login only after Firebase signs out.
+      if(typeof showAuthScreen==="function") showAuthScreen();
+      else if(typeof showLogin==="function") showLogin();
+      else location.reload();
+    }catch(error){
+      console.error("N-Chat Firebase logout:",error);
+      if(typeof showChatToast==="function") showChatToast("تعذر تسجيل الخروج.");
+    }
+  };
+})();
+</script>
