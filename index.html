@@ -8246,3 +8246,282 @@ window.addEventListener("nchat-firebase-error", () => {
     getProfile:()=>realProfile
   };
 </script>
+
+<!-- =========================================================
+     N-CHAT FINAL PATCH — SEARCH FRIEND BY USERNAME / NAME
+     ========================================================= -->
+<style>
+  /* Username search result improvements */
+  .username-search-help{
+    margin-top:-4px;
+    margin-bottom:9px;
+    color:#91899a;
+    font-size:9px;
+    text-align:right;
+  }
+  #friendIdInput{
+    direction:rtl !important;
+    text-align:right !important;
+    letter-spacing:0 !important;
+    font-weight:700 !important;
+  }
+  #idResultId{
+    direction:rtl !important;
+    text-align:right !important;
+    letter-spacing:0 !important;
+  }
+</style>
+
+<script type="module">
+(function(){
+  const FS = "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  function cleanUsername(value){
+    return String(value || "").trim().replace(/\\s+/g," ");
+  }
+
+  async function firebaseReady(timeoutMs=15000){
+    if(window.NChatFirebase?.auth && window.NChatFirebase?.db){
+      return window.NChatFirebase;
+    }
+    await new Promise((resolve,reject)=>{
+      let done=false;
+      const finish=(fn,v)=>{if(done)return;done=true;fn(v)};
+      const timer=setTimeout(()=>finish(reject,new Error("firebase-timeout")),timeoutMs);
+      window.addEventListener("nchat-firebase-ready",()=>{
+        clearTimeout(timer);
+        finish(resolve);
+      },{once:true});
+    });
+    if(!window.NChatFirebase?.auth || !window.NChatFirebase?.db){
+      throw new Error("firebase-not-ready");
+    }
+    return window.NChatFirebase;
+  }
+
+  function showSearchMessage(text){
+    const empty=document.getElementById("idSearchEmpty");
+    const result=document.getElementById("idSearchResult");
+    if(result) result.classList.remove("show");
+    if(empty){
+      empty.textContent=text;
+      empty.classList.add("show");
+    }
+  }
+
+  function displayUsernameFriend(friend){
+    document.getElementById("idSearchEmpty")?.classList.remove("show");
+    const result=document.getElementById("idSearchResult");
+    const name=document.getElementById("idResultName");
+    const id=document.getElementById("idResultId");
+    const avatar=document.getElementById("idResultAvatar");
+
+    if(name) name.textContent=friend.name || "مستخدم";
+    if(id) id.textContent="@"+(friend.username || friend.name || "");
+    if(avatar){
+      avatar.textContent=(friend.name || "م").charAt(0).toUpperCase();
+      avatar.className="id-result-avatar "+(friend.color || "purple");
+    }
+
+    window.realFoundFriend=friend;
+    window.foundFriend=friend;
+    result?.classList.add("show");
+  }
+
+  // Save the existing account name as a searchable username field too.
+  // This keeps old accounts working and makes new accounts searchable by name.
+  async function installUsernameOnAccount(){
+    const original=window.NChatFirebase?.createRealAccount;
+    if(typeof original!=="function" || original.__usernamePatch) return false;
+
+    const wrapped=async function(name,email,password){
+      const result=await original.call(this,name,email,password);
+      try{
+        const fb=window.NChatFirebase;
+        const user=result?.user;
+        if(fb?.db && user){
+          const {doc,setDoc}=await import(FS);
+          await setDoc(doc(fb.db,"users",user.uid),{
+            username: cleanUsername(name),
+            usernameLower: cleanUsername(name).toLowerCase()
+          },{merge:true});
+          if(result.profile) result.profile.username=cleanUsername(name);
+        }
+      }catch(error){
+        console.warn("Could not save username field:",error);
+      }
+      return result;
+    };
+    wrapped.__usernamePatch=true;
+    window.NChatFirebase.createRealAccount=wrapped;
+    return true;
+  }
+
+  // Search by the user's name/username instead of the 8-character N-Chat ID.
+  window.searchFriendById=async function(){
+    const input=document.getElementById("friendIdInput");
+    const username=cleanUsername(input?.value);
+
+    if(input) input.value=username;
+    document.getElementById("idSearchResult")?.classList.remove("show");
+    document.getElementById("idSearchEmpty")?.classList.remove("show");
+    window.realFoundFriend=null;
+    window.foundFriend=null;
+
+    if(!username){
+      showSearchMessage("اكتب اسم المستخدم للبحث عنه.");
+      return;
+    }
+
+    try{
+      const fb=await firebaseReady();
+      const me=fb.auth?.currentUser;
+      if(!me){
+        showSearchMessage("سجّل الدخول أولاً.");
+        return;
+      }
+
+      const {collection,query,where,getDocs}=await import(FS);
+      const users=collection(fb.db,"users");
+      const lower=username.toLowerCase();
+      let foundDocs=[];
+
+      // Fast exact lookup for new profiles.
+      try{
+        const [byUsername,byUsernameLower,byName]=await Promise.all([
+          getDocs(query(users,where("username","==",username))),
+          getDocs(query(users,where("usernameLower","==",lower))),
+          getDocs(query(users,where("name","==",username)))
+        ]);
+        foundDocs=[...byUsername.docs,...byUsernameLower.docs,...byName.docs];
+      }catch(error){
+        console.warn("Username indexed lookup failed; using fallback:",error);
+      }
+
+      // Fallback also supports accounts created before this patch.
+      if(!foundDocs.length){
+        const all=await getDocs(users);
+        foundDocs=all.docs.filter(s=>{
+          const d=s.data() || {};
+          const values=[d.username,d.usernameLower,d.name,d.displayName]
+            .map(v=>String(v || "").trim().toLowerCase());
+          return values.includes(lower);
+        });
+      }
+
+      // Prefer an account that is not the current user.
+      const found=foundDocs.find(s=>s.id!==me.uid);
+
+      if(!found){
+        if(foundDocs.some(s=>s.id===me.uid)){
+          showSearchMessage("هذا اسم المستخدم الخاص بحسابك.");
+        }else{
+          showSearchMessage("لم يتم العثور على مستخدم بهذا الاسم. تأكد من كتابة اسم المستخدم بشكل صحيح.");
+        }
+        return;
+      }
+
+      const d=found.data() || {};
+      const realUsername=cleanUsername(d.username || d.name || d.displayName || username);
+      const uid=d.uid || found.id;
+
+      const friend={
+        uid,
+        id:d.id || d.nchatId || "",
+        nchatId:d.nchatId || d.id || "",
+        username:realUsername,
+        name:d.name || d.displayName || realUsername || "مستخدم",
+        email:d.email || "",
+        initial:(d.name || realUsername || "م").charAt(0).toUpperCase(),
+        color:"purple"
+      };
+
+      displayUsernameFriend(friend);
+    }catch(error){
+      console.error("Firebase username search:",error);
+      showSearchMessage(
+        error?.code==="permission-denied"
+          ? "Firebase رفض قراءة قائمة المستخدمين. تحقق من Firestore Rules."
+          : "تعذر البحث عن المستخدم. تحقق من اتصال الإنترنت ثم حاول مرة أخرى."
+      );
+    }
+  };
+
+  window.openFoundFriendChat=function(){
+    const friend=window.realFoundFriend || window.foundFriend;
+    if(!friend?.uid){
+      showSearchMessage("ابحث عن مستخدم أولاً.");
+      return;
+    }
+    if(typeof closeAddFriendModal==="function") closeAddFriendModal();
+    if(typeof window.openRealChat==="function"){
+      window.openRealChat(friend).catch(console.error);
+    }else if(typeof window.openChat==="function"){
+      window.openChat(friend.name,friend.id,friend);
+    }
+  };
+
+  function installUsernameSearchUI(){
+    const input=document.getElementById("friendIdInput");
+    const button=document.querySelector("#addFriendModal .id-search-button");
+    const modal=document.querySelector("#addFriendModal .modal");
+    const title=modal?.querySelector("h3");
+    const paragraph=modal?.querySelector("p");
+    const empty=document.getElementById("idSearchEmpty");
+    const resultId=document.getElementById("idResultId");
+    const openButton=document.querySelector("#addFriendModal .id-open-button");
+
+    if(title) title.textContent="إضافة صديق";
+    if(paragraph) paragraph.textContent="ابحث عن صديق باستخدام اسم المستخدم الخاص به.";
+    if(input){
+      input.removeAttribute("maxlength");
+      input.removeAttribute("oninput");
+      input.removeAttribute("onkeydown");
+      input.setAttribute("autocomplete","off");
+      input.setAttribute("placeholder","اكتب اسم المستخدم");
+      input.oninput=()=>{ input.value=cleanUsername(input.value); };
+      input.onkeydown=e=>{
+        if(e.key==="Enter"){
+          e.preventDefault();
+          window.searchFriendById();
+        }
+      };
+    }
+    if(button){
+      button.removeAttribute("onclick");
+      button.onclick=e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        window.searchFriendById();
+      };
+    }
+    if(empty) empty.textContent="لم يتم العثور على مستخدم بهذا الاسم.";
+    if(resultId) resultId.textContent="@اسم المستخدم";
+    if(openButton) openButton.textContent="فتح الدردشة";
+
+    if(modal && !modal.querySelector(".username-search-help")){
+      const help=document.createElement("div");
+      help.className="username-search-help";
+      help.textContent="اكتب الاسم الذي اختاره المستخدم عند إنشاء حسابه.";
+      const box=modal.querySelector(".id-search-box");
+      box?.insertAdjacentElement("afterend",help);
+    }
+  }
+
+  function boot(){
+    installUsernameSearchUI();
+    installUsernameOnAccount();
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",boot,{once:true});
+  }else boot();
+
+  // Some Firebase/account scripts in this file initialize later.
+  const timer=setInterval(()=>{
+    installUsernameSearchUI();
+    if(installUsernameOnAccount()) clearInterval(timer);
+  },500);
+  setTimeout(()=>clearInterval(timer),20000);
+})();
+</script>
