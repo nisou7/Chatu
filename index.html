@@ -3342,7 +3342,7 @@ r="3.5"/>
           onkeydown="handleMessageKey(event)"></textarea>
 
         <button id="voiceButton" class="composer-action" type="button"
-          onclick="toggleVoiceRecording()" aria-label="رسالة صوتية">
+          aria-label="رسالة صوتية" title="اضغط مطولاً للتسجيل ثم ارفع إصبعك للإرسال">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <rect x="8" y="3" width="8" height="12" rx="4"/>
             <path d="M5 11C5 15 8 18 12 18C16 18 19 15 19 11"/>
@@ -5103,9 +5103,19 @@ function chatAction(action){
   }
 }
 
-function scrollChatBottom(){
+function scrollChatBottom(force=true){
   const box = document.getElementById("chatMessages");
-  setTimeout(()=>box.scrollTop = box.scrollHeight,30);
+  if(!box) return;
+  if(force===false) return;
+  setTimeout(()=>{box.scrollTop = box.scrollHeight;},30);
+}
+function shouldStickToBottom(box,threshold=90){
+  if(!box) return true;
+  return (box.scrollHeight - box.scrollTop - box.clientHeight) <= threshold;
+}
+function scrollChatBottomIfNeeded(box,wasNearBottom){
+  if(!box || !wasNearBottom) return;
+  requestAnimationFrame(()=>{box.scrollTop=box.scrollHeight;});
 }
 
 function toggleReaction(bubble){
@@ -7200,17 +7210,28 @@ window.addEventListener("nchat-firebase-error", () => {
 
   function renderSocialMessages(messages,uid){
     const box=document.getElementById("chatMessages");if(!box)return;
+    const wasNearBottom=shouldStickToBottom(box,120);
     const typing=document.getElementById("typingIndicator");
     box.querySelectorAll(".message-row[data-real-message]").forEach(x=>x.remove());
-    for(const m of messages){
+    const sorted=[...messages].sort((a,b)=>{
+      const ta=a.createdAt?.toMillis?a.createdAt.toMillis():new Date(a.createdAt||0).getTime();
+      const tb=b.createdAt?.toMillis?b.createdAt.toMillis():new Date(b.createdAt||0).getTime();
+      return ta-tb;
+    });
+    for(const m of sorted){
       const row=document.createElement("div");row.className="message-row "+(m.senderId===uid?"me":"them");row.dataset.realMessage="1";
-      const b=document.createElement("div");b.className="message-bubble";b.dataset.message=m.text||"";
+      const b=document.createElement("div");b.className="message-bubble";b.dataset.message=m.text||"";b.dataset.messageId=m.id||"";
       const d=m.createdAt?.toDate?m.createdAt.toDate():new Date(m.createdAt||Date.now());
-      b.innerHTML=`<div class="message-text"></div><div class="message-meta">${d.toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"})}${m.senderId===uid?' <span class="message-check">✓✓</span>':''}</div><div class="message-reaction">❤️</div>`;
-      b.querySelector(".message-text").textContent=m.text||"";
+      const time=d.toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"});
+      if(m.type==='audio'&&m.audioUrl){
+        b.innerHTML='<div class="nchat-audio-bubble"><audio controls preload="metadata" src="'+escapeHtml(m.audioUrl)+'"></audio></div><div class="message-meta">'+time+(m.senderId===uid?' <span class="message-check">✓✓</span>':'')+'</div><div class="message-reaction">❤️</div>';
+      }else{
+        b.innerHTML='<div class="message-text"></div><div class="message-meta">'+time+(m.senderId===uid?' <span class="message-check">✓✓</span>':'')+'</div><div class="message-reaction">❤️</div>';
+        b.querySelector(".message-text").textContent=m.text||"";
+      }
       b.ondblclick=()=>window.toggleReaction?.(b);row.appendChild(b);if(typing)box.insertBefore(row,typing);else box.appendChild(row);
     }
-    window.scrollChatBottom?.();
+    scrollChatBottomIfNeeded(box,wasNearBottom);
   }
 
   async function sendSocialMessage(text){
@@ -8447,8 +8468,9 @@ setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealH
   function renderRealMessages(messages){
     const box=document.getElementById("chatMessages");
     if(!box) return;
+    const wasNearBottom=shouldStickToBottom(box,120);
     const typing=document.getElementById("typingIndicator");
-    [...box.querySelectorAll(".message-row")].forEach(row=>row.remove());
+    [...box.querySelectorAll(".message-row[data-real-message]")].forEach(row=>row.remove());
     const myUid=realProfile?.uid || window.NChatFirebase?.auth?.currentUser?.uid;
     const sorted=[...messages].sort((a,b)=>{
       const ta=a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
@@ -8458,20 +8480,26 @@ setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealH
     for(const msg of sorted){
       const row=document.createElement("div");
       row.className="message-row " + (msg.senderId===myUid ? "me" : "them");
+      row.dataset.realMessage="1";
       const bubble=document.createElement("div");
       bubble.className="message-bubble";
-      bubble.dataset.message=msg.text || "";
+      bubble.dataset.message=msg.text || (msg.type==='audio'?'🎤 رسالة صوتية':'');
       bubble.dataset.messageId=msg.id || "";
       bubble.ondblclick=()=>{ if(typeof window.toggleReaction==='function') window.toggleReaction(bubble); };
       let date=msg.createdAt?.toDate ? msg.createdAt.toDate() : (msg.createdAt ? new Date(msg.createdAt) : new Date());
       const time=date.toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"});
-      bubble.innerHTML='<div class="message-text"></div><div class="message-meta">'+time+(msg.senderId===myUid?' <span class="message-check">✓✓</span>':'')+'</div><div class="message-reaction">❤️</div>';
-      bubble.querySelector(".message-text").textContent=msg.text || "";
+      const meta=time+(msg.senderId===myUid?' <span class="message-check">✓✓</span>':'');
+      if(msg.type==='audio' && msg.audioUrl){
+        bubble.innerHTML='<div class="nchat-audio-bubble"><audio controls preload="metadata" src="'+escapeHtml(msg.audioUrl)+'"></audio></div><div class="message-meta">'+meta+'</div><div class="message-reaction">❤️</div>';
+      }else{
+        bubble.innerHTML='<div class="message-text"></div><div class="message-meta">'+meta+'</div><div class="message-reaction">❤️</div>';
+        bubble.querySelector(".message-text").textContent=msg.text || "";
+      }
       bubble.addEventListener("contextmenu",e=>{e.preventDefault();if(typeof window.openMessageMenu==='function')window.openMessageMenu(e,bubble);});
       row.appendChild(bubble);
       if(typing && typing.parentNode===box) box.insertBefore(row,typing); else box.appendChild(row);
     }
-    if(typeof window.scrollChatBottom==='function') window.scrollChatBottom();
+    scrollChatBottomIfNeeded(box,wasNearBottom);
   }
 
   function formatChatTime(value){
@@ -8494,7 +8522,7 @@ setInterval(()=>{try{if(typeof refreshRealHomePresence==='function')refreshRealH
     const color=profile.color||colorForId(profile.uid);
     const initial=(profile.name||profile.username||"م").charAt(0).toUpperCase();
     row.className="chat real-firebase-chat-row";
-    row.dataset.name=profile.name||profile.username||"مستخدم";
+    row.dataset.name=(profile.name||profile.username||"مستخدم");row.dataset.username=(profile.username||profile.name||"");
     row.dataset.uid=profile.uid;
     const online=profile.online===true && profile.lastSeen && (profile.lastSeen.toMillis ? (Date.now()-profile.lastSeen.toMillis()<90000) : (Date.now()-new Date(profile.lastSeen).getTime()<90000));
     const presenceText=online?'متصل الآن':formatElapsed(profile.lastSeen)||'غادر منذ قليل';
@@ -9378,4 +9406,247 @@ function ncfBoot(){
 }
 window.addEventListener('nchat-firebase-auth',()=>setTimeout(ncfBoot,250));
 if(window.NChatFirebase?.auth?.currentUser)setTimeout(ncfBoot,500);
+</script>
+
+
+<style id="nchat-final-v7-style">
+/* FINAL V7: notifications, search, stable scroll, long-press voice */
+.nchat-notif-dot{position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%;background:#e0445b;box-shadow:0 0 0 2px #fff;display:none}
+.nchat-notif-dot.show{display:block}
+.nchat-notifications-modal .modal{max-height:76vh;overflow:auto}
+.nchat-notif-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid #eee7f1;cursor:pointer}
+.nchat-notif-row:last-child{border-bottom:0}
+.nchat-notif-avatar{width:42px;height:42px;border-radius:15px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;flex:none}
+.nchat-notif-copy{flex:1;min-width:0}.nchat-notif-copy strong{display:block;font-size:11px}.nchat-notif-copy span{display:block;font-size:9px;color:#8d8794;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nchat-notif-time{font-size:8px;color:#a39ca8;white-space:nowrap}
+.nchat-search-result{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;background:#fff;border:1px solid #eee8f1;border-radius:16px;cursor:pointer}
+.nchat-search-result .avatar{width:40px;height:40px;border-radius:14px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+.nchat-search-empty{font-size:9px;color:#99919f;text-align:center;padding:12px;display:none}
+.nchat-audio-bubble{display:flex;align-items:center;min-width:180px;max-width:240px}.nchat-audio-bubble audio{width:100%;height:36px}
+.nchat-recording{animation:nchatPulse 1s infinite}.nchat-recording:after{content:' حرر لإرسال التسجيل';position:absolute;transform:translateY(-34px);background:#2c2432;color:#fff;border-radius:10px;padding:5px 8px;font-size:8px;white-space:nowrap}
+@keyframes nchatPulse{50%{transform:scale(1.04)}}
+</style>
+
+<script type="module">
+/* =========================================================
+   N-CHAT V7 — REAL NOTIFICATIONS / SEARCH / SCROLL / VOICE
+   ========================================================= */
+import {collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,onSnapshot,query,where,serverTimestamp,arrayUnion} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import {ref as storageRef,uploadBytes,uploadString,getDownloadURL} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+
+const n7fb=()=>window.NChatFirebase;
+const n7uid=()=>n7fb()?.auth?.currentUser?.uid||null;
+const n7chat=(a,b)=>[String(a),String(b)].sort().join('__');
+let n7NotifUnsubs=[];
+let n7StoryUnsub=null;
+let n7ChatMsgUnsubs=new Map();
+let n7KnownMessages=new Set(JSON.parse(localStorage.getItem('nchat_seen_notification_messages')||'[]'));
+let n7KnownStories=new Set(JSON.parse(localStorage.getItem('nchat_seen_notification_stories')||'[]'));
+let n7Notifications=JSON.parse(localStorage.getItem('nchat_notifications_v7')||'[]');
+let n7SearchTimer=null;
+let n7Recorder=null,n7RecorderStream=null,n7AudioChunks=[],n7RecordStartedAt=0,n7HoldActive=false;
+
+function n7Save(){try{localStorage.setItem('nchat_notifications_v7',JSON.stringify(n7Notifications.slice(-80)));localStorage.setItem('nchat_seen_notification_messages',JSON.stringify([...n7KnownMessages].slice(-500)));localStorage.setItem('nchat_seen_notification_stories',JSON.stringify([...n7KnownStories].slice(-300)));}catch(_) {}}
+function n7AddNotification(item){
+  if(!item?.key)return;
+  if(n7Notifications.some(x=>x.key===item.key))return;
+  n7Notifications.push({...item,at:Date.now(),read:false});n7Save();n7RenderBell();try{toast(item.kind==='story'?item.body:(item.title+' • '+item.body))}catch(_){}
+  if(item.kind==='message' && window.NChatUnread?.update)window.NChatUnread.update();
+}
+function n7RenderBell(){
+  const unread=n7Notifications.filter(x=>!x.read).length;
+  const bell=document.querySelector('.home-header .header-button:first-child');
+  if(bell){bell.style.position='relative';let dot=bell.querySelector('.nchat-notif-dot');if(!dot){dot=document.createElement('span');dot.className='nchat-notif-dot';bell.appendChild(dot)}dot.classList.toggle('show',unread>0);dot.title=unread?`${unread} إشعار غير مقروء`:''}
+}
+function n7Time(ts){const sec=Math.max(0,Math.floor((Date.now()-Number(ts||Date.now()))/1000));if(sec<60)return'الآن';const m=Math.floor(sec/60);if(m<60)return`منذ ${m} د`;const h=Math.floor(m/60);if(h<24)return`منذ ${h} س`;return`منذ ${Math.floor(h/24)} يوم`}
+function n7OpenNotifications(){
+  n7Notifications.forEach(x=>x.read=true);n7Save();n7RenderBell();
+  const body=document.createElement('div');
+  body.innerHTML='<div id="nchatNotifList"></div>';
+  const list=body.firstElementChild;
+  const arr=[...n7Notifications].reverse();
+  if(!arr.length){list.innerHTML='<div class="settings-info-box">لا توجد إشعارات جديدة.</div>'}
+  else arr.forEach(n=>{
+    const row=document.createElement('div');row.className='nchat-notif-row';
+    const av=document.createElement('div');av.className='nchat-notif-avatar '+(n.color||'purple');av.textContent=(n.name||'N').charAt(0).toUpperCase();
+    const copy=document.createElement('div');copy.className='nchat-notif-copy';copy.innerHTML='<strong></strong><span></span>';copy.firstChild.textContent=n.title||'إشعار';copy.lastChild.textContent=n.body||'';
+    const t=document.createElement('div');t.className='nchat-notif-time';t.textContent=n7Time(n.at);
+    row.append(av,copy,t);
+    row.onclick=()=>{if(n.kind==='message'&&n.uid&&window.openRealChat)window.openRealChat({uid:n.uid,name:n.name||'صديق',username:n.username||n.name||'',color:n.color||'purple'});else if(n.kind==='story'&&n.storyId)window.openStoryViewer?.(n.storyId)};
+    list.appendChild(row);
+  });
+  window.openSettingsAction?.('الإشعارات','الرسائل والسطوري الجديدة',body.innerHTML);
+}
+window.openNChatNotifications=n7OpenNotifications;
+function n7HookBell(){const bell=document.querySelector('.home-header .header-button:first-child');if(!bell||bell.dataset.n7Bound)return;bell.dataset.n7Bound='1';bell.onclick=n7OpenNotifications;n7RenderBell()}
+
+async function n7GetProfile(uid){const fb=n7fb();if(!fb||!uid)return null;try{const s=await getDoc(doc(fb.db,'users',uid));return s.exists()?{uid,...s.data()}:null}catch(_){return null}}
+async function n7StartChatMessageWatch(chat){
+  const fb=n7fb(),me=n7uid();if(!fb||!me||!chat?.id||n7ChatMsgUnsubs.has(chat.id))return;
+  const unsub=onSnapshot(collection(fb.db,'chats',chat.id,'messages'),async snap=>{
+    const first=!n7KnownMessages.has('__chat_initialized__'+chat.id);
+    for(const d of snap.docs){
+      const m={id:d.id,...d.data()};
+      if(m.receiverId===me && !Array.isArray(m.readBy)?.includes(me) && !n7KnownMessages.has(d.id)){
+        n7KnownMessages.add(d.id);
+        const p=await n7GetProfile(m.senderId);
+        n7AddNotification({key:'message:'+d.id,kind:'message',uid:m.senderId,name:p?.name||'صديق',username:p?.username||p?.name||'',color:p?.color||'purple',title:'رسالة جديدة',body:m.type==='audio'?'🎤 أرسل رسالة صوتية':(m.text||'أرسل لك رسالة')});
+      }else if(!first){
+        n7KnownMessages.add(d.id);
+      }
+    }
+    n7KnownMessages.add('__chat_initialized__'+chat.id);n7Save();
+  },()=>{});
+  n7ChatMsgUnsubs.set(chat.id,unsub);
+}
+async function n7StartMessageNotifications(){
+  const fb=n7fb(),me=n7uid();if(!fb||!me)return;
+  n7ChatMsgUnsubs.forEach(u=>{try{u()}catch(_){}});n7ChatMsgUnsubs.clear();
+  try{
+    const qs=await getDocs(query(collection(fb.db,'chats'),where('members','array-contains',me)));
+    qs.docs.forEach(d=>n7StartChatMessageWatch({id:d.id,...d.data()}));
+  }catch(e){console.warn('message notifications',e)}
+}
+async function n7StartStoryNotifications(){
+  const fb=n7fb(),me=n7uid();if(!fb||!me)return;
+  if(n7StoryUnsub){try{n7StoryUnsub()}catch(_){}n7StoryUnsub=null}
+  try{
+    n7StoryUnsub=onSnapshot(collection(fb.db,'stories'),snap=>{
+      snap.docs.forEach(d=>{
+        const s={id:d.id,...d.data()};
+        if(s.ownerId===me)return;
+        const created=s.createdAt?.toMillis?s.createdAt.toMillis():Number(s.createdAt||0);
+        if(!created||Date.now()-created>24*60*60*1000)return;
+        if(!n7KnownStories.has(d.id)){
+          n7KnownStories.add(d.id);
+          n7AddNotification({key:'story:'+d.id,kind:'story',storyId:d.id,uid:s.ownerId,name:s.ownerName||'صديق',color:s.color||'purple',title:'سطوري جديد',body:(s.ownerName||'صديق')+' أضاف سطوري جديداً'});
+        }
+      });n7Save();
+    },()=>{});
+  }catch(e){console.warn('story notifications',e)}
+}
+
+/* Search: conversations + real Firebase users */
+function n7RenderSearchUser(p){
+  let box=document.getElementById('nchatSearchResult');if(!box){box=document.createElement('div');box.id='nchatSearchResult';box.className='nchat-search-result';document.querySelector('.search-box')?.insertAdjacentElement('afterend',box)}
+  box.style.display='flex';box.innerHTML='';
+  const av=document.createElement('div');av.className='avatar '+(p.color||'purple');av.textContent=(p.name||p.username||'م').charAt(0).toUpperCase();
+  const copy=document.createElement('div');copy.style.flex='1';copy.innerHTML='<strong></strong><span style="display:block;font-size:9px;color:#999">@'+escapeHtml(p.username||p.name||'')+'</span>';copy.querySelector('strong').textContent=p.name||p.username||'مستخدم';
+  box.append(av,copy);box.onclick=()=>window.openRealChat?.({uid:p.uid,id:p.id||p.nchatId||'',username:p.username||p.name||'',name:p.name||p.username||'مستخدم',color:p.color||'purple'});
+}
+function n7ClearSearchResult(){const b=document.getElementById('nchatSearchResult');if(b)b.style.display='none'}
+async function n7SearchHome(value){
+  const q=String(value||'').trim().toLowerCase();
+  document.querySelectorAll('#chatList .real-firebase-chat-row,#chatList .chat').forEach(row=>{
+    if(!q){row.style.display='';return}
+    const hay=(row.dataset.name||'')+' '+(row.dataset.username||'')+' '+(row.textContent||'');row.style.display=hay.toLowerCase().includes(q)?'flex':'none';
+  });
+  if(!q){n7ClearSearchResult();return}
+  clearTimeout(n7SearchTimer);n7SearchTimer=setTimeout(async()=>{
+    const fb=n7fb(),me=n7uid();if(!fb||!me)return;
+    try{
+      const users=await getDocs(collection(fb.db,'users'));let found=null;
+      users.forEach(d=>{if(found)return;const x=d.data()||{},hay=[x.name,x.username,x.usernameLower,x.displayName].map(v=>String(v||'').toLowerCase());if(d.id!==me&&hay.some(v=>v.includes(q)))found={uid:d.id,...x}});
+      if(found)n7RenderSearchUser(found);else n7ClearSearchResult();
+    }catch(e){console.warn('home search',e)}
+  },220);
+}
+function n7HookSearch(){const input=document.getElementById('searchInput');if(!input||input.dataset.n7Bound)return;input.dataset.n7Bound='1';input.addEventListener('input',e=>n7SearchHome(e.target.value));}
+
+/* Voice: real MediaRecorder, long press = record, release = send */
+async function n7StartVoice(){
+  if(n7HoldActive||window.currentFriend?.isGroup)return;
+  const fb=n7fb(),me=n7uid(),target=window.currentFriend;if(!fb||!me||!target?.uid){toast('افتح محادثة مع صديق أولاً');return}
+  try{
+    n7RecorderStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(x=>window.MediaRecorder?.isTypeSupported?.(x))||'';
+    n7Recorder=new MediaRecorder(n7RecorderStream,mime?{mimeType:mime}:undefined);
+    n7AudioChunks=[];n7RecordStartedAt=Date.now();n7HoldActive=true;
+    n7Recorder.ondataavailable=e=>{if(e.data?.size)n7AudioChunks.push(e.data)};
+    n7Recorder.onstop=()=>n7FinishVoice();
+    n7Recorder.start(200);
+    const btn=document.getElementById('voiceButton');btn?.classList.add('nchat-recording');
+    document.getElementById('voicePreview')?.classList.add('show');
+    document.getElementById('voiceTimer').textContent='00:00';
+    clearInterval(window.__n7VoiceTimer);window.__n7VoiceTimer=setInterval(()=>{const sec=Math.floor((Date.now()-n7RecordStartedAt)/1000);document.getElementById('voiceTimer').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')},250);
+  }catch(e){n7HoldActive=false;console.error(e);toast(e.name==='NotAllowedError'?'اسمح للتطبيق باستخدام الميكروفون لإرسال رسالة صوتية':'تعذر بدء التسجيل الصوتي')}
+}
+function n7EndVoice(send=true){
+  if(!n7Recorder||n7Recorder.state==='inactive')return;
+  n7HoldActive=false;clearInterval(window.__n7VoiceTimer);
+  if(!send){try{n7Recorder.onstop=()=>{n7CleanupVoice();};n7Recorder.stop()}catch(_){}return}
+  try{n7Recorder.stop()}catch(_){n7CleanupVoice()}
+}
+async function n7FinishVoice(){
+  const duration=Math.max(1,Math.round((Date.now()-n7RecordStartedAt)/1000));
+  const chunks=n7AudioChunks.slice();const mime=n7Recorder?.mimeType||'audio/webm';
+  n7CleanupVoice();
+  if(!chunks.length)return;
+  try{
+    const fb=n7fb(),me=fb.auth.currentUser,target=window.currentFriend;if(!fb||!me||!target?.uid)return;
+    const chatId=n7chat(me.uid,target.uid);const blob=new Blob(chunks,{type:mime});
+    const ext=mime.includes('mp4')?'m4a':'webm';const path=`voiceMessages/${me.uid}/${chatId}/${Date.now()}.${ext}`;
+    const r=storageRef(fb.storage,path);await uploadBytes(r,blob,{contentType:mime});const url=await getDownloadURL(r);
+    await setDoc(doc(fb.db,'chats',chatId),{members:[me.uid,target.uid],memberIds:[me.uid,target.uid],lastMessage:'🎤 رسالة صوتية',updatedAt:serverTimestamp(),lastSenderId:me.uid},{merge:true});
+    await addDoc(collection(fb.db,'chats',chatId,'messages'),{senderId:me.uid,receiverId:target.uid,participants:[me.uid,target.uid],type:'audio',audioUrl:url,duration,createdAt:serverTimestamp(),readBy:[me.uid],text:'🎤 رسالة صوتية'});
+    toast('تم إرسال الرسالة الصوتية');
+  }catch(e){console.error('voice upload',e);toast('تعذر إرسال التسجيل. تأكد من صلاحيات Firebase Storage.')}
+}
+function n7CleanupVoice(){
+  clearInterval(window.__n7VoiceTimer);if(n7RecorderStream){n7RecorderStream.getTracks().forEach(t=>t.stop());n7RecorderStream=null}n7Recorder=null;n7AudioChunks=[];
+  document.getElementById('voiceButton')?.classList.remove('nchat-recording');document.getElementById('voicePreview')?.classList.remove('show');
+}
+function n7BindVoice(){
+  const b=document.getElementById('voiceButton');if(!b||b.dataset.n7VoiceBound)return;b.dataset.n7VoiceBound='1';b.removeAttribute('onclick');
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);n7StartVoice()});
+  b.addEventListener('pointerup',e=>{e.preventDefault();n7EndVoice(true)});
+  b.addEventListener('pointercancel',()=>n7EndVoice(false));
+}
+
+
+let n7OriginalPublishStories=null;
+async function n7PublishStoriesRemote(){
+  if(!n7OriginalPublishStories){n7OriginalPublishStories=window.publishStories}
+  if(typeof n7OriginalPublishStories==='function') await n7OriginalPublishStories();
+  const fb=n7fb(),uid=n7uid();if(!fb||!uid)return;
+  try{
+    const me=await n7GetProfile(uid);const local=v5Read(NCHAT_STORIES_KEY_V5,[]);
+    const done=new Set(JSON.parse(localStorage.getItem('nchat_remote_story_ids')||'[]'));
+    for(const s of local.filter(x=>!done.has(x.id) && (x.ownerId===me?.id || x.ownerId===uid))){
+      const ref=doc(fb.db,'stories',s.id);
+      let imageUrl='';
+      if(s.image){
+        try{const blob=await fetch(s.image).then(r=>r.blob());const sr=storageRef(fb.storage,`stories/${uid}/${s.id}.jpg`);await uploadBytes(sr,blob,{contentType:'image/jpeg'});imageUrl=await getDownloadURL(sr);}catch(e){console.warn('story image upload',e)}
+      }
+      await setDoc(ref,{ownerId:uid,ownerName:me?.name||s.ownerName||'مستخدم',ownerNChatId:me?.id||'',color:me?.color||s.color||'purple',caption:s.caption||'',imageUrl,createdAt:serverTimestamp(),expiresAt:new Date(Date.now()+24*60*60*1000)},{merge:true});
+      done.add(s.id);
+    }
+    localStorage.setItem('nchat_remote_story_ids',JSON.stringify([...done].slice(-200)));
+    n7StartStoryNotifications();
+  }catch(e){console.warn('remote story publish',e)}
+}
+if(typeof window.publishStories==='function')window.publishStories=n7PublishStoriesRemote;
+
+async function n7SyncRemoteStories(){
+  const fb=n7fb(),uid=n7uid();if(!fb||!uid)return;
+  try{
+    const snap=await getDocs(collection(fb.db,'stories'));const me=await n7GetProfile(uid);const local=getStoriesV5();
+    const valid=local.filter(x=>Date.now()-Number(x.createdAt||0)<24*60*60*1000);
+    for(const d of snap.docs){
+      const s={id:d.id,...d.data()};const created=s.createdAt?.toMillis?s.createdAt.toMillis():Number(s.createdAt||0);if(!created||Date.now()-created>24*60*60*1000)continue;
+      const ownerLocalId=s.ownerId===uid?(me?.id||uid):s.ownerId;const existing=valid.find(x=>x.id===s.id);
+      const item={id:s.id,ownerId:ownerLocalId,ownerUid:s.ownerId,ownerName:s.ownerName||'مستخدم',initial:(s.ownerName||'م').charAt(0).toUpperCase(),color:s.color||'purple',createdAt:created,caption:s.caption||'',image:s.imageUrl||''};
+      if(existing)Object.assign(existing,item);else valid.push(item);
+    }
+    v5Write(NCHAT_STORIES_KEY_V5,valid);renderStoriesV5();
+  }catch(e){console.warn('sync remote stories',e)}
+}
+
+function n7EnhanceSearchResultPlacement(){const r=document.getElementById('nchatSearchResult');if(r){r.style.marginTop='6px';r.style.marginBottom='6px'}}
+
+function n7Init(){n7HookBell();n7HookSearch();n7BindVoice();n7StartMessageNotifications();n7StartStoryNotifications();n7SyncRemoteStories();n7EnhanceSearchResultPlacement();}
+window.addEventListener('nchat-firebase-auth',()=>setTimeout(n7Init,600));
+if(n7uid())setTimeout(n7Init,800);
+setInterval(()=>{n7HookBell();n7HookSearch();n7BindVoice();n7RenderBell()},1500);
+setInterval(()=>{if(n7uid()){n7StartMessageNotifications();n7SyncRemoteStories()}},10000);
 </script>
