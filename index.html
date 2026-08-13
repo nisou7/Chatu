@@ -6842,6 +6842,441 @@ window.addEventListener("nchat-firebase-error", () => {
 
 </script>
 
+
+
+<!-- =========================================================
+     N-CHAT FINAL SOCIAL PATCH — REAL BADGES / PRESENCE / BLOCKS / CHAT COLORS
+     ========================================================= -->
+<style id="nchat-final-social-style">
+  .nav-badge{display:none!important;position:absolute;top:-5px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:#e0445b;color:#fff;font-size:9px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(224,68,91,.28)}
+  .nav-item{position:relative}
+  .chat-status-line{display:flex;align-items:center;justify-content:center;gap:4px}
+  .chat-status-dot{width:8px!important;height:8px!important;border-radius:50%;display:inline-block;background:#28c76f;flex:0 0 8px}
+  .chat-status-dot.offline{background:#e0445b!important}
+  .chat-status-text{font-size:10px;color:#8e8796}
+  .chat-status-text.online{color:#28a965}
+  .chat-status-text.offline{color:#9a929f}
+  .blocked-chat-row{opacity:.72}
+  .blocked-list-row{display:flex;align-items:center;gap:10px;padding:11px;border-radius:14px;background:#fff;border:1px solid #eee8f1;margin-bottom:7px}
+  .blocked-list-avatar{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;flex:0 0 42px}
+  .blocked-list-copy{flex:1;min-width:0}.blocked-list-copy strong{display:block;font-size:12px}.blocked-list-copy span{display:block;margin-top:3px;color:#948c9a;font-size:9px}
+  .blocked-unblock{border:0;background:#eee8f8;color:#6631ce;border-radius:10px;padding:8px 10px;font-size:9px;font-weight:900}
+  .chat-color-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .chat-color-btn{height:42px;border-radius:12px;border:2px solid transparent;color:#fff;font-weight:900;font-size:10px}
+  .chat-color-btn.active{border-color:#1f1a25;box-shadow:0 0 0 2px #fff inset}
+  .chat-theme-pink .me .message-bubble{background:linear-gradient(145deg,#e66b9d,#c84b78)!important}
+  .chat-theme-blue .me .message-bubble{background:linear-gradient(145deg,#4d9ddd,#2f72b4)!important}
+  .chat-theme-green .me .message-bubble{background:linear-gradient(145deg,#48b997,#23856d)!important}
+  .chat-theme-orange .me .message-bubble{background:linear-gradient(145deg,#e6a14b,#c87822)!important}
+  .chat-theme-red .me .message-bubble{background:linear-gradient(145deg,#e35f63,#bd353e)!important}
+  .chat-theme-purple .me .message-bubble{background:linear-gradient(145deg,#7f51df,#632ed0)!important}
+  .chat-theme-pink .send-button{background:linear-gradient(145deg,#e66b9d,#c84b78)!important}
+  .chat-theme-blue .send-button{background:linear-gradient(145deg,#4d9ddd,#2f72b4)!important}
+  .chat-theme-green .send-button{background:linear-gradient(145deg,#48b997,#23856d)!important}
+  .chat-theme-orange .send-button{background:linear-gradient(145deg,#e6a14b,#c87822)!important}
+  .chat-theme-red .send-button{background:linear-gradient(145deg,#e35f63,#bd353e)!important}
+  .chat-theme-purple .send-button{background:linear-gradient(145deg,#7f51df,#632ed0)!important}
+  .blocked-composer-message{display:none;padding:12px;text-align:center;background:#fff3f4;border-top:1px solid #f1d8dd;color:#c13a52;font-size:10px;font-weight:800}
+  .chat-screen.is-blocked .chat-composer-wrap{display:none!important}
+  .chat-screen.is-blocked .blocked-composer-message{display:block!important}
+</style>
+
+<script type="module">
+  import {
+    collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc,
+    onSnapshot, query, where, serverTimestamp, arrayUnion, arrayRemove
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const waitFb = () => new Promise((resolve,reject)=>{
+    if(window.NChatFirebase?.auth && window.NChatFirebase?.db){ resolve(window.NChatFirebase); return; }
+    const timer=setTimeout(()=>reject(new Error("firebase-timeout")),15000);
+    window.addEventListener("nchat-firebase-ready",()=>{
+      clearTimeout(timer);
+      if(window.NChatFirebase?.auth && window.NChatFirebase?.db) resolve(window.NChatFirebase);
+      else reject(new Error("firebase-init-failed"));
+    },{once:true});
+  });
+
+  const colors=["purple","pink","blue","orange","green","violet"];
+  const colorForId=id=>{let n=0;for(const c of String(id||""))n=(n+c.charCodeAt(0))%colors.length;return colors[n]};
+  const chatIdFor=(a,b)=>[String(a),String(b)].sort().join("__");
+  let meProfile=null;
+  let activeTarget=null;
+  let presenceUnsub=null;
+  const unreadUnsubs=new Map();
+  const unreadCounts=new Map();
+
+  function toast(m){
+    if(typeof window.showChatToast==="function") window.showChatToast(m); else console.log(m);
+  }
+
+  function escapeText(v){return String(v??"");}
+
+  function formatElapsed(value){
+    const d=value?.toDate?value.toDate():new Date(value||0);
+    if(!d.getTime()) return "";
+    let sec=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));
+    if(sec<60)return "منذ أقل من دقيقة";
+    const min=Math.floor(sec/60); if(min<60)return `غادر منذ ${min} دقيقة${min===1?"":""}`;
+    const h=Math.floor(min/60); if(h<24)return `غادر منذ ${h} ساعة`;
+    const day=Math.floor(h/24); if(day<30)return `غادر منذ ${day} يوم`;
+    const month=Math.floor(day/30); return `غادر منذ ${month} شهر`;
+  }
+
+  function updateBadge(){
+    const total=[...unreadCounts.values()].reduce((a,b)=>a+b,0);
+    document.querySelectorAll(".nav-badge").forEach(b=>{
+      b.textContent=total>99?"99+":String(total);
+      b.style.display=total>0?"flex":"none";
+    });
+  }
+  window.NChatUnread={update:updateBadge};
+
+  function stopUnreadListeners(){
+    for(const u of unreadUnsubs.values()){try{u()}catch(_){}}
+    unreadUnsubs.clear(); unreadCounts.clear(); updateBadge();
+  }
+
+  async function watchUnreadChats(fb,chats,uid){
+    const ids=new Set(chats.map(c=>c.id));
+    for(const [id,u] of unreadUnsubs){
+      if(!ids.has(id)){try{u()}catch(_){ } unreadUnsubs.delete(id); unreadCounts.delete(id);}
+    }
+    for(const chat of chats){
+      if(unreadUnsubs.has(chat.id)) continue;
+      const unsub=onSnapshot(collection(fb.db,"chats",chat.id,"messages"),snap=>{
+        let count=0;
+        snap.forEach(d=>{
+          const m=d.data();
+          const readBy=Array.isArray(m.readBy)?m.readBy:[];
+          if(m.receiverId===uid && !readBy.includes(uid)) count++;
+        });
+        unreadCounts.set(chat.id,count); updateBadge();
+      },err=>console.warn("unread listener",err));
+      unreadUnsubs.set(chat.id,unsub);
+    }
+    updateBadge();
+  }
+
+  async function getProfile(fb,uid){
+    const s=await getDoc(doc(fb.db,"users",uid));
+    return s.exists()?{uid,...s.data()}:null;
+  }
+
+  function isBlocked(profile,uid){return Array.isArray(profile?.blockedUids)&&profile.blockedUids.includes(uid)}
+
+  async function markChatRead(fb,chatId,uid){
+    try{
+      const snap=await getDocs(collection(fb.db,"chats",chatId,"messages"));
+      const ops=[];
+      snap.forEach(d=>{
+        const m=d.data(); const rb=Array.isArray(m.readBy)?m.readBy:[];
+        if(m.receiverId===uid && !rb.includes(uid)) ops.push(updateDoc(d.ref,{readBy:arrayUnion(uid)}));
+      });
+      await Promise.all(ops);
+      unreadCounts.set(chatId,0); updateBadge();
+    }catch(e){console.warn("mark read",e)}
+  }
+
+  function setChatPresence(profile){
+    const status=document.getElementById("chatStatus"); if(!status)return;
+    const last=profile?.lastSeen?.toMillis?profile.lastSeen.toMillis():new Date(profile?.lastSeen||0).getTime();
+    const online=profile?.online===true && last>0 && (Date.now()-last)<90000;
+    status.innerHTML=`<span class="chat-status-line"><span class="chat-status-dot ${online?"":"offline"}"></span><span class="chat-status-text ${online?"online":"offline"}">${online?"متصل الآن":formatElapsed(profile?.lastSeen)||"غادر منذ قليل"}</span></span>`;
+  }
+
+  function stopPresence(){if(presenceUnsub){try{presenceUnsub()}catch(_){ }presenceUnsub=null;}}
+  function watchPresence(fb,uid){
+    stopPresence();
+    presenceUnsub=onSnapshot(doc(fb.db,"users",uid),snap=>{if(snap.exists())setChatPresence(snap.data())},()=>{});
+  }
+
+  function applyTheme(theme){
+    const screen=document.getElementById("chatScreen"); if(!screen)return;
+    ["purple","pink","blue","green","orange","red"].forEach(x=>screen.classList.remove("chat-theme-"+x));
+    screen.classList.add("chat-theme-"+(theme||"purple"));
+  }
+
+  async function saveTheme(theme){
+    const fb=await waitFb(); if(!meProfile||!activeTarget)return;
+    const id=chatIdFor(meProfile.uid,activeTarget.uid);
+    await setDoc(doc(fb.db,"chats",id),{theme:String(theme)}, {merge:true});
+    applyTheme(theme); toast("تم تغيير لون المحادثة");
+  }
+
+  function openColorPicker(){
+    const current=document.getElementById("chatScreen")?.className.match(/chat-theme-(purple|pink|blue|green|orange|red)/)?.[1]||"purple";
+    const map={purple:"بنفسجي",pink:"وردي",blue:"أزرق",green:"أخضر",orange:"برتقالي",red:"أحمر"};
+    const css={purple:"#6d35d9",pink:"#d65383",blue:"#367fbe",green:"#2b967a",orange:"#d1842d",red:"#c63e48"};
+    if(typeof window.openSettingsAction!=="function")return;
+    window.openSettingsAction("لون المحادثة","اختر لون فقاعات هذه المحادثة",`<div class="chat-color-grid">${Object.entries(map).map(([k,v])=>`<button class="chat-color-btn ${current===k?"active":""}" style="background:${css[k]}" onclick="NChatSetChatColor('${k}')">${v}</button>`).join("")}</div>`);
+  }
+  window.NChatSetChatColor=(c)=>{saveTheme(c).then(()=>window.closeSettingsAction?.()).catch(e=>{console.error(e);toast("تعذر حفظ لون المحادثة")})};
+
+  function installBlockedSettings(){
+    const settings=document.getElementById("settingsScreen"); if(!settings||document.getElementById("nchatBlockedSettingsSection"))return;
+    const section=document.createElement("div"); section.id="nchatBlockedSettingsSection"; section.className="settings-section";
+    section.innerHTML=`<div class="settings-section-title">الخصوصية</div><div class="settings-card"><button class="setting-item" type="button" onclick="NChatOpenBlockedList()"><div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M6 6L18 18"/></svg></div><div class="setting-text"><strong>قائمة الحظر</strong><span>إدارة الأشخاص الذين قمت بحظرهم</span></div><svg class="setting-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18L15 12L9 6"/></svg></button></div>`;
+    const page=settings.querySelector(".settings-page"); const logout=page?.querySelector(".logout-button");
+    if(page) page.insertBefore(section,logout||null);
+  }
+
+  async function openBlockedList(){
+    const fb=await waitFb(); if(!meProfile)return;
+    const ids=Array.isArray(meProfile.blockedUids)?meProfile.blockedUids:[];
+    let body=`<div id="nchatBlockedList">`;
+    if(!ids.length) body+=`<div class="settings-info-box">لا يوجد أشخاص في قائمة الحظر.</div>`;
+    else {
+      const profiles=await Promise.all(ids.map(id=>getProfile(fb,id)));
+      const valid=profiles.filter(Boolean);
+      if(!valid.length) body+=`<div class="settings-info-box">لا يوجد أشخاص في قائمة الحظر.</div>`;
+      for(const p of valid){
+        body+=`<div class="blocked-list-row"><div class="blocked-list-avatar ${colorForId(p.uid)}">${escapeText((p.name||p.username||"م").charAt(0).toUpperCase())}</div><div class="blocked-list-copy"><strong>${escapeText(p.name||p.username||"مستخدم")}</strong><span>@${escapeText(p.username||p.name||"")}</span></div><button class="blocked-unblock" onclick="NChatUnblock('${p.uid}')">إلغاء الحظر</button></div>`;
+      }
+    }
+    body+=`</div>`;
+    window.openSettingsAction("قائمة الحظر","إلغاء الحظر يعيد إمكانية التواصل",body);
+  }
+  window.NChatOpenBlockedList=openBlockedList;
+
+  window.NChatUnblock=async function(uid){
+    try{
+      const fb=await waitFb();
+      await updateDoc(doc(fb.db,"users",meProfile.uid),{blockedUids:arrayRemove(uid)});
+      meProfile.blockedUids=(meProfile.blockedUids||[]).filter(x=>x!==uid);
+      toast("تم إلغاء الحظر");
+      openBlockedList();
+      if(window.startNChatSocialListener) window.startNChatSocialListener();
+    }catch(e){console.error(e);toast("تعذر إلغاء الحظر")}
+  };
+
+  async function blockCurrent(){
+    if(!activeTarget||!meProfile)return;
+    if(!confirm("هل تريد حظر " + activeTarget.name + "؟"))return;
+    const fb=await waitFb();
+    await updateDoc(doc(fb.db,"users",meProfile.uid),{blockedUids:arrayUnion(activeTarget.uid)});
+    meProfile.blockedUids=[...(meProfile.blockedUids||[]),activeTarget.uid];
+    toast("تم حظر " + activeTarget.name);
+    document.getElementById("chatActionsModal")?.classList.add("hidden");
+    closePresenceAndChat();
+    if(window.startNChatSocialListener) window.startNChatSocialListener();
+  }
+  window.NChatBlockCurrent=blockCurrent;
+
+  function closePresenceAndChat(){
+    stopPresence();
+    if(window.NChatRealSocialMessageUnsub){try{window.NChatRealSocialMessageUnsub()}catch(_){ }window.NChatRealSocialMessageUnsub=null;}
+    document.getElementById("chatScreen")?.classList.add("hidden");
+    document.getElementById("homeScreen")?.classList.remove("hidden");
+    activeTarget=null; window.currentFriend=null;
+  }
+
+  // Replace the old static navigation badge with a real one.
+  function rebuildNavBadges(){
+    document.querySelectorAll(".nav-badge").forEach(b=>{b.textContent="";b.style.display="none"});
+  }
+
+  // Add a real color option to the existing chat settings sheet.
+  function installChatColorButton(){
+    const card=document.querySelector("#chatActionsModal .settings-card");
+    if(card && !document.getElementById("nchatColorAction")){
+      const b=document.createElement("button"); b.id="nchatColorAction"; b.className="setting-item"; b.type="button";
+      b.innerHTML=`<div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M8 12h.01M12 8h.01M16 12h.01M12 16h.01"/></svg></div><div class="setting-text"><strong>تغيير لون المحادثة</strong><span>اختر لون فقاعات الرسائل</span></div>`;
+      b.onclick=openColorPicker; card.insertBefore(b,card.firstChild);
+    }
+  }
+
+  async function renderSocialLists(fb,chats){
+    if(!meProfile)return;
+    const blocked=new Set(meProfile.blockedUids||[]);
+    const visible=chats.filter(c=>{
+      const members=Array.isArray(c.members)?c.members:[];
+      const other=members.find(x=>x!==meProfile.uid);
+      return other && !blocked.has(other);
+    }).sort((a,b)=>{
+      const ta=a.updatedAt?.toMillis?a.updatedAt.toMillis():new Date(a.updatedAt||0).getTime();
+      const tb=b.updatedAt?.toMillis?b.updatedAt.toMillis():new Date(b.updatedAt||0).getTime();
+      return tb-ta;
+    });
+    const rows=[];
+    for(const c of visible){
+      const other=c.members.find(x=>x!==meProfile.uid); const p=await getProfile(fb,other); if(p)rows.push({chat:c,profile:p});
+    }
+
+    const home=document.getElementById("chatList");
+    if(home){
+      home.querySelectorAll(".real-firebase-chat-row").forEach(x=>x.remove());
+      home.querySelectorAll("#realHomeEmptyChats").forEach(x=>x.remove());
+      if(rows.length) rows.forEach(({chat,profile})=>home.appendChild(makeHomeRow(profile,chat)));
+    }
+    const msg=document.getElementById("messagesList");
+    if(msg){
+      msg.querySelectorAll(".real-firebase-section-row,.real-messages-empty").forEach(x=>x.remove());
+      if(rows.length)rows.forEach(({chat,profile})=>msg.appendChild(makeSectionRow(profile,chat,"messages")));
+      else {const e=document.createElement("div");e.className="real-empty-state real-messages-empty";e.innerHTML="لا توجد رسائل بعد.<br><span>ستظهر هنا محادثاتك الحقيقية.</span>";msg.appendChild(e)}
+    }
+    const fr=document.getElementById("friendsList");
+    if(fr){
+      fr.querySelectorAll(".real-firebase-friend-row,.real-friends-empty").forEach(x=>x.remove());
+      if(rows.length)rows.forEach(({chat,profile})=>fr.appendChild(makeSectionRow(profile,chat,"friends")));
+      else {const e=document.createElement("div");e.className="real-empty-state real-friends-empty";e.innerHTML="لا يوجد أصدقاء بعد.<br><span>ابحث عن شخص باسم المستخدم ثم أرسل له رسالة.</span>";fr.appendChild(e)}
+    }
+  }
+
+  function makeHomeRow(p,c){
+    const row=document.createElement("div"); row.className="chat real-firebase-chat-row"; row.dataset.uid=p.uid;
+    const color=colorForId(p.uid), initial=(p.name||p.username||"م").charAt(0).toUpperCase();
+    row.innerHTML=`<div class="chat-avatar ${color}">${initial}</div><div class="chat-details"><div class="chat-top"><span class="chat-name"></span><span class="chat-time"></span></div><div class="chat-bottom"><span class="last-message"></span></div></div>`;
+    row.querySelector(".chat-name").textContent=p.name||p.username||"مستخدم";
+    row.querySelector(".chat-time").textContent=c.updatedAt?.toDate?c.updatedAt.toDate().toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"}):"";
+    row.querySelector(".last-message").textContent=c.lastMessage||"ابدأ المحادثة الآن";
+    row.onclick=()=>openSocialChat({...p,id:p.id||p.nchatId||"",color});
+    return row;
+  }
+  function makeSectionRow(p,c,kind){
+    const row=document.createElement("button");row.type="button";row.className="section-row real-firebase-section-row";row.dataset.search=(p.name||"")+" "+(p.username||"");
+    row.innerHTML=`<div class="section-avatar ${colorForId(p.uid)}">${(p.name||p.username||"م").charAt(0).toUpperCase()}</div><div class="section-row-info"><strong></strong><span></span></div><div class="section-row-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18L15 12L9 6"/></svg></div>`;
+    row.querySelector("strong").textContent=p.name||p.username||"مستخدم";
+    row.querySelector("span").textContent="@"+(p.username||p.name||"")+" • "+(kind==="friends"?"صديق":"رسالة");
+    row.onclick=()=>openSocialChat({...p,color:colorForId(p.uid)});
+    return row;
+  }
+
+  let socialChatListUnsub=null;
+  async function startSocialListener(){
+    try{
+      const fb=await waitFb();
+      const user=fb.auth.currentUser; if(!user)return;
+      meProfile=await getProfile(fb,user.uid); if(!meProfile)return;
+      installBlockedSettings(); installChatColorButton(); rebuildNavBadges();
+      if(socialChatListUnsub){try{socialChatListUnsub()}catch(_){}}
+      const q=query(collection(fb.db,"chats"),where("members","array-contains",user.uid));
+      socialChatListUnsub=onSnapshot(q,snap=>{
+        const chats=snap.docs.map(d=>({id:d.id,...d.data()}));
+        renderSocialLists(fb,chats).catch(console.error);
+        watchUnreadChats(fb,chats,user.uid);
+      },e=>console.error("social chat list",e));
+    }catch(e){console.error("social listener",e)}
+  }
+  window.startNChatSocialListener=startSocialListener;
+
+  async function openSocialChat(target){
+    const fb=await waitFb();
+    meProfile=await getProfile(fb,fb.auth.currentUser?.uid); if(!meProfile){toast("سجّل الدخول أولاً");return}
+    if(!target?.uid||target.uid===meProfile.uid)return;
+    const blocked=isBlocked(meProfile,target.uid);
+    activeTarget=target;
+    window.currentFriend={uid:target.uid,id:target.id||target.nchatId||"",name:target.name||target.username||"مستخدم",initial:(target.name||target.username||"م").charAt(0).toUpperCase(),color:colorForId(target.uid),email:target.email||""};
+    document.getElementById("homeScreen")?.classList.add("hidden");document.getElementById("messagesScreen")?.classList.add("hidden");document.getElementById("friendsScreen")?.classList.add("hidden");document.getElementById("accountScreen")?.classList.add("hidden");document.getElementById("settingsScreen")?.classList.add("hidden");document.getElementById("chatScreen")?.classList.remove("hidden");
+    const avatar=document.getElementById("chatAvatar");if(avatar){avatar.className="chat-person-avatar "+colorForId(target.uid);avatar.textContent=window.currentFriend.initial}
+    const name=document.getElementById("chatName");if(name)name.textContent=window.currentFriend.name;
+    installChatColorButton();
+    const chatId=chatIdFor(meProfile.uid,target.uid);
+    const chatRef=doc(fb.db,"chats",chatId);
+    const existing=await getDoc(chatRef);
+    if(!existing.exists() && !blocked){await setDoc(chatRef,{members:[meProfile.uid,target.uid],memberIds:[meProfile.uid,target.uid],updatedAt:serverTimestamp(),theme:"purple"})}
+    const data=existing.exists()?existing.data():{theme:"purple"}; applyTheme(data.theme||"purple");
+    document.getElementById("chatScreen")?.classList.toggle("is-blocked",blocked);
+    const banner=document.getElementById("chatBlockedBanner");
+    if(blocked){
+      if(banner){banner.textContent="تم حظر هذا الحساب. ألغِ الحظر من الإعدادات ← قائمة الحظر للعودة إلى المراسلة.";banner.classList.add("show")}
+    }else if(banner)banner.classList.remove("show");
+    watchPresence(fb,target.uid);
+    await markChatRead(fb,chatId,meProfile.uid);
+    const unsub=window.NChatRealSocialMessageUnsub; if(unsub){try{unsub()}catch(_){}}
+    const mu=onSnapshot(collection(fb.db,"chats",chatId,"messages"),snap=>{
+      const messages=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
+        const ta=a.createdAt?.toMillis?a.createdAt.toMillis():new Date(a.createdAt||0).getTime();const tb=b.createdAt?.toMillis?b.createdAt.toMillis():new Date(b.createdAt||0).getTime();return ta-tb;
+      });
+      renderSocialMessages(messages,meProfile.uid);
+      if(!blocked) markChatRead(fb,chatId,meProfile.uid);
+    },e=>console.error("messages",e));
+    window.NChatRealSocialMessageUnsub=mu;
+  }
+  window.NChatSocialOpenChat=openSocialChat;
+
+  function renderSocialMessages(messages,uid){
+    const box=document.getElementById("chatMessages");if(!box)return;
+    const typing=document.getElementById("typingIndicator");
+    box.querySelectorAll(".message-row[data-real-message]").forEach(x=>x.remove());
+    for(const m of messages){
+      const row=document.createElement("div");row.className="message-row "+(m.senderId===uid?"me":"them");row.dataset.realMessage="1";
+      const b=document.createElement("div");b.className="message-bubble";b.dataset.message=m.text||"";
+      const d=m.createdAt?.toDate?m.createdAt.toDate():new Date(m.createdAt||Date.now());
+      b.innerHTML=`<div class="message-text"></div><div class="message-meta">${d.toLocaleTimeString("ar-DZ",{hour:"2-digit",minute:"2-digit"})}${m.senderId===uid?' <span class="message-check">✓✓</span>':''}</div><div class="message-reaction">❤️</div>`;
+      b.querySelector(".message-text").textContent=m.text||"";
+      b.ondblclick=()=>window.toggleReaction?.(b);row.appendChild(b);if(typing)box.insertBefore(row,typing);else box.appendChild(row);
+    }
+    window.scrollChatBottom?.();
+  }
+
+  async function sendSocialMessage(text){
+    const fb=await waitFb();
+    meProfile=await getProfile(fb,fb.auth.currentUser?.uid);const target=activeTarget||window.currentFriend;
+    if(!meProfile||!target?.uid)throw new Error("no-chat-target");
+    if(isBlocked(meProfile,target.uid))throw new Error("blocked-by-me");
+    const other=await getProfile(fb,target.uid);
+    if(isBlocked(other,meProfile.uid))throw new Error("blocked-by-recipient");
+    const chatId=chatIdFor(meProfile.uid,target.uid);
+    await setDoc(doc(fb.db,"chats",chatId),{members:[meProfile.uid,target.uid],memberIds:[meProfile.uid,target.uid],lastMessage:String(text),updatedAt:serverTimestamp(),lastSenderId:meProfile.uid},{merge:true});
+    await addDoc(collection(fb.db,"chats",chatId,"messages"),{senderId:meProfile.uid,senderNChatId:meProfile.id||meProfile.nchatId||"",receiverId:target.uid,participants:[meProfile.uid,target.uid],text:String(text),createdAt:serverTimestamp(),readBy:[meProfile.uid]});
+  }
+
+  window.sendMessage=async function(){
+    const input=document.getElementById("messageInput");const text=String(input?.value||"").trim();if(!text)return;
+    try{await sendSocialMessage(text);if(input){input.value="";input.style.height="42px"}window.cancelReply?.();window.closeAttach?.();window.scrollChatBottom?.()}
+    catch(e){console.error(e);toast(e.message==="blocked-by-me"?"هذا الحساب محظور. ألغِ الحظر من الإعدادات لإرسال الرسائل.":e.message==="blocked-by-recipient"?"لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.":"تعذر إرسال الرسالة")}
+  };
+
+  window.chatAction=async function(action){
+    if(action==="block"){await blockCurrent();return}
+    if(action==="mute"){document.getElementById("chatActionsModal")?.classList.add("hidden");toast("تم كتم إشعارات هذه المحادثة");return}
+    if(action==="clear"){document.getElementById("chatActionsModal")?.classList.add("hidden");toast("المسح المحلي للمحادثة غير متاح للرسائل السحابية");return}
+  };
+
+  // Replace the old static "محادثة حقيقية" status and keep presence fresh.
+  let heartbeat=null;
+  async function startPresence(){
+    try{
+      const fb=await waitFb();const u=fb.auth.currentUser;if(!u)return;
+      const ref=doc(fb.db,"users",u.uid);
+      await setDoc(ref,{online:true,lastSeen:serverTimestamp()},{merge:true});
+      if(heartbeat)clearInterval(heartbeat);
+      heartbeat=setInterval(async()=>{if(document.visibilityState!=="hidden")try{await setDoc(ref,{online:true,lastSeen:serverTimestamp()},{merge:true})}catch(_){ }},30000);
+    }catch(e){console.warn("presence",e)}
+  }
+  document.addEventListener("visibilitychange",async()=>{
+    try{const fb=await waitFb();const u=fb.auth.currentUser;if(!u)return;await setDoc(doc(fb.db,"users",u.uid),{online:document.visibilityState!=="hidden",lastSeen:serverTimestamp()},{merge:true});if(document.visibilityState!=="hidden")startPresence()}catch(_){}}
+  );
+  window.addEventListener("beforeunload",()=>{ /* heartbeat will expire naturally; no blocking network request */ });
+
+  // Ensure the settings screen contains the blocked list and real nav badge.
+  function bootSocial(){installBlockedSettings();installChatColorButton();startSocialListener();startPresence()}
+  window.addEventListener("nchat-firebase-auth",()=>setTimeout(bootSocial,250));
+  if(window.NChatFirebase?.auth?.currentUser) setTimeout(bootSocial,250);
+  setInterval(()=>{
+    const status=document.querySelector("#chatStatus .chat-status-text.offline");
+    if(status && activeTarget && status.textContent.startsWith("غادر")){
+      // Refresh elapsed offline time without requiring a new Firestore event.
+      const uid=activeTarget.uid; if(window.NChatFirebase?.db)getDoc(doc(window.NChatFirebase.db,"users",uid)).then(s=>{if(s.exists())setChatPresence(s.data())}).catch(()=>{});
+    }
+  },60000);
+</script>
+
+<script>
+(function(){
+  // Add the blocked-composer message only once.
+  function installBlockedComposer(){
+    const wrap=document.querySelector("#chatScreen .chat-composer-wrap");
+    if(wrap && !document.getElementById("blockedComposerMessage")){
+      const d=document.createElement("div");d.id="blockedComposerMessage";d.className="blocked-composer-message";d.textContent="تم حظر هذا الحساب. ألغِ الحظر من الإعدادات ← قائمة الحظر للعودة إلى المراسلة.";wrap.parentNode.insertBefore(d,wrap.nextSibling);
+    }
+  }
+  const oldMenu=window.openChatMenu;
+  window.openChatMenu=function(){installBlockedComposer();if(typeof oldMenu==="function")oldMenu();else document.getElementById("chatActionsModal")?.classList.remove("hidden")};
+  installBlockedComposer();
+})();
+</script>
 </body>
 
 
@@ -8625,4 +9060,72 @@ window.addEventListener("nchat-firebase-error", () => {
   },500);
   setTimeout(()=>clearInterval(timer),20000);
 })();
+</script>
+
+<!-- =========================================================
+     N-CHAT ULTIMATE OVERRIDE — must be last
+     ========================================================= -->
+<script type="module">
+  import {collection,doc,getDoc,setDoc,addDoc,onSnapshot,updateDoc,arrayUnion} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const wait=()=>new Promise((resolve,reject)=>{
+    if(window.NChatFirebase?.auth&&window.NChatFirebase?.db){resolve(window.NChatFirebase);return}
+    const t=setTimeout(()=>reject(new Error("firebase-timeout")),15000);
+    window.addEventListener("nchat-firebase-ready",()=>{clearTimeout(t);if(window.NChatFirebase?.auth&&window.NChatFirebase?.db)resolve(window.NChatFirebase);else reject(new Error("firebase-init-failed"))},{once:true});
+  });
+  const pair=(a,b)=>[String(a),String(b)].sort().join("__");
+  const blocked=(p,uid)=>Array.isArray(p?.blockedUids)&&p.blockedUids.includes(uid);
+
+  async function finalOpen(target){
+    if(typeof window.NChatSocialOpenChat==="function") return window.NChatSocialOpenChat(target);
+    throw new Error("chat-layer-not-ready");
+  }
+  window.openRealChat=finalOpen;
+
+  window.openFoundFriendChat=function(){
+    const f=window.realFoundFriend||window.foundFriend;
+    if(!f?.uid){window.showChatToast?.("ابحث عن مستخدم أولاً.");return}
+    window.closeAddFriendModal?.();
+    finalOpen(f).catch(e=>{console.error(e);window.showChatToast?.("تعذر فتح المحادثة")});
+  };
+
+  window.sendMessage=async function(){
+    const input=document.getElementById("messageInput");
+    const text=String(input?.value||"").trim();
+    if(!text)return;
+    const fb=await wait();
+    const me=fb.auth.currentUser;
+    const target=window.currentFriend;
+    if(!me||!target?.uid){window.showChatToast?.("افتح محادثة أولاً");return}
+    const mySnap=await getDoc(doc(fb.db,"users",me.uid));
+    const my=mySnap.exists()?mySnap.data():null;
+    const otherSnap=await getDoc(doc(fb.db,"users",target.uid));
+    const other=otherSnap.exists()?otherSnap.data():null;
+    if(blocked(my,target.uid)){window.showChatToast?.("هذا الحساب محظور. ألغِ الحظر من الإعدادات ← قائمة الحظر.");return}
+    if(blocked(other,me.uid)){window.showChatToast?.("لا يمكنك إرسال الرسالة لأن هذا الحساب قام بحظرك.");return}
+    const id=pair(me.uid,target.uid);
+    const chatRef=doc(fb.db,"chats",id);
+    await setDoc(chatRef,{members:[me.uid,target.uid],memberIds:[me.uid,target.uid],lastMessage:text,updatedAt:serverTimestamp(),lastSenderId:me.uid},{merge:true});
+    await addDoc(collection(fb.db,"chats",id,"messages"),{senderId:me.uid,senderNChatId:my?.id||my?.nchatId||"",receiverId:target.uid,participants:[me.uid,target.uid],text,createdAt:serverTimestamp(),readBy:[me.uid]});
+    if(input){input.value="";input.style.height="42px"}
+    window.cancelReply?.();window.closeAttach?.();window.scrollChatBottom?.();
+  };
+
+  // Firestore server timestamp is used for chat timestamps; this import is
+  // deliberately kept here because this is the last authoritative sender.
+  // eslint-disable-next-line no-unused-vars
+  const serverTimestamp=(await import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js")).serverTimestamp;
+
+  // Re-apply the real navigation badge after every screen/nav rebuild.
+  const oldBuild=window.buildSectionNavs;
+  window.buildSectionNavs=typeof oldBuild==="function"?function(){oldBuild();window.NChatUnread?.update()}:window.buildSectionNavs;
+  window.NChatUnread?.update();
+
+  // Keep the real chat list alive after authentication.
+  const boot=()=>{
+    if(typeof window.startNChatSocialListener==="function")window.startNChatSocialListener();
+    window.NChatUnread?.update();
+  };
+  window.addEventListener("nchat-firebase-auth",()=>setTimeout(boot,300));
+  if(window.NChatFirebase?.auth?.currentUser)setTimeout(boot,500);
 </script>
