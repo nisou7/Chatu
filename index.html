@@ -4533,8 +4533,8 @@ onclick="closeLanguage()">
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
   import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
   const firebaseConfig = {
@@ -4555,6 +4555,43 @@ onclick="closeLanguage()">
 
     window.NChatFirebase = { app, auth, db, storage, firebaseConfig };
 
+    // REAL AUTH: no local/placeholder password is accepted.
+    window.NChatFirebase.createRealAccount = async function(name, email, password) {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = credential.user;
+
+      // Stable 8-character N-Chat ID.
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let nchatId = "";
+      for (let i = 0; i < 8; i++) {
+        nchatId += chars[Math.floor(Math.random() * chars.length)];
+      }
+
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        name: name,
+        email: email.toLowerCase(),
+        nchatId: nchatId,
+        createdAt: Date.now(),
+        lastSeen: Date.now(),
+        online: true
+      }, { merge: true });
+
+      return { user, nchatId };
+    };
+
+    window.NChatFirebase.loginRealAccount = async function(email, password) {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const user = credential.user;
+
+      const snap = await getDoc(doc(db, "users", user.uid));
+      return { user, profile: snap.exists() ? snap.data() : null };
+    };
+
+    window.NChatFirebase.logoutRealAccount = async function() {
+      await signOut(auth);
+    };
+
     // Analytics is optional and may not work in every local/WebView environment.
     try {
       if (await analyticsSupported()) {
@@ -4565,6 +4602,7 @@ onclick="closeLanguage()">
     }
 
     onAuthStateChanged(auth, (user) => {
+      window.NChatFirebase.authState = user ? "signed-in" : "signed-out";
       window.NChatFirebase.currentUser = user || null;
       window.dispatchEvent(new CustomEvent("nchat-firebase-auth", {
         detail: { user: user || null }
@@ -4620,122 +4658,154 @@ function showLogin(){
    LOGIN
 ========================================================= */
 
-function loginUser(){
+async function loginUser(){
 
-    const email =
-    document
-    .getElementById("loginEmail")
-    .value
-    .trim();
-
-    const password =
-    document
-    .getElementById("loginPassword")
-    .value;
-
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password = document.getElementById("loginPassword").value;
 
     if(email === ""){
-
         alert("أدخل البريد الإلكتروني أولاً.");
-
         return;
     }
-
 
     if(password === ""){
-
         alert("أدخل كلمة المرور أولاً.");
-
         return;
     }
 
+    if(!window.NChatFirebase || !window.NChatFirebase.auth){
+        alert("Firebase لم يتصل بعد. افتح التطبيق من رابط ويب مثل GitHub Pages ثم حاول مرة أخرى.");
+        return;
+    }
 
-    openHome("Nassim");
+    const button = document.querySelector('#loginPage .main-button');
+    const oldText = button ? button.textContent.trim() : "";
+    if(button){ button.disabled = true; button.style.opacity = ".7"; }
 
+    try{
+        const result = await window.NChatFirebase.loginRealAccount(email, password);
+
+        const profile = result.profile || {};
+        const name = profile.name || result.user.displayName || email.split("@")[0] || "Nassim";
+
+        const localUser = {
+            uid: result.user.uid,
+            id: profile.nchatId || result.user.uid.slice(0,8).toUpperCase(),
+            name: name,
+            email: result.user.email,
+            initial: name.charAt(0).toUpperCase()
+        };
+
+        localStorage.setItem("nchat_current_user", JSON.stringify(localUser));
+
+        if(typeof saveCurrentUser === "function") saveCurrentUser(localUser);
+        if(typeof openHome === "function") openHome(name);
+
+    }catch(error){
+        console.error("Firebase login error:", error);
+
+        let message = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+        if(error.code === "auth/invalid-credential") message = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+        else if(error.code === "auth/user-not-found") message = "لا يوجد حساب بهذا البريد الإلكتروني. أنشئ حسابًا أولاً.";
+        else if(error.code === "auth/wrong-password") message = "كلمة المرور غير صحيحة.";
+        else if(error.code === "auth/invalid-email") message = "البريد الإلكتروني غير صالح.";
+        else if(error.code === "auth/too-many-requests") message = "محاولات كثيرة. حاول لاحقًا.";
+        else if(error.code === "auth/network-request-failed") message = "تعذر الاتصال بالإنترنت أو Firebase.";
+        else if(error.code === "auth/operation-not-allowed") message = "يجب تفعيل Email/Password في Firebase Authentication.";
+
+        alert(message);
+    }finally{
+        if(button){
+            button.disabled = false;
+            button.style.opacity = "1";
+        }
+    }
 }
 
 
 /* =========================================================
-   CREATE ACCOUNT
+   CREATE REAL FIREBASE ACCOUNT
 ========================================================= */
 
-function createAccount(){
+async function createAccount(){
 
-    const name =
-    document
-    .getElementById("registerName")
-    .value
-    .trim();
-
-    const email =
-    document
-    .getElementById("registerEmail")
-    .value
-    .trim();
-
-    const password =
-    document
-    .getElementById("registerPassword")
-    .value;
-
-    const confirm =
-    document
-    .getElementById("registerConfirm")
-    .value;
-
+    const name = document.getElementById("registerName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim().toLowerCase();
+    const password = document.getElementById("registerPassword").value;
+    const confirm = document.getElementById("registerConfirm").value;
 
     if(name === ""){
-
-        showRegisterError(
-        "أدخل اسمك أولاً."
-        );
-
+        showRegisterError("أدخل اسمك أولاً.");
         return;
     }
-
 
     if(email === ""){
-
-        showRegisterError(
-        "أدخل البريد الإلكتروني."
-        );
-
+        showRegisterError("أدخل البريد الإلكتروني.");
         return;
     }
 
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        showRegisterError("أدخل بريدًا إلكترونيًا صحيحًا.");
+        return;
+    }
 
     if(password === ""){
-
-        showRegisterError(
-        "أدخل كلمة المرور."
-        );
-
+        showRegisterError("أدخل كلمة المرور.");
         return;
     }
-
 
     if(password.length < 6){
-
-        showRegisterError(
-        "كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل."
-        );
-
+        showRegisterError("كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل.");
         return;
     }
-
 
     if(password !== confirm){
-
-        showRegisterError(
-        "كلمتا المرور غير متطابقتين."
-        );
-
+        showRegisterError("كلمتا المرور غير متطابقتين.");
         return;
     }
 
+    if(!window.NChatFirebase || !window.NChatFirebase.auth){
+        showRegisterError("Firebase لم يتصل بعد. افتح التطبيق من رابط ويب ثم حاول مرة أخرى.");
+        return;
+    }
 
-    openHome(name);
+    const button = document.querySelector('#registerPage .main-button');
+    if(button){ button.disabled = true; button.style.opacity = ".7"; }
 
+    try{
+        const result = await window.NChatFirebase.createRealAccount(name,email,password);
+        const user = result.user;
+
+        const localUser = {
+            uid: user.uid,
+            id: result.nchatId,
+            name: name,
+            email: user.email,
+            initial: name.charAt(0).toUpperCase()
+        };
+
+        localStorage.setItem("nchat_current_user", JSON.stringify(localUser));
+
+        if(typeof saveCurrentUser === "function") saveCurrentUser(localUser);
+        if(typeof openHome === "function") openHome(name);
+
+    }catch(error){
+        console.error("Firebase registration error:", error);
+
+        let message = "تعذر إنشاء الحساب.";
+        if(error.code === "auth/email-already-in-use") message = "هذا البريد مستخدم بالفعل. سجّل الدخول بدلاً من إنشاء حساب جديد.";
+        else if(error.code === "auth/invalid-email") message = "البريد الإلكتروني غير صالح.";
+        else if(error.code === "auth/weak-password") message = "كلمة المرور ضعيفة. استخدم 6 أحرف على الأقل.";
+        else if(error.code === "auth/operation-not-allowed") message = "يجب تفعيل Email/Password في Firebase Authentication.";
+        else if(error.code === "auth/network-request-failed") message = "تعذر الاتصال بالإنترنت أو Firebase.";
+
+        showRegisterError(message);
+    }finally{
+        if(button){
+            button.disabled = false;
+            button.style.opacity = "1";
+        }
+    }
 }
 
 
@@ -4881,40 +4951,19 @@ function closeLogoutModal(){
    LOGOUT
 ========================================================= */
 
-function logoutUser(){
+async function logoutUser(){
+    try{
+        if(window.NChatFirebase && window.NChatFirebase.logoutRealAccount){
+            await window.NChatFirebase.logoutRealAccount();
+        }
+    }catch(error){
+        console.error("Firebase logout error:",error);
+    }
 
-    closeLogoutModal();
+    localStorage.removeItem("nchat_current_user");
 
-
-    document
-    .getElementById("settingsScreen")
-    .classList
-    .add("hidden");
-
-
-    document
-    .getElementById("homeScreen")
-    .classList
-    .add("hidden");
-
-
-    document
-    .getElementById("authScreen")
-    .classList
-    .remove("hidden");
-
-
-    showLogin();
-
-
-    document
-    .getElementById("loginEmail")
-    .value = "";
-
-    document
-    .getElementById("loginPassword")
-    .value = "";
-
+    if(typeof closeLogoutModal === "function") closeLogoutModal();
+    if(typeof showLogin === "function") showLogin();
 }
 
 
