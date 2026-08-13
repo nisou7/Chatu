@@ -3179,16 +3179,15 @@ r="3.5"/>
 <div id="addFriendModal" class="modal-overlay hidden add-friend-modal">
   <div class="modal">
     <h3>إضافة صديق</h3>
-    <p>ابحث عن الشخص باستخدام N-Chat ID المكوّن من 8 أحرف أو أرقام.</p>
+    <p>ابحث عن صديق باستخدام اسم المستخدم الخاص به.</p>
 
     <div class="id-search-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <circle cx="10.8" cy="10.8" r="6.8"/>
         <path d="M16 16L21 21"/>
       </svg>
-      <input id="friendIdInput" maxlength="8" autocomplete="off"
-             placeholder="أدخل N-Chat ID الحقيقي"
-             oninput="normalizeFriendId(this)"
+      <input id="friendIdInput" autocomplete="off"
+             placeholder="اكتب اسم المستخدم"
              onkeydown="if(event.key==='Enter') searchFriendById()">
       <button class="id-search-button" type="button" onclick="searchFriendById()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
@@ -4398,6 +4397,8 @@ onclick="closeLanguage()">
       uid: user.uid,
       id: nchatId,
       name: cleanName,
+      username: cleanName,
+      usernameLower: cleanName.toLowerCase(),
       email: cleanEmail,
       createdAt: Date.now(),
       online: true,
@@ -4408,6 +4409,8 @@ onclick="closeLanguage()">
     await setDoc(doc(db, "nchatIds", nchatId), {
       uid: user.uid,
       name: cleanName,
+      username: cleanName,
+      usernameLower: cleanName.toLowerCase(),
       createdAt: Date.now()
     });
 
@@ -8073,7 +8076,9 @@ window.addEventListener("nchat-firebase-error", () => {
       renderRealMessages(messages);
     },(error)=>{
       console.error("Firestore messages listener:",error);
-      toast("تعذر قراءة الرسائل. تحقق من Firestore Rules.");
+      const code=error?.code || "unknown";
+      if(code === "permission-denied") toast("تم رفض قراءة المحادثة. انشر قواعد firestore.rules المرفقة.");
+      else toast("تعذر قراءة الرسائل: " + (error?.message || code));
     });
 
     if(typeof window.closeMessageMenu==='function') window.closeMessageMenu();
@@ -8208,7 +8213,12 @@ window.addEventListener("nchat-firebase-error", () => {
       if(typeof window.scrollChatBottom==='function') window.scrollChatBottom();
     }catch(error){
       console.error("N-Chat Firestore send:",error);
-      toast("لم تُرسل الرسالة. تحقق من Firestore Rules وتسجيل الدخول.");
+      const code=error?.code || "unknown";
+      if(code === "permission-denied"){
+        toast("تم رفض إرسال الرسالة من Firestore. انشر قواعد firestore.rules المرفقة.");
+      }else{
+        toast("لم تُرسل الرسالة: " + (error?.message || code));
+      }
     }finally{
       if(button) button.disabled=false;
     }
@@ -8502,7 +8512,7 @@ window.addEventListener("nchat-firebase-error", () => {
     if(modal && !modal.querySelector(".username-search-help")){
       const help=document.createElement("div");
       help.className="username-search-help";
-      help.textContent="اكتب الاسم الذي اختاره المستخدم عند إنشاء حسابه.";
+      help.textContent="اكتب اسم المستخدم الذي اختاره الشخص عند إنشاء حسابه.";
       const box=modal.querySelector(".id-search-box");
       box?.insertAdjacentElement("afterend",help);
     }
