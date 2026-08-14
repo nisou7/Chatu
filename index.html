@@ -8472,6 +8472,16 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
     return snap.exists ? snap.data() : null;
   }
 
+  // Generate a unique, human-shareable friend ID like "N-482913".
+  async function makeUniqueNchatId(){
+    for(let i=0;i<20;i++){
+      const id = 'N-' + Math.floor(100000 + Math.random()*900000);
+      const q = await db.collection('users').where('nchatId','==',id).limit(1).get();
+      if(q.empty) return id;
+    }
+    return 'N-' + Date.now().toString().slice(-6);
+  }
+
   async function ensureProfile(user, forcedName){
     if(!user) return null;
 
@@ -8487,11 +8497,17 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
       'مستخدم'
     ).trim();
 
+    // Reuse an existing ID from this or an older code path if present;
+    // otherwise generate a fresh unique one so every user has exactly one ID.
+    const nchatId = old.nchatId || await makeUniqueNchatId();
+
     const data = {
       uid: user.uid,
       name: name,
       email: user.email || old.email || '',
       nameLower: name.toLocaleLowerCase(),
+      nchatId: nchatId,
+      nchatIdLower: nchatId.toLocaleLowerCase(),
       photoURL: old.photoURL || user.photoURL || '',
       updatedAt: FV.serverTimestamp()
     };
@@ -8499,7 +8515,12 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
     if(!snap.exists) data.createdAt = FV.serverTimestamp();
 
     await ref.set(data, {merge:true});
-    return {...old, ...data};
+    const merged = {...old, ...data};
+
+    document.querySelectorAll('#nchatProfileIdValue,.nchat-profile-id,.profile-id')
+      .forEach(e => e.textContent = merged.nchatId);
+
+    return merged;
   }
 
   function showOnlyAuth(){
@@ -8656,7 +8677,7 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
     const q = String(value || '').trim().toLocaleLowerCase();
 
     if(!q){
-      box.innerHTML = '<div class="nchat-empty">اكتب اسم الصديق للبحث.</div>';
+      box.innerHTML = '<div class="nchat-empty">اكتب اسم الصديق أو الـID الخاص به للبحث.</div>';
       return;
     }
 
@@ -8677,11 +8698,12 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
           if(!u.uid || u.uid === me.uid) return false;
           if(DEMO_NAMES.has(String(u.name || '').trim())) return false;
           const name = String(u.nameLower || u.name || '').toLocaleLowerCase();
-          return name.includes(q);
+          const id = String(u.nchatIdLower || u.nchatId || '').toLocaleLowerCase();
+          return name.includes(q) || id.includes(q);
         });
 
       if(!users.length){
-        box.innerHTML = '<div class="nchat-empty">لم يتم العثور على صديق بهذا الاسم.</div>';
+        box.innerHTML = '<div class="nchat-empty">لم يتم العثور على صديق بهذا الاسم أو الـID.</div>';
         return;
       }
 
@@ -8716,6 +8738,7 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
             </div>
             <div class="nchat-result-info">
               <div class="nchat-result-name">${esc(u.name || '')}</div>
+              <div class="nchat-result-id" style="font-size:12px;color:#85818E">${esc(u.nchatId || '')}</div>
             </div>
             ${button}
           </div>`;
@@ -9049,11 +9072,11 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
     if(typeof originalOpenAddFriend === 'function') originalOpenAddFriend();
     const input = $('friendSearchInput');
     if(input){
-      input.placeholder = 'ابحث عن صديق بالاسم';
+      input.placeholder = 'ابحث بالاسم أو الـID (مثل N-482913)';
       input.removeAttribute('data-search-id');
     }
     const results = $('friendSearchResults');
-    if(results && !input?.value) results.innerHTML = '<div class="nchat-empty">اكتب اسم الصديق للبحث.</div>';
+    if(results && !input?.value) results.innerHTML = '<div class="nchat-empty">اكتب اسم الصديق أو الـID الخاص به للبحث.</div>';
   };
 
   // Remove all known fake/demo data from local storage and visible DOM.
