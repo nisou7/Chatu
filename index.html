@@ -4975,21 +4975,10 @@ input{
 <main class="nchat-content">
 <div class="nchat-section-head"><span class="nchat-section-title">الأصدقاء المتصلون</span><span class="nchat-section-link" onclick="showAllFriends()">عرض الكل</span></div>
 <div class="nchat-online-list">
-<div class="nchat-online-person" onclick="openChat('أحمد','12')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=12"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">أحمد</span></div>
-<div class="nchat-online-person" onclick="openChat('سارة','32')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=32"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">سارة</span></div>
-<div class="nchat-online-person" onclick="openChat('محمد','47')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=47"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">محمد</span></div>
-<div class="nchat-online-person" onclick="openChat('ريم','44')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=44"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">ريم</span></div>
-<div class="nchat-online-person" onclick="openChat('ياسين','68')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=68"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">ياسين</span></div>
-<div class="nchat-online-person" onclick="openChat('نور','49')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=49"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">نور</span></div>
 </div>
 <div class="nchat-search-box"><svg fill="none" viewbox="0 0 24 24"><circle cx="11" cy="11" r="6.5" stroke-width="1.8"></circle><path d="M16 16l5 5" stroke-linecap="round" stroke-width="1.8"></path></svg><input id="chatSearch" oninput="searchChats(this.value)" placeholder="ابحث في المحادثات..." type="text"/></div>
 <div class="nchat-section-head"><span class="nchat-section-title">المحادثات</span><span class="nchat-section-link">الكل</span></div>
 <div class="nchat-chat-list" id="chatList">
-<div class="nchat-chat-item" data-name="أحمد" onclick="openChat('أحمد','12')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=12"/><span class="nchat-online-dot"></span></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">أحمد</span><span class="nchat-chat-time">21:18</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">مرحباً، كيف حالك؟</span><span class="nchat-unread">2</span></div></div></div>
-<div class="nchat-chat-item" data-name="سارة" onclick="openChat('سارة','32')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=32"/><span class="nchat-online-dot"></span></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">سارة</span><span class="nchat-chat-time">20:43</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">هل نخرج غداً؟</span></div></div></div>
-<div class="nchat-chat-item" data-name="محمد" onclick="openChat('محمد','47')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=47"/></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">محمد</span><span class="nchat-chat-time">19:26</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">أرسل لي الملف عندما تنتهي.</span></div></div></div>
-<div class="nchat-chat-item" data-name="ريم" onclick="openChat('ريم','44')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=44"/></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">ريم</span><span class="nchat-chat-time">18:51</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">تمام، شكراً لك ❤️</span></div></div></div>
-<div class="nchat-chat-item" data-name="ياسين" onclick="openChat('ياسين','68')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=68"/></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">ياسين</span><span class="nchat-chat-time">17:20</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">نراك لاحقاً.</span></div></div></div>
 </div>
 </main>
 <nav class="nchat-bottom-nav">
@@ -6058,17 +6047,9 @@ window.addEventListener("load",function(){loadTheme();});
     return id;
   }
   function seedAccounts(){
-    let accounts=getJSON(ACCOUNTS_KEY,[]);
-    const demo=[
-      {name:'أحمد',id:'N-120431',email:'ahmed@nchat.local',avatar:'https://i.pravatar.cc/150?img=12',online:true},
-      {name:'سارة',id:'N-327814',email:'sara@nchat.local',avatar:'https://i.pravatar.cc/150?img=32',online:true},
-      {name:'محمد',id:'N-475620',email:'mohamed@nchat.local',avatar:'https://i.pravatar.cc/150?img=47',online:true},
-      {name:'ريم',id:'N-449205',email:'rim@nchat.local',avatar:'https://i.pravatar.cc/150?img=44',online:true},
-      {name:'ياسين',id:'N-683517',email:'yassine@nchat.local',avatar:'https://i.pravatar.cc/150?img=68',online:true},
-      {name:'نور',id:'N-492731',email:'nour@nchat.local',avatar:'https://i.pravatar.cc/150?img=49',online:true}
-    ];
-    demo.forEach(d=>{if(!accounts.some(a=>a.id===d.id)) accounts.push(d)});
-    setJSON(ACCOUNTS_KEY,accounts); return accounts;
+    // Demo/fake accounts intentionally disabled. Real users come from Firebase.
+    const accounts=getJSON(ACCOUNTS_KEY,[]);
+    return accounts;
   }
   function ensureUserId(user){
     if(!user) return null;
@@ -8246,11 +8227,11 @@ html[dir="ltr"] .nchat-final-row{text-align:left}
 })();
 </script>
 
-
 <!-- =========================================================
-     N CHAT — REAL FIREBASE INTEGRATION
-     Project: nchat-app-663e4
-     ========================================================= -->
+     N CHAT — REAL FIREBASE AUTHENTICATION FINAL PATCH
+     This patch intentionally makes Firebase Authentication the
+     only way to enter the main application.
+========================================================= -->
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
@@ -8258,309 +8239,297 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut,
-  updateProfile
+  updateProfile,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   getFirestore,
   doc,
   getDoc,
   setDoc,
-  updateDoc,
-  collection,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  addDoc,
-  serverTimestamp,
-  arrayUnion,
-  arrayRemove,
-  getDocs,
-  limit
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAMsKcSMpIz3p2ufg3y7AhfbJ-KPb5TltI",
-  authDomain: "nchat-app-663e4.firebaseapp.com",
-  projectId: "nchat-app-663e4",
-  storageBucket: "nchat-app-663e4.firebasestorage.app",
-  messagingSenderId: "744710571184",
-  appId: "1:744710571184:web:127f9b1531094712172775",
-  measurementId: "G-F20ZRWPP2C"
-};
-
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-window.NChatFirebase = { app, auth, db, storage, firebaseConfig };
-
-const $ = id => document.getElementById(id);
-const toast = text => typeof window.showToast === 'function' ? window.showToast(text) : console.log(text);
-
-function setAuthVisible(loggedIn){
-  const authApp=$('authApp'), chatApp=$('chatApp');
-  if(authApp) authApp.style.display=loggedIn?'none':'flex';
-  if(chatApp) chatApp.style.display=loggedIn?'flex':'none';
-}
-function cleanName(v){ return String(v||'').trim().replace(/\s+/g,' '); }
-function lower(v){ return cleanName(v).toLowerCase(); }
-function makeNChatId(){
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let out='';
-  for(let i=0;i<8;i++) out+=chars[Math.floor(Math.random()*chars.length)];
-  return out;
-}
-function esc(v){
-  const d=document.createElement('div'); d.textContent=String(v??''); return d.innerHTML;
-}
-function timeText(ts){
-  if(!ts) return '';
-  try { return ts.toDate().toLocaleTimeString('ar-DZ',{hour:'2-digit',minute:'2-digit'}); } catch(e){return '';}
-}
-function chatIdFor(a,b){ return [a,b].sort().join('__'); }
-
-async function createProfile(user,name){
-  const profileRef=doc(db,'users',user.uid);
-  const old=await getDoc(profileRef);
-  if(old.exists()) return old.data();
-  let id=makeNChatId();
-  while((await getDoc(doc(db,'nchatIds',id))).exists()) id=makeNChatId();
-  const data={
-    uid:user.uid,
-    name:cleanName(name)||'مستخدم N Chat',
-    nameLower:lower(name)||'مستخدم n chat',
-    email:user.email||'',
-    photoURL:user.photoURL||'https://i.pravatar.cc/150?img=11',
-    nchatId:id,
-    friendIds:[],
-    blockedIds:[],
-    online:true,
-    lastSeen:serverTimestamp(),
-    createdAt:serverTimestamp()
+(function(){
+  const firebaseConfig = {
+    apiKey: "AIzaSyBk5j5WDKKc89TNZPmHyKOXuRidVJe1b1E",
+    authDomain: "n-chat-5bbdd.firebaseapp.com",
+    projectId: "n-chat-5bbdd",
+    storageBucket: "n-chat-5bbdd.firebasestorage.app",
+    messagingSenderId: "342628360517",
+    appId: "1:342628360517:web:87e15ec1f2cfb4e1ea1e2c",
+    measurementId: "G-0V8M4LS09G"
   };
-  await setDoc(profileRef,data);
-  await setDoc(doc(db,'nchatIds',id),{uid:user.uid,name:data.name,nameLower:data.nameLower,nchatId:id,createdAt:serverTimestamp()});
-  return data;
-}
 
-async function getProfile(uid=auth.currentUser?.uid){
-  if(!uid) return null;
-  const s=await getDoc(doc(db,'users',uid));
-  return s.exists()?{uid:s.id,...s.data()}:null;
-}
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
-function showApp(profile){
-  setAuthVisible(true);
-  if(typeof window.openChatApp==='function'){
-    // Bypass the old local/demo account storage by supplying the real profile.
-    const u={name:profile.name,email:profile.email,id:profile.nchatId,avatar:profile.photoURL,uid:profile.uid};
-    window.openChatApp(u);
+  window.NChatFirebase = { app, auth, db, storage, firebaseConfig };
+
+  const authApp = document.getElementById('authApp');
+  const chatApp = document.getElementById('chatApp');
+  const loginScreen = document.getElementById('loginScreen');
+  const registerScreen = document.getElementById('registerScreen');
+
+  function toast(msg){
+    if(typeof window.showToast === 'function') window.showToast(msg);
+    else alert(msg);
   }
-  const name=$('profileName'); if(name) name.textContent=profile.name||'مستخدم N Chat';
-  const email=$('profileEmail'); if(email) email.textContent=profile.email||'';
-  const id=$('nchatProfileIdValue'); if(id) id.textContent=profile.nchatId||'';
-  renderRealChats(profile.uid);
-}
 
-// REAL LOGIN
-async function realLogin(){
-  const email=cleanName($('loginEmail')?.value);
-  const password=$('loginPassword')?.value||'';
-  if(!email||!password){toast('أدخل البريد الإلكتروني وكلمة المرور');return;}
-  try{
-    const cred=await signInWithEmailAndPassword(auth,email,password);
-    const profile=(await getProfile(cred.user.uid)) || await createProfile(cred.user,'مستخدم N Chat');
-    await updateDoc(doc(db,'users',cred.user.uid),{online:true,lastSeen:serverTimestamp()});
-    showApp(profile);
-    toast('تم تسجيل الدخول بنجاح');
-  }catch(e){
-    console.error(e);
-    const msg=e.code==='auth/invalid-credential'?'البريد الإلكتروني أو كلمة المرور غير صحيحة':
-      e.code==='auth/too-many-requests'?'تمت محاولات كثيرة، حاول لاحقًا':
-      'تعذر تسجيل الدخول: '+(e.message||e.code);
-    toast(msg);
+  function showAuth(){
+    if(authApp) authApp.style.display='flex';
+    if(chatApp) chatApp.style.display='none';
+    if(loginScreen) loginScreen.style.display='flex';
+    if(registerScreen) registerScreen.style.display='none';
   }
-}
 
-// REAL CREATE ACCOUNT
-async function realCreate(){
-  const name=cleanName($('registerName')?.value);
-  const email=cleanName($('registerEmail')?.value);
-  const password=$('registerPassword')?.value||'';
-  const confirm=$('registerConfirm')?.value||'';
-  if(!name||!email||!password||!confirm){toast('يرجى ملء جميع البيانات');return;}
-  if(password.length<6){toast('كلمة المرور يجب أن تكون 6 أحرف على الأقل');return;}
-  if(password!==confirm){toast('كلمتا المرور غير متطابقتين');return;}
-  try{
-    const cred=await createUserWithEmailAndPassword(auth,email,password);
-    await updateProfile(cred.user,{displayName:name});
-    const profile=await createProfile(cred.user,name);
-    showApp(profile);
-    toast('تم إنشاء الحساب بنجاح');
-  }catch(e){
-    console.error(e);
-    const msg=e.code==='auth/email-already-in-use'?'هذا البريد مستخدم بالفعل':
-      e.code==='auth/invalid-email'?'البريد الإلكتروني غير صالح':
-      e.code==='auth/weak-password'?'كلمة المرور ضعيفة':'تعذر إنشاء الحساب: '+(e.message||e.code);
-    toast(msg);
+  function hideAuth(){
+    if(authApp) authApp.style.display='none';
+    if(chatApp) chatApp.style.display='flex';
   }
-}
 
-$('loginButton')?.addEventListener('click',e=>{e.preventDefault();realLogin()});
-$('createAccountButton')?.addEventListener('click',e=>{e.preventDefault();realCreate()});
-
-// Replace old logout with Firebase sign out.
-window.logout=async function(){
-  try{
-    if(auth.currentUser) await updateDoc(doc(db,'users',auth.currentUser.uid),{online:false,lastSeen:serverTimestamp()});
-  }catch(e){}
-  try{await signOut(auth)}catch(e){}
-  setAuthVisible(false);
-  toast('تم تسجيل الخروج');
-};
-
-// Presence: online while page is open; best-effort offline on page exit.
-onAuthStateChanged(auth,async user=>{
-  if(user){
-    try{
-      const p=(await getProfile(user.uid)) || await createProfile(user,user.displayName||'مستخدم N Chat');
-      await updateDoc(doc(db,'users',user.uid),{online:true,lastSeen:serverTimestamp()});
-      showApp(p);
-    }catch(e){console.error('profile init',e);toast('تعذر تحميل ملفك من Firebase');}
-  }else{
-    setAuthVisible(false);
+  function cleanError(error){
+    const code=error?.code||'';
+    const map={
+      'auth/invalid-email':'البريد الإلكتروني غير صحيح.',
+      'auth/invalid-credential':'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+      'auth/user-not-found':'هذا الحساب غير موجود. أنشئ حسابًا أولاً.',
+      'auth/wrong-password':'كلمة المرور غير صحيحة.',
+      'auth/email-already-in-use':'هذا البريد مستخدم بالفعل. استخدم تسجيل الدخول.',
+      'auth/weak-password':'كلمة المرور يجب أن تكون 6 أحرف على الأقل.',
+      'auth/network-request-failed':'تعذر الاتصال بـ Firebase. تحقق من الإنترنت.',
+      'auth/too-many-requests':'تمت محاولات كثيرة. حاول لاحقًا.',
+      'permission-denied':'تم رفض الوصول إلى Firestore. تحقق من Rules.'
+    };
+    return map[code] || ('حدث خطأ أثناء الاتصال بـ Firebase: '+(error?.message||code||'خطأ غير معروف'));
   }
-});
-window.addEventListener('beforeunload',()=>{
-  if(auth.currentUser){ updateDoc(doc(db,'users',auth.currentUser.uid),{online:false,lastSeen:serverTimestamp()}).catch(()=>{}); }
-});
 
-// FRIEND SEARCH: name or N-Chat ID.
-window.searchFriends=async function(value){
-  const box=$('friendSearchResults'); if(!box)return;
-  const q=cleanName(value).toLowerCase();
-  if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسمًا أو ID للبحث.</div>';return;}
-  try{
-    const me=await getProfile();
-    let found=[];
-    if(q.startsWith('n-') || q.length===8){
-      const idSnap=await getDoc(doc(db,'nchatIds',q.toUpperCase()));
-      if(idSnap.exists()){
-        const d=idSnap.data();
-        if(d.uid!==auth.currentUser.uid) found=[d];
+  function randomNChatId(){
+    const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let id='';
+    for(let i=0;i<8;i++) id += alphabet[Math.floor(Math.random()*alphabet.length)];
+    return id;
+  }
+
+  async function createProfile(user, name){
+    const ref=doc(db,'users',user.uid);
+    const existing=await getDoc(ref);
+    if(existing.exists()) return existing.data();
+
+    let nchatId='';
+    for(let i=0;i<20;i++){
+      const candidate=randomNChatId();
+      const idRef=doc(db,'nchatIds',candidate);
+      const taken=await getDoc(idRef);
+      if(!taken.exists()){
+        nchatId=candidate;
+        await setDoc(idRef,{
+          uid:user.uid,
+          name:name,
+          email:user.email||'',
+          createdAt:serverTimestamp()
+        });
+        break;
       }
-    }else{
-      const snap=await getDocs(query(collection(db,'users'),where('nameLower','>=',q),where('nameLower','<=',q+'\uf8ff'),limit(20)));
-      found=snap.docs.map(d=>({uid:d.id,...d.data()})).filter(x=>x.uid!==auth.currentUser.uid);
     }
-    if(!found.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على حساب بهذا الاسم أو ID.</div>';return;}
-    const friends=me?.friendIds||[];
-    box.innerHTML=found.map(a=>{
-      const id=a.nchatId||a.id||'';
-      const action=friends.includes(a.uid)
-        ? `<button class="nchat-add-btn" onclick="startFriendChatReal('${esc(a.name)}','${esc(a.photoURL||'https://i.pravatar.cc/150?img=12')}','${esc(a.uid)}','${esc(id)}')">مراسلة</button>`
-        : `<button class="nchat-add-btn" onclick="addRealFriend('${esc(a.uid)}')">إضافة</button>`;
-      return `<div class="nchat-search-result"><img class="nchat-result-avatar" src="${esc(a.photoURL||'https://i.pravatar.cc/150?img=12')}"><div class="nchat-result-info"><div class="nchat-result-name">${esc(a.name||'مستخدم')}</div><div class="nchat-result-id">${esc(id)}</div></div>${action}</div>`;
-    }).join('');
-  }catch(e){console.error(e);box.innerHTML='<div class="nchat-empty">تعذر البحث حاليًا.</div>';}
-};
-window.addRealFriend=async function(uid){
-  try{
-    if(!auth.currentUser)return;
-    await updateDoc(doc(db,'users',auth.currentUser.uid),{friendIds:arrayUnion(uid)});
-    toast('تمت إضافة الصديق');
-    window.searchFriends($('friendSearchInput')?.value||'');
-    await renderRealChats(auth.currentUser.uid);
-  }catch(e){console.error(e);toast('تعذر إضافة الصديق');}
-};
+    if(!nchatId) throw new Error('تعذر إنشاء معرف N Chat.');
 
-window.startFriendChatReal=async function(name,avatar,uid,id){
-  if(!auth.currentUser)return;
-  closeAddFriend?.();
-  closeFriendsPage?.();
-  await openRealChat({uid,name,photoURL:avatar,nchatId:id});
-};
-
-let chatListUnsub=null;
-async function renderRealChats(uid){
-  if(chatListUnsub)chatListUnsub();
-  const list=$('chatList'); if(!list)return;
-  const q=query(collection(db,'chats'),where('members','array-contains',uid),orderBy('updatedAt','desc'),limit(50));
-  chatListUnsub=onSnapshot(q,async snap=>{
-    const rows=[];
-    for(const d of snap.docs){
-      const x=d.data();
-      const other=(x.members||[]).find(v=>v!==uid); if(!other)continue;
-      const p=await getProfile(other); if(p)rows.push({chatId:d.id,...x,friend:p});
-    }
-    if(!rows.length){list.innerHTML='<div class="nchat-empty" style="padding:25px">لا توجد محادثات حقيقية بعد.<br>اضغط + لإضافة صديق.</div>';return;}
-    list.innerHTML=rows.map(r=>`<div class="nchat-chat-item" data-name="${esc(r.friend.name)}" onclick="openRealChat({uid:'${esc(r.friend.uid)}',name:'${esc(r.friend.name)}',photoURL:'${esc(r.friend.photoURL||'https://i.pravatar.cc/150?img=12')}',nchatId:'${esc(r.friend.nchatId||'')}'})"><div class="nchat-chat-avatar"><img src="${esc(r.friend.photoURL||'https://i.pravatar.cc/150?img=12')}" style="width:100%;height:100%;border-radius:inherit;object-fit:cover"><span class="nchat-online-dot ${r.friend.online?'':'offline'}"></span></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">${esc(r.friend.name)}</span><span class="nchat-chat-time">${timeText(r.updatedAt)}</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">${esc(r.lastMessage||'ابدأ المحادثة')}</span></div></div></div>`).join('');
-  },e=>{console.error(e);toast('تعذر قراءة المحادثات. تحقق من Firestore Rules.');});
-}
-
-let messagesUnsub=null;
-let activeRealFriend=null;
-async function ensureChat(meUid,friendUid){
-  const id=chatIdFor(meUid,friendUid), ref=doc(db,'chats',id), snap=await getDoc(ref);
-  if(!snap.exists()){
-    await setDoc(ref,{members:[meUid,friendUid],memberIds:[meUid,friendUid],lastMessage:'',lastSenderId:'',theme:'purple',typing:{},updatedAt:serverTimestamp(),createdAt:serverTimestamp()});
+    const profile={
+      uid:user.uid,
+      id:nchatId,
+      name:name,
+      username:name,
+      usernameLower:name.toLowerCase(),
+      email:user.email||'',
+      photoURL:user.photoURL||'',
+      createdAt:serverTimestamp(),
+      lastSeen:serverTimestamp(),
+      online:true
+    };
+    await setDoc(ref,profile);
+    return profile;
   }
-  return id;
-}
 
-window.openRealChat=async function(friend){
-  if(!auth.currentUser||!friend?.uid)return;
-  activeRealFriend=friend;
-  const room=$('chatRoom'); if(!room)return;
-  room.classList.add('active','nchat-chat-room-enhanced');
-  $('roomName').textContent=friend.name||'صديق';
-  $('roomAvatar').src=friend.photoURL||'https://i.pravatar.cc/150?img=12';
-  const rid=$('roomIdMeta'); if(rid)rid.textContent='';
-  const chatId=await ensureChat(auth.currentUser.uid,friend.uid);
-  room.dataset.realChatId=chatId;
-  if(messagesUnsub)messagesUnsub();
-  const mq=query(collection(db,'chats',chatId,'messages'),orderBy('createdAt','asc'));
-  messagesUnsub=onSnapshot(mq,snap=>{
-    const box=$('messages'); if(!box)return;
-    box.innerHTML='';
-    snap.docs.forEach(d=>{
-      const m=d.data(), sent=m.senderId===auth.currentUser.uid;
-      const el=document.createElement('div');el.className='nchat-message '+(sent?'sent':'received');
-      el.innerHTML=esc(m.text||'')+'<span class="nchat-message-time">'+esc(timeText(m.createdAt))+'</span>';
-      el.addEventListener('dblclick',()=>{let r=el.querySelector('.nchat-reaction');if(!r){r=document.createElement('span');r.className='nchat-reaction';r.textContent='❤️';el.appendChild(r)}});
-      box.appendChild(el);
+  async function finishLogin(user, profile){
+    if(!user) return;
+    hideAuth();
+
+    // Keep localStorage only as a UI cache. It is NEVER used for authentication.
+    try{
+      localStorage.setItem('nchat_user',JSON.stringify({
+        uid:user.uid,
+        name:profile?.name||user.displayName||'مستخدم N Chat',
+        email:user.email||'',
+        id:profile?.id||''
+      }));
+    }catch(e){}
+
+    const name=profile?.name||user.displayName||'مستخدم N Chat';
+    const email=user.email||'';
+    const pn=document.getElementById('profileName');
+    const pe=document.getElementById('profileEmail');
+    if(pn) pn.textContent=name;
+    if(pe) pe.textContent=email;
+
+    if(typeof window.updateProfileId==='function'){
+      try{window.updateProfileId(profile?.id||'')}catch(e){}
+    }
+
+    // Start on the app's existing home/new-chat screen without changing its design.
+    ['chatsScreen','friendsScreen','settingsScreen','chatRoom'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display='none';
     });
-    box.scrollTop=box.scrollHeight;
-  },e=>{console.error(e);toast('تعذر قراءة الرسائل. تحقق من Rules.');});
-  updateRealRoomPresence();
-};
+    const chatScreen=document.getElementById('chatScreen');
+    if(chatScreen) chatScreen.style.display='block';
+  }
 
-async function updateRealRoomPresence(){
-  if(!activeRealFriend)return;
-  const p=await getProfile(activeRealFriend.uid); if(!p)return;
-  const dot=$('roomPresenceDot'); if(dot){dot.classList.toggle('offline',!p.online);dot.style.display='block';}
-  const st=document.querySelector('#chatRoom .nchat-room-status');
-  if(st){st.textContent=p.online?'متصل الآن':'غادر منذ قليل';st.classList.toggle('offline',!p.online);}
-}
-window.closeChat=function(){if(messagesUnsub){messagesUnsub();messagesUnsub=null;}activeRealFriend=null;$('chatRoom')?.classList.remove('active');};
+  // Replace the original buttons so the old demo/localStorage handlers cannot run.
+  function replaceButton(id, handler){
+    const old=document.getElementById(id);
+    if(!old) return null;
+    const fresh=old.cloneNode(true);
+    old.replaceWith(fresh);
+    fresh.addEventListener('click',handler);
+    return fresh;
+  }
 
-window.sendMessage=async function(){
-  const input=$('messageInput'), text=cleanName(input?.value); if(!text||!activeRealFriend||!auth.currentUser)return;
+  replaceButton('createAccountButton',async function(e){
+    e.preventDefault();
+    const name=(document.getElementById('registerName')?.value||'').trim();
+    const email=(document.getElementById('registerEmail')?.value||'').trim().toLowerCase();
+    const password=document.getElementById('registerPassword')?.value||'';
+    const confirm=document.getElementById('registerConfirm')?.value||'';
+
+    if(!name||!email||!password||!confirm){toast('يرجى ملء جميع البيانات');return;}
+    if(password.length<6){toast('كلمة المرور يجب أن تكون 6 أحرف على الأقل');return;}
+    if(password!==confirm){toast('كلمتا المرور غير متطابقتين');return;}
+
+    const btn=e.currentTarget;
+    btn.disabled=true;
+    try{
+      const credential=await createUserWithEmailAndPassword(auth,email,password);
+      const user=credential.user;
+      try{await updateProfile(user,{displayName:name});}catch(_){ }
+      const profile=await createProfile(user,name);
+      await finishLogin(user,profile);
+      toast('تم إنشاء الحساب بنجاح');
+    }catch(error){
+      console.error('N Chat Firebase register:',error);
+      toast(cleanError(error));
+    }finally{btn.disabled=false;}
+  });
+
+  replaceButton('loginButton',async function(e){
+    e.preventDefault();
+    const email=(document.getElementById('loginEmail')?.value||'').trim().toLowerCase();
+    const password=document.getElementById('loginPassword')?.value||'';
+
+    // No demo credentials, no generated credentials, and no local fallback.
+    if(!email){toast('أدخل البريد الإلكتروني');return;}
+    if(!password){toast('أدخل كلمة المرور');return;}
+
+    const btn=e.currentTarget;
+    btn.disabled=true;
+    try{
+      const credential=await signInWithEmailAndPassword(auth,email,password);
+      const user=credential.user;
+      const profileRef=doc(db,'users',user.uid);
+      let snap=await getDoc(profileRef);
+      let profile=snap.exists()?snap.data():null;
+      if(!profile){
+        profile=await createProfile(user,user.displayName||'مستخدم N Chat');
+      }else{
+        await setDoc(profileRef,{lastSeen:serverTimestamp(),online:true},{merge:true});
+      }
+      await finishLogin(user,profile);
+      toast('تم تسجيل الدخول بنجاح');
+    }catch(error){
+      console.error('N Chat Firebase login:',error);
+      toast(cleanError(error));
+      showAuth();
+    }finally{btn.disabled=false;}
+  });
+
+  // Prevent any old code from opening the app without a real Firebase user.
+  window.openChatApp=async function(user){
+    const current=auth.currentUser;
+    if(!current){
+      showAuth();
+      toast('يجب تسجيل الدخول بحساب Firebase أولاً.');
+      return;
+    }
+    try{
+      const snap=await getDoc(doc(db,'users',current.uid));
+      const profile=snap.exists()?snap.data():await createProfile(current,current.displayName||'مستخدم N Chat');
+      await finishLogin(current,profile);
+    }catch(error){
+      console.error(error);
+      showAuth();
+      toast(cleanError(error));
+    }
+  };
+
+  // If there is no Firebase session, the main app is always blocked.
+  onAuthStateChanged(auth,async(user)=>{
+    if(!user){
+      showAuth();
+      return;
+    }
+    try{
+      const snap=await getDoc(doc(db,'users',user.uid));
+      const profile=snap.exists()?snap.data():await createProfile(user,user.displayName||'مستخدم N Chat');
+      await setDoc(doc(db,'users',user.uid),{online:true,lastSeen:serverTimestamp()},{merge:true});
+      await finishLogin(user,profile);
+    }catch(error){
+      console.error('N Chat auth state:',error);
+      await signOut(auth);
+      showAuth();
+      toast(cleanError(error));
+    }
+  });
+
+  // Make logout use Firebase, not localStorage.
+  window.nchatFirebaseLogout=async function(){
+    try{
+      if(auth.currentUser){
+        await setDoc(doc(db,'users',auth.currentUser.uid),{online:false,lastSeen:serverTimestamp()},{merge:true});
+      }
+      await signOut(auth);
+    }catch(error){toast(cleanError(error));}
+  };
+
+  // Make the existing Settings -> Logout action use Firebase Authentication.
+  window.logout=async function(){
+    try{
+      const user=auth.currentUser;
+      if(user){
+        await setDoc(doc(db,'users',user.uid),{online:false,lastSeen:serverTimestamp()},{merge:true});
+      }
+      await signOut(auth);
+      try{localStorage.removeItem('nchat_user');}catch(e){}
+      if(typeof window.closeSettings==='function') window.closeSettings();
+      if(typeof window.closeAddFriend==='function') window.closeAddFriend();
+      if(typeof window.closeFriendsPage==='function') window.closeFriendsPage();
+      if(typeof window.closeChat==='function') window.closeChat();
+      toast('تم تسجيل الخروج');
+    }catch(error){
+      console.error('N Chat Firebase logout:',error);
+      toast(cleanError(error));
+    }
+  };
+
+  // Remove any old fake/demo accounts from local cache. Firebase accounts are untouched.
   try{
-    const chatId=$('chatRoom')?.dataset.realChatId || await ensureChat(auth.currentUser.uid,activeRealFriend.uid);
-    await addDoc(collection(db,'chats',chatId,'messages'),{text,senderId:auth.currentUser.uid,receiverId:activeRealFriend.uid,participants:[auth.currentUser.uid,activeRealFriend.uid],createdAt:serverTimestamp()});
-    await updateDoc(doc(db,'chats',chatId),{lastMessage:text,lastSenderId:auth.currentUser.uid,updatedAt:serverTimestamp()});
-    input.value='';
-  }catch(e){console.error(e);toast(e.code==='permission-denied'?'تم رفض إرسال الرسالة. تحقق من Firestore Rules.':'تعذر إرسال الرسالة');}
-};
-window.handleMessage=function(e){if(e.key==='Enter'){e.preventDefault();window.sendMessage();}};
-
-// Expose Firebase API for later features (Storage, notifications, etc.).
-window.NChatReal={auth,db,storage,getProfile,ensureChat,openRealChat};
+    localStorage.removeItem('nchat_accounts_v2');
+    localStorage.removeItem('nchat_user');
+  }catch(e){}
+})();
 </script>
-
+</body>
+</html>
 </body>
 </html>
