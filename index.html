@@ -8319,5 +8319,115 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await ensureUserDoc(fu);showApp(d)}catch(e){showApp({name:fu.displayName||fu.email.split('@')[0],email:fu.email})}});
 })();
 </script>
+<script>
+/* N CHAT FINAL FIREBASE FRIEND ID / USER NAME PATCH
+   Keeps the original UI and makes the profile name + ID come from Firebase.
+*/
+(function(){
+  if(!window.firebase) return;
+  const FAuth=firebase.auth();
+  const FDB=firebase.firestore();
+  const $=id=>document.getElementById(id);
+  const DEMO=new Set(['أحمد','سارة','محمد','ريم','ياسين','نور','مستخدم N Chat']);
+
+  // A real, stable ID derived from the Firebase Authentication UID.
+  // It is unique for the Firebase account and never changes when the user logs in again.
+  function realNChatId(uid){ return 'N-'+uid; }
+
+  function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
+  async function syncFirebaseUser(user){
+    if(!user) return null;
+    const ref=FDB.collection('users').doc(user.uid);
+    const snap=await ref.get();
+    const old=snap.exists?snap.data():{};
+    const name=(old.name||user.displayName||user.email?.split('@')[0]||'مستخدم').trim();
+    const id=realNChatId(user.uid);
+    const data={
+      uid:user.uid,
+      name:name,
+      email:user.email||old.email||'',
+      nameLower:name.toLocaleLowerCase(),
+      nchatId:id,
+      nchatIdLower:id.toLowerCase(),
+      photoURL:old.photoURL||'',
+      createdAt:old.createdAt||firebase.firestore.FieldValue.serverTimestamp()
+    };
+    await ref.set(data,{merge:true});
+    return data;
+  }
+
+  function updateProfileUI(data){
+    const name=(data?.name||FAuth.currentUser?.displayName||FAuth.currentUser?.email?.split('@')[0]||'مستخدم').trim();
+    const email=data?.email||FAuth.currentUser?.email||'';
+    const id=data?.nchatId||realNChatId(FAuth.currentUser?.uid||'');
+    document.querySelectorAll('.nchat-profile-name').forEach(e=>e.textContent=name);
+    document.querySelectorAll('.nchat-profile-email').forEach(e=>e.textContent=email);
+    const idEl=$('nchatProfileIdValue'); if(idEl) idEl.textContent=id;
+    document.querySelectorAll('.nchat-profile-avatar').forEach(old=>{
+      const d=document.createElement('div');
+      d.className=old.className;
+      d.textContent=(name[0]||'N').toUpperCase();
+      d.style.cssText='display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800;font-size:22px;border-radius:50%;width:56px;height:56px;flex:0 0 56px;';
+      old.replaceWith(d);
+    });
+  }
+
+  // Replace the old local/demo search with Firestore search.
+  window.searchFriends=async function(value){
+    const box=$('friendSearchResults'); if(!box)return;
+    const q=(value||'').trim().toLocaleLowerCase();
+    if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسمًا أو ID للبحث.</div>';return;}
+    const me=FAuth.currentUser;
+    if(!me){box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';return;}
+    box.innerHTML='<div class="nchat-empty">جاري البحث...</div>';
+    try{
+      const snap=await FDB.collection('users').get();
+      const rows=snap.docs.map(d=>d.data()).filter(u=>{
+        if(!u.uid||u.uid===me.uid||DEMO.has((u.name||'').trim()))return false;
+        const name=(u.nameLower||u.name||'').toLocaleLowerCase();
+        const id=(u.nchatIdLower||u.nchatId||'').toLocaleLowerCase();
+        return name.includes(q)||id.includes(q);
+      });
+      if(!rows.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على حساب بهذا الاسم أو ID.</div>';return;}
+      box.innerHTML=rows.map(u=>{
+        const initial=escapeHtml((u.name||'N').trim()[0]?.toUpperCase()||'N');
+        return `<div class="nchat-search-result" data-uid="${escapeHtml(u.uid)}">
+          <div class="nchat-result-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">${initial}</div>
+          <div class="nchat-result-info"><div class="nchat-result-name">${escapeHtml(u.name||'')}</div><div class="nchat-result-id">${escapeHtml(u.nchatId||realNChatId(u.uid))}</div></div>
+          <button class="nchat-add-btn" onclick="addFriendFirebase('${escapeHtml(u.uid)}')">إضافة</button>
+        </div>`;
+      }).join('');
+    }catch(e){console.error(e);box.innerHTML='<div class="nchat-empty">حدث خطأ أثناء البحث في Firebase.</div>';}
+  };
+
+  window.addFriendFirebase=async function(uid){
+    const me=FAuth.currentUser;
+    if(!me||!uid)return;
+    if(uid===me.uid)return;
+    try{
+      await FDB.collection('users').doc(me.uid).collection('friends').doc(uid).set({uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      // Also create a reciprocal record so both users can see the friendship.
+      await FDB.collection('users').doc(uid).collection('friends').doc(me.uid).set({uid:me.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      if(typeof window.showToast==='function') window.showToast('تمت إضافة الصديق');
+      else if(typeof window.toast==='function') window.toast('تمت إضافة الصديق');
+      await window.searchFriends($('friendSearchInput')?.value||'');
+    }catch(e){console.error(e);if(typeof window.showToast==='function')window.showToast('تعذر إضافة الصديق');}
+  };
+
+  FAuth.onAuthStateChanged(async user=>{
+    if(!user)return;
+    try{const data=await syncFirebaseUser(user);updateProfileUI(data);}catch(e){console.error('Firebase user sync failed',e);}
+  });
+
+  // If the profile settings page is opened later, refresh its real data.
+  document.addEventListener('click',async e=>{
+    const row=e.target.closest?.('.nchat-setting');
+    if(row && /الحساب والملف الشخصي/.test(row.textContent||'')){
+      try{const d=await syncFirebaseUser(FAuth.currentUser);updateProfileUI(d);}catch(err){console.error(err);}
+    }
+  },true);
+})();
+</script>
 </body>
 </html>
