@@ -8431,3 +8431,175 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
 </script>
 </body>
 </html>
+<style>
+/* Firebase friend-request final layer */
+.nchat-friend-request-card{background:#fff;border:1px solid #eceaf4;border-radius:18px;padding:14px;margin:10px 0;display:flex;align-items:center;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
+.nchat-friend-request-card .rq-info{flex:1;min-width:0}.nchat-friend-request-card .rq-name{font-weight:800}.nchat-friend-request-card .rq-id{font-size:11px;color:#8b8799;margin-top:4px}
+.nchat-rq-actions{display:flex;gap:7px}.nchat-rq-actions button{border:0;border-radius:10px;padding:8px 11px;font-weight:800;cursor:pointer}.nchat-rq-accept{background:#7054f6;color:#fff}.nchat-rq-reject{background:#f1eff7;color:#625d70}
+.nchat-request-banner{margin:10px 16px;padding:12px 14px;border-radius:16px;background:#f7f5ff;border:1px solid #e7e1ff;cursor:pointer}
+.nchat-request-banner .rq-title{font-weight:800}.nchat-request-banner .rq-sub{font-size:12px;color:#77718a;margin-top:4px}
+</style>
+<script>
+/* ==========================================================
+   FINAL FIREBASE FRIEND REQUEST / REAL ID FIX
+   Keeps the original UI and overrides only the friend system.
+   ========================================================== */
+(function(){
+  const FApp=window.firebase?.app?.();
+  if(!FApp || !window.firebase.auth || !window.firebase.firestore) return;
+  const FAuth=window.firebase.auth();
+  const FDB=window.firebase.firestore();
+  const FV=window.firebase.firestore.FieldValue;
+  const DEMO=new Set(['أحمد','سارة','محمد','ريم','ياسين','نور','N Chat User','مستخدم N Chat']);
+
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const initial=name=>(String(name||'N').trim().charAt(0)||'N').toUpperCase();
+  const toast=m=>{if(typeof window.showToast==='function')window.showToast(m);else if(typeof window.toast==='function')window.toast(m);else console.log(m)};
+
+  // One stable, Firebase-linked ID. Existing users get migrated on login.
+  function realId(uid){ return 'N-'+String(uid||'').replace(/[^A-Za-z0-9]/g,'').slice(0,10).toUpperCase(); }
+
+  async function ensureProfile(user){
+    if(!user) return null;
+    const ref=FDB.collection('users').doc(user.uid);
+    const snap=await ref.get();
+    const old=snap.exists?snap.data():{};
+    const name=(old.name||user.displayName||user.email?.split('@')[0]||'User').trim();
+    const id=realId(user.uid);
+    const data={uid:user.uid,name,email:user.email||old.email||'',nameLower:name.toLocaleLowerCase(),nchatId:id,nchatIdLower:id.toLocaleLowerCase(),photoURL:'',updatedAt:FV.serverTimestamp()};
+    if(!snap.exists) data.createdAt=FV.serverTimestamp();
+    await ref.set(data,{merge:true});
+    return {...old,...data};
+  }
+
+  function chatId(a,b){ return [a,b].sort().join('_'); }
+
+  async function getProfile(uid){
+    const s=await FDB.collection('users').doc(uid).get();
+    return s.exists?s.data():null;
+  }
+
+  // Replace the old random/0000 ID wherever the profile displays it.
+  async function refreshOwnProfileUI(){
+    const u=FAuth.currentUser;if(!u)return;
+    const p=await ensureProfile(u); if(!p)return;
+    document.querySelectorAll('#nchatProfileIdValue,.nchat-profile-id,.profile-id').forEach(e=>e.textContent=p.nchatId);
+    document.querySelectorAll('[data-user-name],.nchat-profile-name').forEach(e=>{if(e.dataset.userName!==undefined||e.classList.contains('nchat-profile-name'))e.textContent=p.name});
+    document.querySelectorAll('img[src*="avatar"], img[src*="photo"]').forEach(img=>{
+      // Do not replace arbitrary chat avatars here.
+    });
+    // Replace obvious placeholder text without disturbing translations.
+    document.querySelectorAll('*').forEach(el=>{
+      if(el.children.length===0 && (el.textContent.trim()==='مستخدم N Chat'||el.textContent.trim()==='N Chat User'||el.textContent.trim()==='user@nchat.com')){
+        if(el.textContent.trim().includes('@')) el.textContent=p.email||''; else el.textContent=p.name;
+      }
+    });
+  }
+
+  // Search Firebase users by name or real N-ID.
+  window.searchFriends=async function(value){
+    const box=$('friendSearchResults'); if(!box)return;
+    const q=String(value||'').trim().toLocaleLowerCase();
+    if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسمًا أو ID للبحث.</div>';return;}
+    const me=FAuth.currentUser;
+    if(!me){box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';return;}
+    box.innerHTML='<div class="nchat-empty">جاري البحث...</div>';
+    try{
+      const snap=await FDB.collection('users').get();
+      const rows=snap.docs.map(d=>d.data()).filter(u=>u.uid!==me.uid&&!DEMO.has(u.name)&&((u.nameLower||u.name||'').toLocaleLowerCase().includes(q)||(u.nchatIdLower||u.nchatId||realId(u.uid)).toLocaleLowerCase().includes(q)));
+      if(!rows.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على حساب بهذا الاسم أو ID.</div>';return;}
+      const meChats=await FDB.collection('chats').where('members','array-contains',me.uid).get();
+      const states={}; meChats.forEach(d=>{const x=d.data();const other=(x.members||[]).find(id=>id!==me.uid);if(other)states[other]=x.status||'pending'});
+      box.innerHTML=rows.map(u=>{
+        const st=states[u.uid];
+        let btn='';
+        if(st==='accepted') btn='<button class="nchat-add-btn" disabled>مضاف</button>';
+        else if(st==='pending') btn='<button class="nchat-add-btn" disabled>معلق</button>';
+        else btn='<button class="nchat-add-btn" onclick="sendFriendRequest(\''+esc(u.uid)+'\')">إضافة</button>';
+        return '<div class="nchat-search-result" data-uid="'+esc(u.uid)+'"><div class="nchat-result-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">'+esc(initial(u.name))+'</div><div class="nchat-result-info"><div class="nchat-result-name">'+esc(u.name||'')+'</div><div class="nchat-result-id">'+esc(u.nchatId||realId(u.uid))+'</div></div>'+btn+'</div>';
+      }).join('');
+    }catch(e){console.error('searchFriends',e);box.innerHTML='<div class="nchat-empty">حدث خطأ أثناء البحث.</div>';}
+  };
+
+  window.sendFriendRequest=async function(uid){
+    const me=FAuth.currentUser;if(!me||!uid||uid===me.uid)return;
+    try{
+      const other=await getProfile(uid);if(!other){toast('الحساب غير موجود');return;}
+      const id=chatId(me.uid,uid); const ref=FDB.collection('chats').doc(id); const old=await ref.get();
+      if(old.exists && old.data().status==='accepted'){toast('هذا الصديق مضاف بالفعل');return;}
+      if(old.exists && old.data().status==='pending'){toast('طلب المحادثة معلق بالفعل');return;}
+      const meP=await ensureProfile(me);
+      await ref.set({
+        type:'friend_request',status:'pending',members:[me.uid,uid],requesterId:me.uid,recipientId:uid,
+        requesterName:meP.name,requesterNchatId:meP.nchatId,recipientName:other.name,recipientNchatId:other.nchatId||realId(uid),
+        lastMessage:meP.name+' يريد بدء محادثة معك',lastMessageAt:FV.serverTimestamp(),updatedAt:FV.serverTimestamp(),createdAt:FV.serverTimestamp()
+      },{merge:true});
+      toast('تم إرسال طلب المحادثة');
+      await window.searchFriends($('friendSearchInput')?.value||'');
+    }catch(e){console.error('sendFriendRequest',e);toast('تعذر إرسال طلب المحادثة');}
+  };
+
+  async function openRequestChat(data){
+    const otherId=FAuth.currentUser.uid===data.requesterId?data.recipientId:data.requesterId;
+    const other=await getProfile(otherId);
+    if(typeof window.openEnhancedChat==='function'){
+      window.__nchatActiveFriend={name:other?.name||data.requesterName||data.recipientName||'صديق',avatar:'',id:otherId,uid:otherId,chatId:data.chatId||chatId(FAuth.currentUser.uid,otherId),pending:true};
+      window.openEnhancedChat(window.__nchatActiveFriend.name,'',otherId);
+    }
+    showRequestActions(data);
+  }
+
+  function showRequestActions(data){
+    const me=FAuth.currentUser;if(!me)return;
+    const isRecipient=me.uid===data.recipientId;
+    if(!isRecipient || data.status!=='pending')return;
+    let box=document.getElementById('firebaseRequestActions');
+    if(!box){box=document.createElement('div');box.id='firebaseRequestActions';document.body.appendChild(box);}
+    box.innerHTML='<div style="position:fixed;left:16px;right:16px;bottom:92px;z-index:99999;background:#fff;border:1px solid #e9e5f5;border-radius:18px;padding:14px;box-shadow:0 10px 35px rgba(0,0,0,.15)"><div style="font-weight:800;margin-bottom:6px">طلب محادثة</div><div style="font-size:13px;color:#666;margin-bottom:12px">'+esc(data.requesterName||'صديق')+' يريد بدء محادثة معك</div><div style="display:flex;gap:8px"><button onclick="acceptFriendRequest(\''+esc(data.id||data.chatId)+'\')" style="flex:1;border:0;border-radius:11px;padding:11px;background:#7054f6;color:#fff;font-weight:800">قبول</button><button onclick="rejectFriendRequest(\''+esc(data.id||data.chatId)+'\')" style="flex:1;border:0;border-radius:11px;padding:11px;background:#eeeaf5;color:#555;font-weight:800">رفض</button></div></div>';
+  }
+
+  window.acceptFriendRequest=async function(id){
+    const me=FAuth.currentUser;if(!me||!id)return;
+    try{await FDB.collection('chats').doc(id).update({status:'accepted',type:'chat',acceptedAt:FV.serverTimestamp(),updatedAt:FV.serverTimestamp(),lastMessage:'تم قبول المحادثة'});toast('تم قبول المحادثة');document.getElementById('firebaseRequestActions')?.remove();await renderRealChats();}
+    catch(e){console.error(e);toast('تعذر قبول المحادثة');}
+  };
+
+  window.rejectFriendRequest=async function(id){
+    // Per request: rejection leaves the request pending.
+    toast('تم رفض الطلب، وسيبقى معلقًا');document.getElementById('firebaseRequestActions')?.remove();
+  };
+
+  async function renderRealChats(){
+    const me=FAuth.currentUser;if(!me)return;
+    const snap=await FDB.collection('chats').where('members','array-contains',me.uid).get();
+    const pending=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.status==='pending'&&x.type==='friend_request');
+    let host=document.getElementById('firebasePendingRequests');
+    if(!host){
+      host=document.createElement('div');host.id='firebasePendingRequests';
+      const target=document.querySelector('#chatsScreen .nchat-screen-body')||document.querySelector('#chatsScreen');
+      if(target)target.prepend(host);
+    }
+    host.innerHTML=pending.map(x=>{
+      const recipient=me.uid===x.recipientId; const name=recipient?x.requesterName:x.recipientName;
+      return '<div class="nchat-request-banner" onclick="openFirebaseRequest(\''+esc(x.id)+'\')"><div class="rq-title">'+esc(name||'طلب محادثة')+'</div><div class="rq-sub">'+(recipient?'طلب محادثة جديد — اضغط لعرض قبول أو رفض':'طلب المحادثة معلق')+'</div></div>';
+    }).join('');
+  }
+  window.openFirebaseRequest=async function(id){const s=await FDB.collection('chats').doc(id).get();if(s.exists)await openRequestChat({id:s.id,chatId:s.id,...s.data()});};
+
+  // Override opening a friend: pending requests must show actions to recipient.
+  const originalOpen=window.openEnhancedChat;
+  window.openEnhancedChat=async function(name,avatar,id){
+    const me=FAuth.currentUser;
+    if(me&&id){
+      try{const s=await FDB.collection('chats').doc(chatId(me.uid,id)).get();if(s.exists&&s.data().status==='pending'&&s.data().type==='friend_request'){await openRequestChat({id:s.id,chatId:s.id,...s.data()});return;}}catch(e){console.warn(e)}
+    }
+    if(typeof originalOpen==='function')return originalOpen.apply(this,arguments);
+  };
+
+  FAuth.onAuthStateChanged(async user=>{
+    if(!user)return;
+    try{await ensureProfile(user);await refreshOwnProfileUI();await renderRealChats();}catch(e){console.error('profile init',e)}
+  });
+})();
+</script>
