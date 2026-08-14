@@ -4975,7 +4975,7 @@ input{
 <main class="nchat-content">
 <div class="nchat-section-head"><span class="nchat-section-title">الأصدقاء المتصلون</span><span class="nchat-section-link" onclick="showAllFriends()">عرض الكل</span></div>
 <div class="nchat-online-list">
-<div class="nchat-online-person" onclick="openChat('أحمد','12')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=12"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">أحمد</span></div>
+<div class="nchat-online-person" onclick="openChat('أحمد','12')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src=""/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">أحمد</span></div>
 <div class="nchat-online-person" onclick="openChat('سارة','32')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=32"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">سارة</span></div>
 <div class="nchat-online-person" onclick="openChat('محمد','47')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=47"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">محمد</span></div>
 <div class="nchat-online-person" onclick="openChat('ريم','44')"><div class="nchat-avatar-wrap"><img class="nchat-avatar" src="https://i.pravatar.cc/150?img=44"/><span class="nchat-online-dot"></span></div><span class="nchat-online-name">ريم</span></div>
@@ -4985,7 +4985,7 @@ input{
 <div class="nchat-search-box"><svg fill="none" viewbox="0 0 24 24"><circle cx="11" cy="11" r="6.5" stroke-width="1.8"></circle><path d="M16 16l5 5" stroke-linecap="round" stroke-width="1.8"></path></svg><input id="chatSearch" oninput="searchChats(this.value)" placeholder="ابحث في المحادثات..." type="text"/></div>
 <div class="nchat-section-head"><span class="nchat-section-title">المحادثات</span><span class="nchat-section-link">الكل</span></div>
 <div class="nchat-chat-list" id="chatList">
-<div class="nchat-chat-item" data-name="أحمد" onclick="openChat('أحمد','12')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=12"/><span class="nchat-online-dot"></span></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">أحمد</span><span class="nchat-chat-time">21:18</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">مرحباً، كيف حالك؟</span><span class="nchat-unread">2</span></div></div></div>
+<div class="nchat-chat-item" data-name="أحمد" onclick="openChat('أحمد','12')"><div class="nchat-chat-avatar"><img src=""/><span class="nchat-online-dot"></span></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">أحمد</span><span class="nchat-chat-time">21:18</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">مرحباً، كيف حالك؟</span><span class="nchat-unread">2</span></div></div></div>
 <div class="nchat-chat-item" data-name="سارة" onclick="openChat('سارة','32')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=32"/><span class="nchat-online-dot"></span></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">سارة</span><span class="nchat-chat-time">20:43</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">هل نخرج غداً؟</span></div></div></div>
 <div class="nchat-chat-item" data-name="محمد" onclick="openChat('محمد','47')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=47"/></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">محمد</span><span class="nchat-chat-time">19:26</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">أرسل لي الملف عندما تنتهي.</span></div></div></div>
 <div class="nchat-chat-item" data-name="ريم" onclick="openChat('ريم','44')"><div class="nchat-chat-avatar"><img src="https://i.pravatar.cc/150?img=44"/></div><div class="nchat-chat-info"><div class="nchat-chat-top"><span class="nchat-chat-name">ريم</span><span class="nchat-chat-time">18:51</span></div><div class="nchat-chat-bottom"><span class="nchat-last-message">تمام، شكراً لك ❤️</span></div></div></div>
@@ -5010,8 +5010,8 @@ input{
 </div>
 </section>
 <section class="nchat-chat-room" id="chatRoom">
-<header class="nchat-room-header"><button class="nchat-back-btn" onclick="closeChat()"><svg fill="none" viewbox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button><img class="nchat-room-avatar" id="roomAvatar" src="https://i.pravatar.cc/150?img=12"/><div class="nchat-room-info"><div class="nchat-room-name" id="roomName">أحمد</div><div class="nchat-room-status">متصل الآن</div></div><button class="nchat-icon-btn" onclick="showToast('المزيد من الخيارات')"><svg fill="none" viewbox="0 0 24 24"><circle cx="5" cy="12" fill="#6243df" r="1.5" stroke="none"></circle><circle cx="12" cy="12" fill="#6243df" r="1.5" stroke="none"></circle><circle cx="19" cy="12" fill="#6243df" r="1.5" stroke="none"></circle></svg></button></header>
-<div class="nchat-messages" id="messages"><div class="nchat-message received">مرحباً 👋 كيف حالك؟<span class="nchat-message-time">21:15</span></div><div class="nchat-message sent">أنا بخير، الحمد لله. وأنت؟<span class="nchat-message-time">21:16</span></div><div class="nchat-message received">بخير أيضاً، سعيد بالتحدث معك.<span class="nchat-message-time">21:17</span></div></div>
+<header class="nchat-room-header"><button class="nchat-back-btn" onclick="closeChat()"><svg fill="none" viewbox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button><img class="nchat-room-avatar" id="roomAvatar" src=""/><div class="nchat-room-info"><div class="nchat-room-name" id="roomName">أحمد</div><div class="nchat-room-status">متصل الآن</div></div><button class="nchat-icon-btn" onclick="showToast('المزيد من الخيارات')"><svg fill="none" viewbox="0 0 24 24"><circle cx="5" cy="12" fill="#6243df" r="1.5" stroke="none"></circle><circle cx="12" cy="12" fill="#6243df" r="1.5" stroke="none"></circle><circle cx="19" cy="12" fill="#6243df" r="1.5" stroke="none"></circle></svg></button></header>
+<div class="nchat-messages" id="messages"></div>
 <div class="nchat-message-input"><button class="nchat-icon-btn" onclick="showToast('إضافة صورة')"><svg fill="none" viewbox="0 0 24 24"><path d="M7 4.5h10A2.5 2.5 0 0 1 19.5 7v10a2.5 2.5 0 0 1-2.5 2.5H7A2.5 2.5 0 0 1 4.5 17V7A2.5 2.5 0 0 1 7 4.5Z" stroke-width="1.6"></path><circle cx="9" cy="9" r="1.2" stroke-width="1.5"></circle><path d="m6.5 17 3.8-4 2.5 2.5 1.8-2 3 3.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path></svg></button><input id="messageInput" onkeydown="handleMessage(event)" placeholder="اكتب رسالة..." type="text"/><button class="nchat-send-btn" onclick="sendMessage()"><svg fill="none" viewbox="0 0 24 24"><path d="M21 3 10 14" stroke="white" stroke-linecap="round" stroke-width="1.8"></path><path d="m21 3-7 18-4-7-7-4 18-7Z" stroke="white" stroke-linejoin="round" stroke-width="1.8"></path></svg></button></div>
 </section>
 <div class="nchat-toast" id="toast">تم</div>
@@ -6059,14 +6059,7 @@ window.addEventListener("load",function(){loadTheme();});
   }
   function seedAccounts(){
     let accounts=getJSON(ACCOUNTS_KEY,[]);
-    const demo=[
-      {name:'أحمد',id:'N-120431',email:'ahmed@nchat.local',avatar:'https://i.pravatar.cc/150?img=12',online:true},
-      {name:'سارة',id:'N-327814',email:'sara@nchat.local',avatar:'https://i.pravatar.cc/150?img=32',online:true},
-      {name:'محمد',id:'N-475620',email:'mohamed@nchat.local',avatar:'https://i.pravatar.cc/150?img=47',online:true},
-      {name:'ريم',id:'N-449205',email:'rim@nchat.local',avatar:'https://i.pravatar.cc/150?img=44',online:true},
-      {name:'ياسين',id:'N-683517',email:'yassine@nchat.local',avatar:'https://i.pravatar.cc/150?img=68',online:true},
-      {name:'نور',id:'N-492731',email:'nour@nchat.local',avatar:'https://i.pravatar.cc/150?img=49',online:true}
-    ];
+    const demo=[];
     demo.forEach(d=>{if(!accounts.some(a=>a.id===d.id)) accounts.push(d)});
     setJSON(ACCOUNTS_KEY,accounts); return accounts;
   }
@@ -6160,9 +6153,9 @@ window.addEventListener("load",function(){loadTheme();});
   function isFriend(id){return friendIds().includes(id)}
   window.searchFriends=function(value){
     const q=(value||'').trim().toLowerCase(); const box=document.getElementById('friendSearchResults'); if(!box)return;
-    if(!q){box.innerHTML='<div class="nchat-empty"><div class="nchat-empty-icon"><svg fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>اكتب اسمًا أو ID للبحث.</div>';return}
+    if(!q){box.innerHTML='<div class="nchat-empty"><div class="nchat-empty-icon"><svg fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>اكتب اسم الصديق للبحث.</div>';return}
     const me=currentUser(); const results=seedAccounts().filter(a=>a.id!==me?.id && ((a.name||'').toLowerCase().includes(q)||(a.id||'').toLowerCase()===q||(a.id||'').toLowerCase().includes(q)));
-    if(!results.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على حساب بهذا الاسم أو ID.</div>';return}
+    if(!results.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على صديق بهذا الاسم.</div>';return}
     box.innerHTML=results.map(a=>`<div class="nchat-search-result"><img class="nchat-result-avatar" src="${escapeAttr(a.avatar)}"><div class="nchat-result-info"><div class="nchat-result-name">${escapeHTML(a.name)}</div><div class="nchat-result-id">${escapeHTML(a.id)}</div></div>${isFriend(a.id)?'<button class="nchat-add-btn" onclick="startFriendChat(\''+escapeJS(a.name)+'\',\''+escapeJS(a.avatar)+'\',\''+escapeJS(a.id)+'\')">مراسلة</button>':'<button class="nchat-add-btn" onclick="addFriend(\''+escapeJS(a.id)+'\')">إضافة</button>'}</div>`).join('');
   };
   window.addFriend=function(id){
@@ -8303,8 +8296,8 @@ async function googleLogin(){
 window.logout=async function(){try{await auth.signOut();localStorage.removeItem('nchat_user')}catch(e){toast('تعذر تسجيل الخروج')}};
 window.openChatApp=function(){const u=auth.currentUser;if(!u)return showAuth();db.collection('users').doc(u.uid).get().then(s=>showApp(Object.assign({name:u.displayName||u.email.split('@')[0],email:u.email},s.data()||{}))).catch(()=>showApp({name:u.displayName||u.email.split('@')[0],email:u.email}));};
 async function searchFriends(value){
- const box=$('friendSearchResults');if(!box)return;const q=(value||'').trim().toLowerCase();if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسمًا أو ID للبحث.</div>';return}if(!auth.currentUser){box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';return}
- try{const snap=await db.collection('users').get();const me=auth.currentUser.uid;const rows=snap.docs.map(d=>d.data()).filter(u=>u.uid!==me&&!DEMO_NAMES.has(u.name||'')&&((u.nameLower||u.name||'').includes(q)||(u.nchatIdLower||u.nchatId||'').includes(q)));if(!rows.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على حساب بهذا الاسم أو ID.</div>';return}box.innerHTML=rows.map(u=>{const initial=(u.name||'N').trim()[0].toUpperCase();return `<div class="nchat-search-result" data-uid="${u.uid}"><div class="nchat-result-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">${initial}</div><div class="nchat-result-info"><div class="nchat-result-name">${escapeHTML(u.name||'')}</div><div class="nchat-result-id">${escapeHTML(u.nchatId||'')}</div></div><button class="nchat-add-btn" onclick="addFriendFirebase('${u.uid}')">إضافة</button></div>`}).join('')}
+ const box=$('friendSearchResults');if(!box)return;const q=(value||'').trim().toLowerCase();if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسم الصديق للبحث.</div>';return}if(!auth.currentUser){box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';return}
+ try{const snap=await db.collection('users').get();const me=auth.currentUser.uid;const rows=snap.docs.map(d=>d.data()).filter(u=>u.uid!==me&&!DEMO_NAMES.has(u.name||'')&&((u.nameLower||u.name||'').includes(q)||(u.nchatIdLower||u.nchatId||'').includes(q)));if(!rows.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على صديق بهذا الاسم.</div>';return}box.innerHTML=rows.map(u=>{const initial=(u.name||'N').trim()[0].toUpperCase();return `<div class="nchat-search-result" data-uid="${u.uid}"><div class="nchat-result-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">${initial}</div><div class="nchat-result-info"><div class="nchat-result-name">${escapeHTML(u.name||'')}</div><div class="nchat-result-id">${escapeHTML(u.nchatId||'')}</div></div><button class="nchat-add-btn" onclick="addFriendFirebase('${u.uid}')">إضافة</button></div>`}).join('')}
  catch(e){box.innerHTML='<div class="nchat-empty">حدث خطأ أثناء البحث.</div>'}
 }
 window.searchFriends=searchFriends;
@@ -8377,7 +8370,7 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
   window.searchFriends=async function(value){
     const box=$('friendSearchResults'); if(!box)return;
     const q=(value||'').trim().toLocaleLowerCase();
-    if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسمًا أو ID للبحث.</div>';return;}
+    if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسم الصديق للبحث.</div>';return;}
     const me=FAuth.currentUser;
     if(!me){box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';return;}
     box.innerHTML='<div class="nchat-empty">جاري البحث...</div>';
@@ -8389,7 +8382,7 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
         const id=(u.nchatIdLower||u.nchatId||'').toLocaleLowerCase();
         return name.includes(q)||id.includes(q);
       });
-      if(!rows.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على حساب بهذا الاسم أو ID.</div>';return;}
+      if(!rows.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على صديق بهذا الاسم.</div>';return;}
       box.innerHTML=rows.map(u=>{
         const initial=escapeHtml((u.name||'N').trim()[0]?.toUpperCase()||'N');
         return `<div class="nchat-search-result" data-uid="${escapeHtml(u.uid)}">
@@ -8429,336 +8422,1137 @@ auth.onAuthStateChanged(async fu=>{if(!fu){showAuth();return}try{const d=await e
   },true);
 })();
 </script>
-</body>
-</html>
-<style>
-/* Firebase friend-request final layer */
-.nchat-friend-request-card{background:#fff;border:1px solid #eceaf4;border-radius:18px;padding:14px;margin:10px 0;display:flex;align-items:center;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
-.nchat-friend-request-card .rq-info{flex:1;min-width:0}.nchat-friend-request-card .rq-name{font-weight:800}.nchat-friend-request-card .rq-id{font-size:11px;color:#8b8799;margin-top:4px}
-.nchat-rq-actions{display:flex;gap:7px}.nchat-rq-actions button{border:0;border-radius:10px;padding:8px 11px;font-weight:800;cursor:pointer}.nchat-rq-accept{background:#7054f6;color:#fff}.nchat-rq-reject{background:#f1eff7;color:#625d70}
-.nchat-request-banner{margin:10px 16px;padding:12px 14px;border-radius:16px;background:#f7f5ff;border:1px solid #e7e1ff;cursor:pointer}
-.nchat-request-banner .rq-title{font-weight:800}.nchat-request-banner .rq-sub{font-size:12px;color:#77718a;margin-top:4px}
-</style>
-<script>
-/* ==========================================================
-   FINAL FIREBASE FRIEND REQUEST / REAL ID FIX
-   Keeps the original UI and overrides only the friend system.
-   ========================================================== */
+
+<script id="nchat-firebase-real-only">
 (function(){
-  const FApp=window.firebase?.app?.();
-  if(!FApp || !window.firebase.auth || !window.firebase.firestore) return;
-  const FAuth=window.firebase.auth();
-  const FDB=window.firebase.firestore();
-  const FV=window.firebase.firestore.FieldValue;
-  const DEMO=new Set(['أحمد','سارة','محمد','ريم','ياسين','نور','N Chat User','مستخدم N Chat']);
+  'use strict';
 
-  const $=id=>document.getElementById(id);
-  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const initial=name=>(String(name||'N').trim().charAt(0)||'N').toUpperCase();
-  const toast=m=>{if(typeof window.showToast==='function')window.showToast(m);else if(typeof window.toast==='function')window.toast(m);else console.log(m)};
+  if(!window.firebase || !firebase.auth || !firebase.firestore) return;
 
-  // One stable, Firebase-linked ID. Existing users get migrated on login.
-  function realId(uid){ return 'N-'+String(uid||'').replace(/[^A-Za-z0-9]/g,'').slice(0,10).toUpperCase(); }
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const FV = firebase.firestore.FieldValue;
+  const $ = id => document.getElementById(id);
 
-  async function ensureProfile(user){
-    if(!user) return null;
-    const ref=FDB.collection('users').doc(user.uid);
-    const snap=await ref.get();
-    const old=snap.exists?snap.data():{};
-    const name=(old.name||user.displayName||user.email?.split('@')[0]||'User').trim();
-    const id=realId(user.uid);
-    const data={uid:user.uid,name,email:user.email||old.email||'',nameLower:name.toLocaleLowerCase(),nchatId:id,nchatIdLower:id.toLocaleLowerCase(),photoURL:'',updatedAt:FV.serverTimestamp()};
-    if(!snap.exists) data.createdAt=FV.serverTimestamp();
-    await ref.set(data,{merge:true});
-    return {...old,...data};
+  const DEMO_NAMES = new Set(['أحمد','سارة','محمد','ريم','ياسين','نور','مستخدم تجريبي','مستخدم N Chat','N Chat User']);
+
+  function esc(v){
+    return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
   }
 
-  function chatId(a,b){ return [a,b].sort().join('_'); }
+  function toast(message){
+    if(typeof window.showToast === 'function') window.showToast(message);
+    else console.log(message);
+  }
+
+  function initial(name){
+    const t = String(name || '').trim();
+    return esc((t.charAt(0) || 'م').toUpperCase());
+  }
+
+  function chatId(a,b){
+    return [a,b].sort().join('_');
+  }
 
   async function getProfile(uid){
-    const s=await FDB.collection('users').doc(uid).get();
-    return s.exists?s.data():null;
+    if(!uid) return null;
+    const snap = await db.collection('users').doc(uid).get();
+    return snap.exists ? snap.data() : null;
   }
 
-  // Replace the old random/0000 ID wherever the profile displays it.
-  async function refreshOwnProfileUI(){
-    const u=FAuth.currentUser;if(!u)return;
-    const p=await ensureProfile(u); if(!p)return;
-    document.querySelectorAll('#nchatProfileIdValue,.nchat-profile-id,.profile-id').forEach(e=>e.textContent=p.nchatId);
-    document.querySelectorAll('[data-user-name],.nchat-profile-name').forEach(e=>{if(e.dataset.userName!==undefined||e.classList.contains('nchat-profile-name'))e.textContent=p.name});
-    document.querySelectorAll('img[src*="avatar"], img[src*="photo"]').forEach(img=>{
-      // Do not replace arbitrary chat avatars here.
+  async function ensureProfile(user, forcedName){
+    if(!user) return null;
+
+    const ref = db.collection('users').doc(user.uid);
+    const snap = await ref.get();
+    const old = snap.exists ? snap.data() : {};
+
+    const name = String(
+      forcedName ||
+      old.name ||
+      user.displayName ||
+      (user.email || '').split('@')[0] ||
+      'مستخدم'
+    ).trim();
+
+    const data = {
+      uid: user.uid,
+      name: name,
+      email: user.email || old.email || '',
+      nameLower: name.toLocaleLowerCase(),
+      photoURL: old.photoURL || user.photoURL || '',
+      updatedAt: FV.serverTimestamp()
+    };
+
+    if(!snap.exists) data.createdAt = FV.serverTimestamp();
+
+    await ref.set(data, {merge:true});
+    return {...old, ...data};
+  }
+
+  function showOnlyAuth(){
+    const authApp = $('authApp');
+    const chatApp = $('chatApp');
+    if(authApp) authApp.style.display = 'flex';
+    if(chatApp) chatApp.style.display = 'none';
+
+    document.querySelectorAll('#chatApp .nchat-chat-room').forEach(x => x.classList.remove('active'));
+  }
+
+  function setProfileUI(profile){
+    const user = auth.currentUser;
+    const name = profile?.name || user?.displayName || (user?.email || '').split('@')[0] || 'مستخدم';
+    const email = profile?.email || user?.email || '';
+
+    document.querySelectorAll('#profileName,.nchat-profile-name,.profile-name').forEach(e => e.textContent = name);
+    document.querySelectorAll('#profileEmail,.nchat-profile-email,.profile-email').forEach(e => e.textContent = email);
+
+    document.querySelectorAll('.nchat-profile-avatar').forEach(old => {
+      const d = document.createElement('div');
+      d.className = old.className;
+      d.textContent = (name.trim().charAt(0) || 'م').toUpperCase();
+      d.style.cssText =
+        'display:flex;align-items:center;justify-content:center;' +
+        'background:#7054F6;color:#fff;font-weight:800;font-size:22px;' +
+        'border-radius:50%;width:56px;height:56px;flex:0 0 56px;';
+      old.replaceWith(d);
     });
-    // Replace obvious placeholder text without disturbing translations.
-    document.querySelectorAll('*').forEach(el=>{
-      if(el.children.length===0 && (el.textContent.trim()==='مستخدم N Chat'||el.textContent.trim()==='N Chat User'||el.textContent.trim()==='user@nchat.com')){
-        if(el.textContent.trim().includes('@')) el.textContent=p.email||''; else el.textContent=p.name;
-      }
-    });
+
+    // ID is intentionally not part of this version.
+    document.querySelectorAll('#nchatProfileIdValue,.nchat-profile-id,.profile-id,.nchat-result-id,.nchat-chat-id,#roomIdMeta')
+      .forEach(e => e.remove());
   }
 
-  // Search Firebase users by name or real N-ID.
-  window.searchFriends=async function(value){
-    const box=$('friendSearchResults'); if(!box)return;
-    const q=String(value||'').trim().toLocaleLowerCase();
-    if(!q){box.innerHTML='<div class="nchat-empty">اكتب اسمًا أو ID للبحث.</div>';return;}
-    const me=FAuth.currentUser;
-    if(!me){box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';return;}
-    box.innerHTML='<div class="nchat-empty">جاري البحث...</div>';
-    try{
-      const snap=await FDB.collection('users').get();
-      const rows=snap.docs.map(d=>d.data()).filter(u=>u.uid!==me.uid&&!DEMO.has(u.name)&&((u.nameLower||u.name||'').toLocaleLowerCase().includes(q)||(u.nchatIdLower||u.nchatId||realId(u.uid)).toLocaleLowerCase().includes(q)));
-      if(!rows.length){box.innerHTML='<div class="nchat-empty">لم يتم العثور على حساب بهذا الاسم أو ID.</div>';return;}
-      const meChats=await FDB.collection('chats').where('members','array-contains',me.uid).get();
-      const states={}; meChats.forEach(d=>{const x=d.data();const other=(x.members||[]).find(id=>id!==me.uid);if(other)states[other]=x.status||'pending'});
-      box.innerHTML=rows.map(u=>{
-        const st=states[u.uid];
-        let btn='';
-        if(st==='accepted') btn='<button class="nchat-add-btn" disabled>مضاف</button>';
-        else if(st==='pending') btn='<button class="nchat-add-btn" disabled>معلق</button>';
-        else btn='<button class="nchat-add-btn" onclick="sendFriendRequest(\''+esc(u.uid)+'\')">إضافة</button>';
-        return '<div class="nchat-search-result" data-uid="'+esc(u.uid)+'"><div class="nchat-result-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">'+esc(initial(u.name))+'</div><div class="nchat-result-info"><div class="nchat-result-name">'+esc(u.name||'')+'</div><div class="nchat-result-id">'+esc(u.nchatId||realId(u.uid))+'</div></div>'+btn+'</div>';
-      }).join('');
-    }catch(e){console.error('searchFriends',e);box.innerHTML='<div class="nchat-empty">حدث خطأ أثناء البحث.</div>';}
-  };
-
-  window.sendFriendRequest=async function(uid){
-    const me=FAuth.currentUser;if(!me||!uid||uid===me.uid)return;
-    try{
-      const other=await getProfile(uid);if(!other){toast('الحساب غير موجود');return;}
-      const id=chatId(me.uid,uid); const ref=FDB.collection('chats').doc(id); const old=await ref.get();
-      if(old.exists && old.data().status==='accepted'){toast('هذا الصديق مضاف بالفعل');return;}
-      if(old.exists && old.data().status==='pending'){toast('طلب المحادثة معلق بالفعل');return;}
-      const meP=await ensureProfile(me);
-      await ref.set({
-        type:'friend_request',status:'pending',members:[me.uid,uid],requesterId:me.uid,recipientId:uid,
-        requesterName:meP.name,requesterNchatId:meP.nchatId,recipientName:other.name,recipientNchatId:other.nchatId||realId(uid),
-        lastMessage:meP.name+' يريد بدء محادثة معك',lastMessageAt:FV.serverTimestamp(),updatedAt:FV.serverTimestamp(),createdAt:FV.serverTimestamp()
-      },{merge:true});
-      toast('تم إرسال طلب المحادثة');
-      await window.searchFriends($('friendSearchInput')?.value||'');
-    }catch(e){console.error('sendFriendRequest',e);toast('تعذر إرسال طلب المحادثة');}
-  };
-
-  async function openRequestChat(data){
-    const otherId=FAuth.currentUser.uid===data.requesterId?data.recipientId:data.requesterId;
-    const other=await getProfile(otherId);
-    if(typeof window.openEnhancedChat==='function'){
-      window.__nchatActiveFriend={name:other?.name||data.requesterName||data.recipientName||'صديق',avatar:'',id:otherId,uid:otherId,chatId:data.chatId||chatId(FAuth.currentUser.uid,otherId),pending:true};
-      window.openEnhancedChat(window.__nchatActiveFriend.name,'',otherId);
-    }
-    showRequestActions(data);
-  }
-
-  function showRequestActions(data){
-    const me=FAuth.currentUser;if(!me)return;
-    const isRecipient=me.uid===data.recipientId;
-    if(!isRecipient || data.status!=='pending')return;
-    let box=document.getElementById('firebaseRequestActions');
-    if(!box){box=document.createElement('div');box.id='firebaseRequestActions';document.body.appendChild(box);}
-    box.innerHTML='<div style="position:fixed;left:16px;right:16px;bottom:92px;z-index:99999;background:#fff;border:1px solid #e9e5f5;border-radius:18px;padding:14px;box-shadow:0 10px 35px rgba(0,0,0,.15)"><div style="font-weight:800;margin-bottom:6px">طلب محادثة</div><div style="font-size:13px;color:#666;margin-bottom:12px">'+esc(data.requesterName||'صديق')+' يريد بدء محادثة معك</div><div style="display:flex;gap:8px"><button onclick="acceptFriendRequest(\''+esc(data.id||data.chatId)+'\')" style="flex:1;border:0;border-radius:11px;padding:11px;background:#7054f6;color:#fff;font-weight:800">قبول</button><button onclick="rejectFriendRequest(\''+esc(data.id||data.chatId)+'\')" style="flex:1;border:0;border-radius:11px;padding:11px;background:#eeeaf5;color:#555;font-weight:800">رفض</button></div></div>';
-  }
-
-  window.acceptFriendRequest=async function(id){
-    const me=FAuth.currentUser;if(!me||!id)return;
-    try{await FDB.collection('chats').doc(id).update({status:'accepted',type:'chat',acceptedAt:FV.serverTimestamp(),updatedAt:FV.serverTimestamp(),lastMessage:'تم قبول المحادثة'});toast('تم قبول المحادثة');document.getElementById('firebaseRequestActions')?.remove();await renderRealChats();}
-    catch(e){console.error(e);toast('تعذر قبول المحادثة');}
-  };
-
-  window.rejectFriendRequest=async function(id){
-    // Per request: rejection leaves the request pending.
-    toast('تم رفض الطلب، وسيبقى معلقًا');document.getElementById('firebaseRequestActions')?.remove();
-  };
-
-  async function renderRealChats(){
-    const me=FAuth.currentUser;if(!me)return;
-    const snap=await FDB.collection('chats').where('members','array-contains',me.uid).get();
-    const pending=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.status==='pending'&&x.type==='friend_request');
-    let host=document.getElementById('firebasePendingRequests');
-    if(!host){
-      host=document.createElement('div');host.id='firebasePendingRequests';
-      const target=document.querySelector('#chatsScreen .nchat-screen-body')||document.querySelector('#chatsScreen');
-      if(target)target.prepend(host);
-    }
-    host.innerHTML=pending.map(x=>{
-      const recipient=me.uid===x.recipientId; const name=recipient?x.requesterName:x.recipientName;
-      return '<div class="nchat-request-banner" onclick="openFirebaseRequest(\''+esc(x.id)+'\')"><div class="rq-title">'+esc(name||'طلب محادثة')+'</div><div class="rq-sub">'+(recipient?'طلب محادثة جديد — اضغط لعرض قبول أو رفض':'طلب المحادثة معلق')+'</div></div>';
-    }).join('');
-  }
-  window.openFirebaseRequest=async function(id){const s=await FDB.collection('chats').doc(id).get();if(s.exists)await openRequestChat({id:s.id,chatId:s.id,...s.data()});};
-
-  // Override opening a friend: pending requests must show actions to recipient.
-  const originalOpen=window.openEnhancedChat;
-  window.openEnhancedChat=async function(name,avatar,id){
-    const me=FAuth.currentUser;
-    if(me&&id){
-      try{const s=await FDB.collection('chats').doc(chatId(me.uid,id)).get();if(s.exists&&s.data().status==='pending'&&s.data().type==='friend_request'){await openRequestChat({id:s.id,chatId:s.id,...s.data()});return;}}catch(e){console.warn(e)}
-    }
-    if(typeof originalOpen==='function')return originalOpen.apply(this,arguments);
-  };
-
-  FAuth.onAuthStateChanged(async user=>{
-    if(!user)return;
-    try{await ensureProfile(user);await refreshOwnProfileUI();await renderRealChats();}catch(e){console.error('profile init',e)}
-  });
-})();
-</script>
-
-<style>
-/* FINAL NAME-ONLY MODE: hide N-Chat ID from the user interface */
-#nchatProfileIdValue,
-.nchat-profile-id,
-.profile-id,
-.nchat-profile-id-line,
-.nchat-id-pill,
-.nchat-result-id,
-.nchat-copy-id,
-.nchat-friend-status + .nchat-id-pill,
-[data-nchat-id],
-.nchat-id-display,
-.nchat-account-id { display:none !important; }
-</style>
-<script>
-/* ==========================================================
-   FINAL PATCH — NAME ONLY FRIEND SEARCH
-   Firebase remains the source of truth. N-Chat ID is not shown
-   or used by the friend search. The original UI is preserved.
-   ========================================================== */
-(function(){
-  if(!window.firebase || !firebase.auth || !firebase.firestore) return;
-  const auth=firebase.auth();
-  const db=firebase.firestore();
-  const $=id=>document.getElementById(id);
-  const DEMO=new Set(['أحمد','سارة','محمد','ريم','ياسين','نور','N Chat User','مستخدم N Chat']);
-  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const initial=name=>(String(name||'م').trim().charAt(0)||'م').toUpperCase();
-  const toast=m=>{if(typeof window.showToast==='function')window.showToast(m);else console.log(m)};
-  const chatId=(a,b)=>[a,b].sort().join('_');
-
-  function hideIds(){
-    document.querySelectorAll('#nchatProfileIdValue,.nchat-profile-id,.profile-id,.nchat-profile-id-line,.nchat-id-pill,.nchat-result-id,.nchat-copy-id,[data-nchat-id],.nchat-id-display,.nchat-account-id').forEach(e=>{
-      const row=e.closest('.nchat-profile-id-line,.nchat-copy-id')||e;
-      row.style.setProperty('display','none','important');
-    });
-    const input=$('friendSearchInput');
-    if(input){
-      input.placeholder='ابحث باسم المستخدم...';
-      input.removeAttribute('oninput');
-      input.setAttribute('oninput','searchFriends(this.value)');
-    }
-  }
-
-  async function profile(uid){
-    const s=await db.collection('users').doc(uid).get();
-    return s.exists?s.data():null;
-  }
-
-  window.searchFriends=async function(value){
-    hideIds();
-    const box=$('friendSearchResults');
-    if(!box)return;
-    const q=String(value||'').trim().toLocaleLowerCase();
-    if(!q){
-      box.innerHTML='<div class="nchat-empty">اكتب اسم المستخدم للبحث.</div>';
+  // No local/demo account can open the application.
+  window.openChatApp = async function(){
+    const user = auth.currentUser;
+    if(!user) {
+      showOnlyAuth();
       return;
     }
-    const me=auth.currentUser;
-    if(!me){box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';return;}
-    box.innerHTML='<div class="nchat-empty">جاري البحث...</div>';
+
+    const profile = await ensureProfile(user);
+    const authApp = $('authApp');
+    const chatApp = $('chatApp');
+
+    if(authApp) authApp.style.display = 'none';
+    if(chatApp) chatApp.style.display = 'flex';
+
+    setProfileUI(profile);
+    await renderRealChats();
+    if(typeof window.showChats === 'function') window.showChats();
+  };
+
+  // Real email/password registration.
+  window.register = async function(){
+    const name = $('registerName')?.value.trim();
+    const email = $('registerEmail')?.value.trim();
+    const password = $('registerPassword')?.value || '';
+    const confirm = $('registerConfirm')?.value || '';
+
+    if(!name || !email || !password || !confirm){
+      toast('يرجى ملء جميع البيانات');
+      return;
+    }
+    if(password.length < 6){
+      toast('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+    if(password !== confirm){
+      toast('كلمتا المرور غير متطابقتين');
+      return;
+    }
+
     try{
-      const snap=await db.collection('users').get();
-      const users=snap.docs.map(d=>d.data()).filter(u=>{
-        if(!u.uid || u.uid===me.uid || DEMO.has(String(u.name||'').trim())) return false;
-        const name=String(u.nameLower||u.name||'').toLocaleLowerCase();
-        return name.includes(q);
-      });
+      const result = await auth.createUserWithEmailAndPassword(email,password);
+      await ensureProfile(result.user,name);
+      toast('تم إنشاء الحساب الحقيقي بنجاح');
+    }catch(e){
+      const messages = {
+        'auth/email-already-in-use':'هذا البريد مستخدم بالفعل',
+        'auth/invalid-email':'البريد الإلكتروني غير صحيح',
+        'auth/weak-password':'كلمة المرور ضعيفة'
+      };
+      toast(messages[e.code] || 'تعذر إنشاء الحساب');
+      console.error(e);
+    }
+  };
+
+  // Real email/password login only.
+  window.login = async function(){
+    const email = $('loginEmail')?.value.trim();
+    const password = $('loginPassword')?.value || '';
+
+    if(!email || !password){
+      toast('أدخل البريد الإلكتروني وكلمة المرور');
+      return;
+    }
+
+    try{
+      await auth.signInWithEmailAndPassword(email,password);
+    }catch(e){
+      const messages = {
+        'auth/user-not-found':'لا يوجد حساب بهذا البريد الإلكتروني',
+        'auth/wrong-password':'كلمة المرور غير صحيحة',
+        'auth/invalid-credential':'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+        'auth/invalid-email':'البريد الإلكتروني غير صحيح'
+      };
+      toast(messages[e.code] || 'تعذر تسجيل الدخول');
+      console.error(e);
+    }
+  };
+
+  window.googleLogin = async function(){
+    try{
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({prompt:'select_account'});
+      await auth.signInWithPopup(provider);
+    }catch(e){
+      if(e.code === 'auth/popup-blocked'){
+        try{
+          await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+          return;
+        }catch(x){
+          console.error(x);
+        }
+      }
+      if(e.code === 'auth/unauthorized-domain'){
+        toast('أضف نطاق GitHub Pages في Authorized domains داخل Firebase');
+      }else{
+        toast('تعذر تسجيل الدخول باستخدام Google');
+      }
+      console.error(e);
+    }
+  };
+
+  window.logout = async function(){
+    try{
+      await auth.signOut();
+      showOnlyAuth();
+      if(typeof window.showLogin === 'function') window.showLogin();
+    }catch(e){
+      console.error(e);
+      toast('تعذر تسجيل الخروج');
+    }
+  };
+
+  // Search REAL Firebase users by registration name only.
+  window.searchFriends = async function(value){
+    const box = $('friendSearchResults');
+    if(!box) return;
+
+    const q = String(value || '').trim().toLocaleLowerCase();
+
+    if(!q){
+      box.innerHTML = '<div class="nchat-empty">اكتب اسم الصديق للبحث.</div>';
+      return;
+    }
+
+    const me = auth.currentUser;
+    if(!me){
+      box.innerHTML = '<div class="nchat-empty">سجل الدخول أولاً.</div>';
+      return;
+    }
+
+    box.innerHTML = '<div class="nchat-empty">جاري البحث...</div>';
+
+    try{
+      const snap = await db.collection('users').get();
+
+      const users = snap.docs
+        .map(d => d.data())
+        .filter(u => {
+          if(!u.uid || u.uid === me.uid) return false;
+          if(DEMO_NAMES.has(String(u.name || '').trim())) return false;
+          const name = String(u.nameLower || u.name || '').toLocaleLowerCase();
+          return name.includes(q);
+        });
 
       if(!users.length){
-        box.innerHTML='<div class="nchat-empty">لم يتم العثور على مستخدم بهذا الاسم.</div>';
+        box.innerHTML = '<div class="nchat-empty">لم يتم العثور على صديق بهذا الاسم.</div>';
         return;
       }
 
-      const chats=await db.collection('chats').where('members','array-contains',me.uid).get();
-      const state={};
-      chats.forEach(d=>{
-        const x=d.data()||{};
-        const other=(x.members||[]).find(id=>id!==me.uid);
-        if(other)state[other]=x.status||'pending';
+      const chats = await db.collection('chats')
+        .where('members','array-contains',me.uid).get();
+
+      const state = {};
+      chats.forEach(d => {
+        const x = d.data();
+        const other = (x.members || []).find(id => id !== me.uid);
+        if(other) state[other] = x;
       });
 
-      box.innerHTML=users.map(u=>{
-        const st=state[u.uid];
-        let button;
-        if(st==='accepted') button='<button class="nchat-add-btn" disabled>مضاف</button>';
-        else if(st==='pending') button='<button class="nchat-add-btn" disabled>معلق</button>';
-        else button='<button class="nchat-add-btn" onclick="sendFriendRequestByName(\''+esc(u.uid)+'\')">إضافة</button>';
-        return '<div class="nchat-search-result" data-uid="'+esc(u.uid)+'">'
-          +'<div class="nchat-result-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">'+esc(initial(u.name))+'</div>'
-          +'<div class="nchat-result-info"><div class="nchat-result-name">'+esc(u.name||'')+'</div></div>'
-          +button+'</div>';
+      box.innerHTML = users.map(u => {
+        const st = state[u.uid];
+        let button = '';
+
+        if(st?.status === 'accepted'){
+          button = '<button class="nchat-add-btn" disabled>مضاف</button>';
+        }else if(st?.status === 'pending'){
+          button = '<button class="nchat-add-btn" disabled>معلق</button>';
+        }else{
+          button = '<button class="nchat-add-btn" onclick="sendFriendRequestReal(\'' +
+            esc(u.uid) + '\')">إضافة</button>';
+        }
+
+        return `
+          <div class="nchat-search-result" data-uid="${esc(u.uid)}">
+            <div class="nchat-result-avatar"
+              style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">
+              ${initial(u.name)}
+            </div>
+            <div class="nchat-result-info">
+              <div class="nchat-result-name">${esc(u.name || '')}</div>
+            </div>
+            ${button}
+          </div>`;
       }).join('');
-    }catch(err){
-      console.error('name search',err);
-      box.innerHTML='<div class="nchat-empty">حدث خطأ أثناء البحث. تحقق من اتصال Firebase.</div>';
+    }catch(e){
+      console.error('searchFriends',e);
+      box.innerHTML = '<div class="nchat-empty">تعذر البحث في Firebase.</div>';
     }
   };
 
-  window.sendFriendRequestByName=async function(uid){
-    const me=auth.currentUser;
-    if(!me||!uid||uid===me.uid)return;
+  // Real request stored in Firestore.
+  window.sendFriendRequestReal = async function(uid){
+    const me = auth.currentUser;
+    if(!me || !uid || uid === me.uid) return;
+
     try{
-      const other=await profile(uid);
-      if(!other){toast('المستخدم غير موجود');return;}
-      const meProfile=await profile(me.uid);
-      const id=chatId(me.uid,uid);
-      const ref=db.collection('chats').doc(id);
-      const old=await ref.get();
-      if(old.exists){
-        const status=old.data().status;
-        if(status==='accepted'){toast('هذا المستخدم مضاف بالفعل');return;}
-        if(status==='pending'){toast('طلب المحادثة معلق بالفعل');return;}
+      const other = await getProfile(uid);
+      if(!other){
+        toast('الحساب غير موجود');
+        return;
       }
+
+      const meProfile = await ensureProfile(me);
+      const id = chatId(me.uid,uid);
+      const ref = db.collection('chats').doc(id);
+      const old = await ref.get();
+
+      if(old.exists){
+        const data = old.data();
+        if(data.status === 'accepted'){
+          toast('هذا الصديق مضاف بالفعل');
+          return;
+        }
+        if(data.status === 'pending'){
+          toast(data.requesterId === me.uid ? 'الطلب ما زال معلقًا' : 'لديك طلب محادثة من هذا المستخدم');
+          return;
+        }
+      }
+
       await ref.set({
         type:'friend_request',
         status:'pending',
         members:[me.uid,uid],
         requesterId:me.uid,
         recipientId:uid,
-        requesterName:meProfile?.name || me.displayName || me.email?.split('@')[0] || 'مستخدم',
-        recipientName:other.name || 'مستخدم',
-        lastMessage:(meProfile?.name||'مستخدم')+' يريد بدء محادثة معك',
-        lastMessageAt:firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
-        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        requesterName:meProfile.name,
+        recipientName:other.name,
+        createdAt: old.exists && old.data().createdAt ? old.data().createdAt : FV.serverTimestamp(),
+        updatedAt:FV.serverTimestamp()
       },{merge:true});
+
       toast('تم إرسال طلب المحادثة');
-      await window.searchFriends($('friendSearchInput')?.value||'');
-      if(typeof window.renderRealChats==='function') await window.renderRealChats();
-    }catch(err){
-      console.error('send friend request',err);
-      toast('تعذر إرسال طلب المحادثة');
+      await renderRealChats();
+      await window.searchFriends($('friendSearchInput')?.value || '');
+    }catch(e){
+      console.error('sendFriendRequestReal',e);
+      toast('تعذر إرسال الطلب. تحقق من Firestore Rules.');
     }
   };
 
-  // Keep the existing request accept/reject behaviour from the app.
-  // Rejection stays pending as requested.
-  const oldAccept=window.acceptFriendRequest;
-  window.acceptFriendRequest=async function(id){
-    if(typeof oldAccept==='function') return oldAccept(id);
-    const me=auth.currentUser;if(!me)return;
+  async function renderRealChats(){
+    const me = auth.currentUser;
+    if(!me) return;
+
     try{
-      await db.collection('chats').doc(id).update({status:'accepted',type:'chat',acceptedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-      toast('تم قبول المحادثة');
-    }catch(e){toast('تعذر قبول المحادثة');}
+      const snap = await db.collection('chats')
+        .where('members','array-contains',me.uid).get();
+
+      const items = snap.docs
+        .map(d => ({id:d.id,...d.data()}))
+        .filter(x => x.status === 'accepted' && x.type === 'chat');
+
+      const body = $('chatsListBody') || document.querySelector('#chatsScreen .nchat-feature-body');
+      if(!body) return;
+
+      body.innerHTML = '';
+
+      for(const item of items){
+        const otherId = (item.members || []).find(id => id !== me.uid);
+        if(!otherId) continue;
+
+        const p = await getProfile(otherId);
+        if(!p) continue;
+
+        const el = document.createElement('div');
+        el.className = 'nchat-chat-item';
+        el.dataset.name = p.name || '';
+        el.dataset.uid = otherId;
+        el.innerHTML = `
+          <div class="nchat-chat-avatar"
+            style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">
+            ${initial(p.name)}
+          </div>
+          <div class="nchat-chat-info">
+            <div class="nchat-chat-name">${esc(p.name || '')}</div>
+            <div class="nchat-chat-preview">${esc(item.lastMessage || '')}</div>
+          </div>`;
+
+        el.onclick = () => window.openRealChat(otherId,p.name || 'صديق');
+        body.appendChild(el);
+      }
+
+      if(!items.length){
+        body.innerHTML = '<div class="nchat-empty">لا توجد محادثات بعد.</div>';
+      }
+    }catch(e){
+      console.error('renderRealChats',e);
+    }
+  }
+
+  window.openRealChat = async function(otherId,name){
+    const me = auth.currentUser;
+    if(!me) return;
+
+    const id = chatId(me.uid,otherId);
+    const chat = await db.collection('chats').doc(id).get();
+
+    if(!chat.exists || chat.data().status !== 'accepted'){
+      toast('المحادثة لم تُقبل بعد');
+      return;
+    }
+
+    window.__realChatId = id;
+    window.__realOtherId = otherId;
+
+    const room = $('chatRoom');
+    if(room) room.classList.add('active');
+
+    const roomName = $('roomName');
+    if(roomName) roomName.textContent = name;
+
+    const avatar = $('roomAvatar');
+    if(avatar){
+      avatar.removeAttribute('src');
+      avatar.style.background = '#7054F6';
+      avatar.style.borderRadius = '50%';
+      avatar.style.objectFit = 'cover';
+      avatar.style.padding = '0';
+      avatar.alt = name;
+      // Use an accessible visual initial without a fake image.
+      avatar.outerHTML =
+        '<div id="roomAvatar" class="nchat-room-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800;border-radius:50%">'+
+        initial(name)+'</div>';
+    }
+
+    listenMessages(id);
   };
 
-  function init(){
-    hideIds();
-    const input=$('friendSearchInput');
-    if(input){input.placeholder='ابحث باسم المستخدم...';input.removeAttribute('oninput');input.setAttribute('oninput','searchFriends(this.value)');}
+  let unsubscribeMessages = null;
+
+  function listenMessages(id){
+    if(unsubscribeMessages) unsubscribeMessages();
+
+    const box = $('messages');
+    if(!box) return;
+
+    box.innerHTML = '';
+
+    unsubscribeMessages = db.collection('chats').doc(id)
+      .collection('messages')
+      .orderBy('createdAt','asc')
+      .onSnapshot(snapshot => {
+        box.innerHTML = '';
+
+        snapshot.forEach(doc => {
+          const m = doc.data();
+          const el = document.createElement('div');
+          el.className = 'nchat-message ' + (m.senderId === auth.currentUser.uid ? 'sent' : 'received');
+
+          const time = m.createdAt?.toDate
+            ? m.createdAt.toDate().toLocaleTimeString('ar-DZ',{hour:'2-digit',minute:'2-digit'})
+            : '';
+
+          el.innerHTML = esc(m.text || '') +
+            '<span class="nchat-message-time">' + esc(time) + '</span>';
+
+          box.appendChild(el);
+        });
+
+        box.scrollTop = box.scrollHeight;
+      }, e => {
+        console.error('messages listener',e);
+        toast('تعذر تحميل الرسائل من Firebase');
+      });
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(init,300));
-  else setTimeout(init,300);
-  new MutationObserver(hideIds).observe(document.body,{childList:true,subtree:true});
+
+  window.sendMessage = async function(){
+    const input = $('messageInput');
+    const text = input?.value.trim();
+    const me = auth.currentUser;
+    const id = window.__realChatId;
+
+    if(!text || !me || !id) return;
+
+    try{
+      const chatRef = db.collection('chats').doc(id);
+      const chat = await chatRef.get();
+
+      if(!chat.exists || chat.data().status !== 'accepted'){
+        toast('المحادثة غير مفعلة');
+        return;
+      }
+
+      await chatRef.collection('messages').add({
+        text:text,
+        senderId:me.uid,
+        createdAt:FV.serverTimestamp()
+      });
+
+      await chatRef.update({
+        lastMessage:text,
+        lastMessageAt:FV.serverTimestamp(),
+        updatedAt:FV.serverTimestamp()
+      });
+
+      input.value = '';
+    }catch(e){
+      console.error('sendMessage',e);
+      toast('تعذر إرسال الرسالة إلى Firebase');
+    }
+  };
+
+  window.handleMessage = function(e){
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      window.sendMessage();
+    }
+  };
+
+  // Requests: recipient sees accept/reject; rejection remains pending as requested.
+  async function renderRequests(){
+    const me = auth.currentUser;
+    if(!me) return;
+
+    const snap = await db.collection('chats')
+      .where('members','array-contains',me.uid).get();
+
+    const pending = snap.docs
+      .map(d => ({id:d.id,...d.data()}))
+      .filter(x => x.type === 'friend_request' && x.status === 'pending');
+
+    let host = $('nchatFirebaseRequests');
+
+    if(!host){
+      host = document.createElement('div');
+      host.id = 'nchatFirebaseRequests';
+
+      const target =
+        document.querySelector('#chatsScreen .nchat-screen-body') ||
+        document.querySelector('#chatsScreen .nchat-feature-body') ||
+        $('chatsScreen');
+
+      if(target) target.prepend(host);
+    }
+
+    if(!host) return;
+
+    host.innerHTML = pending.map(x => {
+      const incoming = x.recipientId === me.uid;
+      const name = incoming ? x.requesterName : x.recipientName;
+
+      return `
+        <div class="nchat-firebase-request">
+          <div class="rq-avatar">${initial(name)}</div>
+          <div class="rq-main">
+            <div class="rq-name">${esc(name || 'صديق')}</div>
+            <div class="rq-state">${incoming ? 'طلب محادثة جديد' : 'طلب المحادثة معلق'}</div>
+            ${incoming ? `
+              <div class="rq-actions">
+                <button class="accept" onclick="acceptRealRequest('${esc(x.id)}')">قبول</button>
+                <button class="reject" onclick="rejectRealRequest('${esc(x.id)}')">رفض</button>
+              </div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  window.acceptRealRequest = async function(id){
+    const me = auth.currentUser;
+    if(!me) return;
+
+    try{
+      const ref = db.collection('chats').doc(id);
+      const snap = await ref.get();
+
+      if(!snap.exists || snap.data().recipientId !== me.uid){
+        toast('لا يمكنك قبول هذا الطلب');
+        return;
+      }
+
+      await ref.update({
+        type:'chat',
+        status:'accepted',
+        acceptedAt:FV.serverTimestamp(),
+        updatedAt:FV.serverTimestamp(),
+        lastMessage:'تم قبول المحادثة',
+        lastMessageAt:FV.serverTimestamp()
+      });
+
+      toast('تم قبول المحادثة');
+      await renderRequests();
+      await renderRealChats();
+    }catch(e){
+      console.error(e);
+      toast('تعذر قبول الطلب');
+    }
+  };
+
+  window.rejectRealRequest = async function(id){
+    const me = auth.currentUser;
+    if(!me) return;
+
+    try{
+      const ref = db.collection('chats').doc(id);
+      const snap = await ref.get();
+
+      if(!snap.exists || snap.data().recipientId !== me.uid) return;
+
+      // Deliberately keep it pending.
+      toast('تم رفض الطلب، وسيبقى معلقًا');
+      await renderRequests();
+    }catch(e){
+      console.error(e);
+      toast('تعذر معالجة الطلب');
+    }
+  };
+
+  // Keep the original add-friend page, but make its search Firebase-only.
+  const originalOpenAddFriend = window.openAddFriend;
+  window.openAddFriend = function(){
+    if(typeof originalOpenAddFriend === 'function') originalOpenAddFriend();
+    const input = $('friendSearchInput');
+    if(input){
+      input.placeholder = 'ابحث عن صديق بالاسم';
+      input.removeAttribute('data-search-id');
+    }
+    const results = $('friendSearchResults');
+    if(results && !input?.value) results.innerHTML = '<div class="nchat-empty">اكتب اسم الصديق للبحث.</div>';
+  };
+
+  // Remove all known fake/demo data from local storage and visible DOM.
+  function removeFakeData(){
+    [
+      'nchat_accounts_v2',
+      'nchat_friends_v2',
+      'nchat_demo_messages',
+      'nchat_demo_presence'
+    ].forEach(k => {
+      try{ localStorage.removeItem(k); }catch(e){}
+    });
+
+    document.querySelectorAll('#chatApp .nchat-chat-item,#chatApp .nchat-online-person').forEach(el => {
+      const text = (el.textContent || '').trim();
+      if([...DEMO_NAMES].some(n => text.includes(n))) el.remove();
+    });
+
+    document.querySelectorAll('#messages .nchat-message').forEach(el => el.remove());
+  }
+
+  // No demo search or local friend handlers may remain authoritative.
+  window.addFriend = window.sendFriendRequestReal;
+
+  // Firebase is the only authentication source.
+  auth.onAuthStateChanged(async user => {
+    removeFakeData();
+
+    if(!user){
+      showOnlyAuth();
+      return;
+    }
+
+    try{
+      const profile = await ensureProfile(user);
+      setProfileUI(profile);
+      await window.openChatApp();
+      await renderRequests();
+      await renderRealChats();
+    }catch(e){
+      console.error('Firebase initialization',e);
+      toast('تعذر تحميل حسابك من Firebase');
+    }
+  });
+
+  // Re-render real requests when returning to chats.
+  document.addEventListener('click', () => {
+    setTimeout(() => {
+      if(auth.currentUser){
+        renderRequests().catch(console.error);
+        renderRealChats().catch(console.error);
+      }
+    },250);
+  }, true);
+
+  document.addEventListener('input', e => {
+    if(e.target?.id === 'friendSearchInput'){
+      clearTimeout(window.__realSearchTimer);
+      window.__realSearchTimer = setTimeout(() => window.searchFriends(e.target.value), 300);
+    }
+  });
+
+  // Ensure the original static fake message content never reappears.
+  setTimeout(removeFakeData, 100);
+  setTimeout(removeFakeData, 1000);
+})();
+</script>
+
+</body>
+</html>
+
+<style id="nchat-firebase-name-request-fix">
+#nchatFirebaseRequests{margin:0 16px 12px}
+.nchat-firebase-request{background:#fff;border:1px solid #e8e4f2;border-radius:16px;padding:13px 14px;margin:8px 0;display:flex;align-items:center;gap:10px;box-shadow:0 3px 12px rgba(0,0,0,.04)}
+.nchat-firebase-request .rq-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#7054f6;color:#fff;font-weight:800;flex:0 0 42px}
+.nchat-firebase-request .rq-main{flex:1;min-width:0}
+.nchat-firebase-request .rq-name{font-weight:800}
+.nchat-firebase-request .rq-state{font-size:12px;color:#77718a;margin-top:3px}
+.nchat-firebase-request .rq-actions{display:flex;gap:7px;margin-top:9px}
+.nchat-firebase-request button{border:0;border-radius:10px;padding:8px 13px;font-weight:800;cursor:pointer}
+.nchat-firebase-request .accept{background:#7054f6;color:#fff}
+.nchat-firebase-request .reject{background:#eeeaf5;color:#5f596c}
+</style>
+<script id="nchat-firebase-name-request-fix-script">
+(function(){
+  'use strict';
+  if(!window.firebase || !firebase.auth || !firebase.firestore) return;
+
+  const auth=firebase.auth();
+  const db=firebase.firestore();
+  const FV=firebase.firestore.FieldValue;
+  const $=id=>document.getElementById(id);
+  const demo=new Set(['مستخدم N Chat','N Chat User']);
+
+  function esc(v){
+    return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function initial(name){
+    return esc((String(name||'م').trim().charAt(0)||'م').toUpperCase());
+  }
+  function cid(a,b){ return [a,b].sort().join('_'); }
+  function notify(m){
+    if(typeof window.showToast==='function') window.showToast(m);
+    else console.log(m);
+  }
+
+  // The app no longer uses an ID for friend discovery.
+  function hideIds(){
+    document.querySelectorAll(
+      '#nchatProfileIdValue,.nchat-profile-id,.profile-id,'+
+      '#friendSearchResults .nchat-result-id,.nchat-result-id,'+
+      '#chatRoom #roomIdMeta,#chatRoom .nchat-chat-id'
+    ).forEach(e=>e.style.display='none');
+
+    const input=$('friendSearchInput');
+    if(input){
+      input.placeholder='ابحث عن صديق بالاسم';
+      input.setAttribute('aria-label','ابحث عن صديق بالاسم');
+    }
+  }
+
+  async function profile(uid){
+    const s=await db.collection('users').doc(uid).get();
+    return s.exists ? s.data() : null;
+  }
+
+  async function ensureProfile(user){
+    if(!user) return null;
+    const ref=db.collection('users').doc(user.uid);
+    const s=await ref.get();
+    const old=s.exists?s.data():{};
+    const name=(old.name || user.displayName || user.email?.split('@')[0] || 'مستخدم').trim();
+    const data={
+      uid:user.uid,
+      name:name,
+      email:user.email || old.email || '',
+      nameLower:name.toLocaleLowerCase(),
+      photoURL:old.photoURL || '',
+      updatedAt:FV.serverTimestamp()
+    };
+    if(!s.exists) data.createdAt=FV.serverTimestamp();
+    await ref.set(data,{merge:true});
+    return {...old,...data};
+  }
+
+  // Search ONLY real Firebase users by the name they used at registration.
+  window.searchFriends=async function(value){
+    const box=$('friendSearchResults');
+    if(!box) return;
+
+    const q=String(value||'').trim().toLocaleLowerCase();
+    if(!q){
+      box.innerHTML='<div class="nchat-empty">اكتب اسم الصديق للبحث.</div>';
+      hideIds();
+      return;
+    }
+
+    const me=auth.currentUser;
+    if(!me){
+      box.innerHTML='<div class="nchat-empty">سجل الدخول أولاً.</div>';
+      return;
+    }
+
+    box.innerHTML='<div class="nchat-empty">جاري البحث...</div>';
+
+    try{
+      const snap=await db.collection('users').get();
+
+      const users=snap.docs
+        .map(d=>d.data())
+        .filter(u=>{
+          if(!u.uid || u.uid===me.uid) return false;
+          if(demo.has((u.name||'').trim())) return false;
+          const name=String(u.nameLower||u.name||'').toLocaleLowerCase();
+          return name.includes(q);
+        });
+
+      if(!users.length){
+        box.innerHTML='<div class="nchat-empty">لم يتم العثور على صديق بهذا الاسم.</div>';
+        hideIds();
+        return;
+      }
+
+      // Read the current user's existing requests/chats to show the correct state.
+      const chatSnap=await db.collection('chats')
+        .where('members','array-contains',me.uid).get();
+
+      const states={};
+      chatSnap.forEach(d=>{
+        const x=d.data();
+        const other=(x.members||[]).find(id=>id!==me.uid);
+        if(other) states[other]={id:d.id,...x};
+      });
+
+      box.innerHTML=users.map(u=>{
+        const st=states[u.uid];
+        let button='';
+
+        if(st && st.status==='accepted'){
+          button='<button class="nchat-add-btn" disabled>محادثة</button>';
+        }else if(st && st.status==='pending'){
+          button='<button class="nchat-add-btn" disabled>معلق</button>';
+        }else{
+          button='<button class="nchat-add-btn" onclick="sendNameFriendRequest(\''+
+                 esc(u.uid)+'\')">إضافة</button>';
+        }
+
+        return `
+          <div class="nchat-search-result" data-uid="${esc(u.uid)}">
+            <div class="nchat-result-avatar" style="display:flex;align-items:center;justify-content:center;background:#7054F6;color:#fff;font-weight:800">
+              ${initial(u.name)}
+            </div>
+            <div class="nchat-result-info">
+              <div class="nchat-result-name">${esc(u.name||'')}</div>
+            </div>
+            ${button}
+          </div>`;
+      }).join('');
+
+      hideIds();
+    }catch(err){
+      console.error('Firebase name search:',err);
+      box.innerHTML='<div class="nchat-empty">تعذر البحث في Firebase. تأكد من تسجيل الدخول وقواعد Firestore.</div>';
+    }
+  };
+
+  // Send a real friend/chat request. Nothing is stored in localStorage.
+  window.sendNameFriendRequest=async function(uid){
+    const me=auth.currentUser;
+    if(!me || !uid || uid===me.uid) return;
+
+    try{
+      const other=await profile(uid);
+      if(!other){
+        notify('لم يعد هذا الحساب موجودًا.');
+        return;
+      }
+
+      const meProfile=await ensureProfile(me);
+      const id=cid(me.uid,uid);
+      const ref=db.collection('chats').doc(id);
+      const existing=await ref.get();
+
+      if(existing.exists){
+        const x=existing.data();
+        if(x.status==='accepted'){
+          notify('هذا الصديق مضاف بالفعل.');
+          return;
+        }
+        if(x.status==='pending'){
+          notify(x.requesterId===me.uid?'طلبك ما زال معلقًا.':'لديك طلب محادثة مع هذا المستخدم.');
+          return;
+        }
+      }
+
+      await ref.set({
+        type:'friend_request',
+        status:'pending',
+        members:[me.uid,uid],
+        requesterId:me.uid,
+        recipientId:uid,
+        requesterName:meProfile.name,
+        recipientName:other.name||'صديق',
+        lastMessage:meProfile.name+' يريد بدء محادثة معك',
+        lastMessageAt:FV.serverTimestamp(),
+        updatedAt:FV.serverTimestamp(),
+        createdAt:existing.exists && existing.data().createdAt
+          ? existing.data().createdAt
+          : FV.serverTimestamp()
+      },{merge:true});
+
+      notify('تم إرسال طلب المحادثة إلى '+(other.name||'الصديق'));
+      await window.searchFriends($('friendSearchInput')?.value||'');
+      await renderNameRequests();
+    }catch(err){
+      console.error('sendNameFriendRequest:',err);
+      notify('تعذر إرسال الطلب. تحقق من Firestore Rules.');
+    }
+  };
+
+  async function renderNameRequests(){
+    const me=auth.currentUser;
+    if(!me) return;
+
+    try{
+      const snap=await db.collection('chats')
+        .where('members','array-contains',me.uid).get();
+
+      const requests=snap.docs
+        .map(d=>({id:d.id,...d.data()}))
+        .filter(x=>x.type==='friend_request' && x.status==='pending');
+
+      let host=$('nchatFirebaseRequests');
+
+      if(!host){
+        host=document.createElement('div');
+        host.id='nchatFirebaseRequests';
+
+        const target=
+          document.querySelector('#chatsScreen .nchat-screen-body') ||
+          document.querySelector('#chatsScreen');
+
+        if(target) target.prepend(host);
+      }
+
+      if(!host) return;
+
+      host.innerHTML=requests.map(x=>{
+        const incoming=x.recipientId===me.uid;
+        const name=incoming ? x.requesterName : x.recipientName;
+        const text=incoming
+          ? 'طلب محادثة جديد — يمكنك قبول أو رفض الطلب'
+          : 'طلب المحادثة معلق';
+
+        return `
+          <div class="nchat-firebase-request">
+            <div class="rq-avatar">${initial(name)}</div>
+            <div class="rq-main">
+              <div class="rq-name">${esc(name||'صديق')}</div>
+              <div class="rq-state">${esc(text)}</div>
+              ${incoming ? `
+                <div class="rq-actions">
+                  <button class="accept" onclick="acceptNameFriendRequest('${esc(x.id)}')">قبول</button>
+                  <button class="reject" onclick="rejectNameFriendRequest('${esc(x.id)}')">رفض</button>
+                </div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+
+      hideIds();
+    }catch(err){
+      console.error('renderNameRequests:',err);
+    }
+  }
+
+  window.acceptNameFriendRequest=async function(id){
+    const me=auth.currentUser;
+    if(!me || !id) return;
+
+    try{
+      const ref=db.collection('chats').doc(id);
+      const s=await ref.get();
+
+      if(!s.exists){
+        notify('الطلب غير موجود.');
+        return;
+      }
+
+      const x=s.data();
+
+      if(x.recipientId!==me.uid){
+        notify('لا يمكنك قبول هذا الطلب.');
+        return;
+      }
+
+      await ref.update({
+        type:'chat',
+        status:'accepted',
+        acceptedAt:FV.serverTimestamp(),
+        updatedAt:FV.serverTimestamp(),
+        lastMessage:'تم قبول المحادثة',
+        lastMessageAt:FV.serverTimestamp()
+      });
+
+      notify('تم قبول المحادثة.');
+      await renderNameRequests();
+
+      const otherId=x.requesterId;
+      const other=await profile(otherId);
+
+      if(typeof window.openEnhancedChat==='function' && other){
+        window.__nchatActiveFriend={
+          uid:otherId,
+          id:otherId,
+          name:other.name,
+          avatar:'',
+          chatId:id
+        };
+        window.openEnhancedChat(other.name,'',otherId);
+      }
+    }catch(err){
+      console.error('acceptNameFriendRequest:',err);
+      notify('تعذر قبول الطلب.');
+    }
+  };
+
+  // As requested: rejection does NOT delete the request.
+  window.rejectNameFriendRequest=async function(id){
+    const me=auth.currentUser;
+    if(!me || !id) return;
+
+    try{
+      const s=await db.collection('chats').doc(id).get();
+      if(!s.exists || s.data().recipientId!==me.uid) return;
+
+      // Keep status = pending exactly as requested.
+      notify('تم رفض الطلب، وسيبقى معلقًا.');
+      await renderNameRequests();
+    }catch(err){
+      console.error('rejectNameFriendRequest:',err);
+      notify('تعذر معالجة الطلب.');
+    }
+  };
+
+  // When an accepted Firebase chat is opened, use the real chat id.
+  const oldEnhanced=window.openEnhancedChat;
+  window.openEnhancedChat=async function(name,avatar,uid){
+    const me=auth.currentUser;
+    if(me && uid){
+      try{
+        const id=cid(me.uid,uid);
+        const s=await db.collection('chats').doc(id).get();
+
+        if(s.exists && s.data().status==='pending'){
+          const x=s.data();
+          if(x.recipientId===me.uid){
+            const other=await profile(x.requesterId);
+            if(other){
+              window.__nchatActiveFriend={
+                uid:x.requesterId,
+                id:x.requesterId,
+                name:other.name,
+                avatar:'',
+                chatId:id
+              };
+            }
+          }
+          await renderNameRequests();
+          return;
+        }
+
+        if(s.exists && s.data().status==='accepted'){
+          window.__nchatActiveFriend={
+            uid:uid,
+            id:uid,
+            name:name,
+            avatar:avatar||'',
+            chatId:id
+          };
+        }
+      }catch(err){
+        console.error('openEnhancedChat:',err);
+      }
+    }
+
+    if(typeof oldEnhanced==='function'){
+      return oldEnhanced.apply(this,arguments);
+    }
+  };
+
+  // Keep the home screen synchronized with Firestore.
+  let lastUid='';
+  function startSync(){
+    const me=auth.currentUser;
+    if(!me) return;
+
+    if(lastUid===me.uid) return;
+    lastUid=me.uid;
+
+    renderNameRequests();
+    hideIds();
+
+    // Refresh request state periodically; no fake/local friend data.
+    if(!window.__nchatRequestTimer){
+      window.__nchatRequestTimer=setInterval(()=>{
+        if(auth.currentUser) renderNameRequests();
+      },5000);
+    }
+  }
+
+  auth.onAuthStateChanged(async user=>{
+    if(!user){
+      lastUid='';
+      return;
+    }
+
+    try{
+      await ensureProfile(user);
+    }catch(err){
+      console.error('ensureProfile:',err);
+    }
+
+    startSync();
+
+    // Re-apply when the UI changes screens.
+    setTimeout(()=>{
+      hideIds();
+      renderNameRequests();
+    },300);
+  });
+
+  document.addEventListener('input',e=>{
+    if(e.target && e.target.id==='friendSearchInput'){
+      clearTimeout(window.__nchatSearchTimer);
+      window.__nchatSearchTimer=setTimeout(()=>window.searchFriends(e.target.value),300);
+    }
+  });
+
+  document.addEventListener('click',()=>{
+    setTimeout(()=>{
+      hideIds();
+      if(auth.currentUser) renderNameRequests();
+    },150);
+  },true);
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(hideIds,300));
+  }else{
+    setTimeout(hideIds,300);
+  }
 })();
 </script>
