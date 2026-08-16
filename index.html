@@ -4988,11 +4988,18 @@ input{
 <section class="nchat-page-overlay" id="settingsPage">
 <div class="nchat-page-header"><button class="nchat-back-btn" onclick="closeSettings()"><svg fill="none" viewbox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button><span class="nchat-page-title">الإعدادات</span></div>
 <div class="nchat-settings-content">
-<div class="nchat-profile-card"><div class="nchat-profile-avatar nchat-initial-avatar" id="firebaseProfileInitial">م</div><div><div class="nchat-profile-name">مستخدم N Chat</div><div class="nchat-profile-email">user@nchat.com</div></div></div>
-<div class="nchat-setting" onclick="showToast('الحساب والملف الشخصي')"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="8" r="3" stroke-width="1.7"></circle><path d="M5 20c.6-3.5 2.9-5.3 7-5.3s6.4 1.8 7 5.3" stroke-linecap="round" stroke-width="1.7"></path></svg></div><span>الحساب والملف الشخصي</span></div>
-<div class="nchat-setting" onclick="showToast('الخصوصية والأمان')"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><path d="M12 3.5l7 3v5.2c0 4.2-2.7 7.3-7 8.8-4.3-1.5-7-4.6-7-8.8V6.5l7-3Z" stroke-linejoin="round" stroke-width="1.7"></path><path d="M9.5 12l1.7 1.7 3.5-3.7" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path></svg></div><span>الخصوصية والأمان</span></div>
-<div class="nchat-setting" onclick="showToast('الإشعارات')"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke-linecap="round" stroke-width="1.7"></path></svg></div><span>الإشعارات</span></div>
-<div class="nchat-setting" onclick="toggleDarkMode()"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5" stroke-linecap="round" stroke-width="1.7"></path><path d="M20.5 3.5v5h-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path></svg></div><span>المظهر</span></div>
+<div class="nchat-profile-card">
+  <div class="nchat-profile-avatar nchat-initial-avatar" id="firebaseProfileInitial">م</div>
+  <div class="nchat-profile-main">
+    <div class="nchat-profile-name" id="settingsProfileName">مستخدم</div>
+    <div class="nchat-profile-email" id="settingsProfileEmail"></div>
+    <div class="nchat-profile-id-line"><span class="nchat-profile-id-label">N-Chat ID</span><span class="nchat-profile-id-value" id="nchatProfileIdValue">—</span><button class="nchat-profile-id-copy" onclick="copyMyId()" aria-label="نسخ ID"><svg fill="none" viewbox="0 0 24 24"><rect height="11" rx="2" stroke="currentColor" stroke-width="1.7" width="9" x="9" y="9"></rect><path d="M15 9V6.5A2.5 2.5 0 0 0 12.5 4H6.5A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15H9" stroke="currentColor" stroke-width="1.7"></path></svg></button></div>
+  </div>
+</div>
+<div class="nchat-setting" onclick="openAccountSettings()"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="8" r="3" stroke-width="1.7"></circle><path d="M5 20c.6-3.5 2.9-5.3 7-5.3s6.4 1.8 7 5.3" stroke-linecap="round" stroke-width="1.7"></path></svg></div><span>الحساب والملف الشخصي</span></div>
+<div class="nchat-setting" onclick="openPrivacySettings()"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><path d="M12 3.5l7 3v5.2c0 4.2-2.7 7.3-7 8.8-4.3-1.5-7-4.6-7-8.8V6.5l7-3Z" stroke-linejoin="round" stroke-width="1.7"></path><path d="M9.5 12l1.7 1.7 3.5-3.7" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path></svg></div><span>الخصوصية والأمان</span></div>
+<div class="nchat-setting" onclick="openNotificationSettings()"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" stroke-linejoin="round" stroke-width="1.7"></path><path d="M10 21h4" stroke-linecap="round" stroke-width="1.7"></path></svg></div><span>الإشعارات</span></div>
+<div class="nchat-setting" onclick="openAppearanceSettings()"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5" stroke-linecap="round" stroke-width="1.7"></path><path d="M20.5 3.5v5h-5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path></svg></div><span>المظهر</span></div>
 <div class="nchat-setting" onclick="logout()"><div class="nchat-setting-icon"><svg fill="none" viewbox="0 0 24 24"><path d="M10 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19H10" stroke-linecap="round" stroke-width="1.7"></path><path d="M13 8l4 4-4 4M17 12H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path></svg></div><span>تسجيل الخروج</span></div>
 </div>
 </section>
@@ -5612,7 +5619,7 @@ async function ensureProfile(user,nameOverride=''){
  const name=String(nameOverride||old.name||user.displayName||'مستخدم').trim();
  let nchatId=old.nchatId;
  if(!nchatId||nchatId==='N-000000')nchatId=await uniqueId();
- const data={uid:user.uid,name,nameLower:name.toLocaleLowerCase(),email:user.email||old.email||'',nchatId,updatedAt:serverTimestamp()};
+ const data={uid:user.uid,name,nameLower:name.toLocaleLowerCase(),email:user.email||old.email||'',nchatId,settings:{...(old.settings||{}),searchable:old.settings?.searchable!==false,notifications:old.settings?.notifications!==false,theme:old.settings?.theme||'light'},updatedAt:serverTimestamp()};
  if(!old.createdAt)data.createdAt=serverTimestamp();
  await setDoc(ref,data,{merge:true});
  await setDoc(doc(db,'nchatIds',nchatId),{uid:user.uid,nchatId,name,nameLower:data.nameLower,idKey:nchatId.replace(/[^A-Z0-9]/gi,''),updatedAt:serverTimestamp()},{merge:true});
@@ -5627,6 +5634,8 @@ function showApp(){
  const p=document.querySelector('.nchat-profile-avatar');initialAvatar(p,currentUserData);
  $('firebaseProfileInitial')?.replaceChildren(document.createTextNode(initial(currentUserData)));
  $('nchatProfileIdValue')?.replaceChildren(document.createTextNode(currentUserData.nchatId||'—'));
+ renderFirebaseSettings();
+ $('chatApp')?.classList.toggle('nchat-dark',currentUserData?.settings?.theme==='dark');
  subscribeChats();subscribeFriends();
 }
 function showAuth(){
@@ -5637,7 +5646,7 @@ function showAuth(){
 window.showLogin=()=>{$('loginScreen').style.display='flex';$('registerScreen').style.display='none'};
 window.showRegister=()=>{$('loginScreen').style.display='none';$('registerScreen').style.display='flex'};
 window.togglePassword=(id,b)=>{const x=$(id);if(x)x.type=x.type==='password'?'text':'password'};
-window.toggleDarkMode=()=>{const appEl=$('chatApp');appEl.classList.toggle('nchat-dark');localStorage.setItem('nchatDarkMode',appEl.classList.contains('nchat-dark')?'1':'0')};
+window.toggleDarkMode=async()=>{const isDark=!$('chatApp').classList.contains('nchat-dark');await window.saveUserSetting?.('theme',isDark?'dark':'light')};
 window.openSettings=()=>{$('settingsPage').classList.add('active')};
 window.closeSettings=()=>{$('settingsPage').classList.remove('active')};
 window.setNav=b=>{document.querySelectorAll('.nchat-nav-item').forEach(x=>x.classList.remove('active'));b?.classList.add('active')};
@@ -5652,6 +5661,7 @@ window.openFriendsPage=()=>{$('friendsPage')?.classList.add('active');renderFrie
 window.closeChat=()=>{ $('chatRoom')?.classList.remove('active');activeOther=null;activeChatId=null;if(unsubMessages){unsubMessages();unsubMessages=null} };
 window.searchChats=v=>{const q=String(v||'').toLocaleLowerCase();document.querySelectorAll('#chatList .nchat-chat-item').forEach(x=>x.style.display=(x.dataset.name||'').includes(q)?'flex':'none')};
 window.showToast=toast;
+window.closeInfoModal=()=>{document.querySelectorAll('.nchat-info-modal,.info-modal,.nchat-modal').forEach(x=>x.classList.remove('active'));};
 
 async function loginEmail(){
  const email=($('loginEmail')?.value||'').trim(),password=$('loginPassword')?.value||'';
@@ -5724,9 +5734,9 @@ window.searchFriends=async value=>{
  box.innerHTML='<div class="nchat-empty">جاري البحث في Firebase...</div>';
  try{
   const users=new Map();const compact=term.toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(compact.length>=3){const exact='N-'+compact;const s=await getDoc(doc(db,'nchatIds',exact));if(s.exists()){const u=await getDoc(doc(db,'users',s.data().uid));if(u.exists()&&u.id!==currentUid)users.set(u.id,{uid:u.id,...u.data()})}
+  if(compact.length>=3){const exact='N-'+compact;const s=await getDoc(doc(db,'nchatIds',exact));if(s.exists()){const u=await getDoc(doc(db,'users',s.data().uid));if(u.exists()&&u.id!==currentUid&&u.data().settings?.searchable!==false)users.set(u.id,{uid:u.id,...u.data()})}
    const ids=await getDocs(query(collection(db,'nchatIds'),where('idKey','>=',compact),where('idKey','<=',compact+'\\uf8ff'),limit(20)));for(const d of ids.docs){const uid=d.data().uid;if(uid===currentUid||users.has(uid))continue;const u=await getDoc(doc(db,'users',uid));if(u.exists())users.set(uid,{uid:u.id,...u.data()})}}
-  const n=term.toLocaleLowerCase();const ns=await getDocs(query(collection(db,'users'),where('nameLower','>=',n),where('nameLower','<=',n+'\\uf8ff'),limit(20)));ns.forEach(d=>{if(d.id!==currentUid)users.set(d.id,{uid:d.id,...d.data()})});
+  const n=term.toLocaleLowerCase();const ns=await getDocs(query(collection(db,'users'),where('nameLower','>=',n),where('nameLower','<=',n+'\\uf8ff'),limit(20)));ns.forEach(d=>{if(d.id!==currentUid&&d.data().settings?.searchable!==false)users.set(d.id,{uid:d.id,...d.data()})});
   box.innerHTML='';if(!users.size){box.innerHTML='<div class="nchat-empty">لم يتم العثور على مستخدم.</div>';return}
   for(const u of users.values()){const row=document.createElement('div');row.className='nchat-search-result';row.innerHTML='<div class="nchat-result-avatar nchat-initial-avatar">'+esc(initial(u))+'</div><div class="nchat-result-info"><div class="nchat-result-name">'+esc(u.name||'مستخدم')+'</div><div class="nchat-result-id">'+esc(u.nchatId||'')+'</div></div><button class="nchat-add-btn" type="button">إضافة</button>';row.querySelector('button').onclick=()=>addFriend(u);box.appendChild(row)}
  }catch(e){box.innerHTML='<div class="nchat-empty">'+esc(authError(e))+'</div>'}
@@ -5745,18 +5755,65 @@ async function renderFriends(friends){
 
 window.updateFirebaseProfile=async patch=>{
  const name=String(patch?.name||currentUserData?.name||'مستخدم').trim();
+ if(!currentUid)return;
  await setDoc(doc(db,'users',currentUid),{name,nameLower:name.toLocaleLowerCase(),updatedAt:serverTimestamp()},{merge:true});
+ if(auth.currentUser&&auth.currentUser.displayName!==name){try{await updateProfile(auth.currentUser,{displayName:name})}catch{}}
  if(currentUserData?.nchatId)await setDoc(doc(db,'nchatIds',currentUserData.nchatId),{name,nameLower:name.toLocaleLowerCase(),updatedAt:serverTimestamp()},{merge:true});
  currentUserData={...currentUserData,name,nameLower:name.toLocaleLowerCase()};showApp();
 };
 window.showAccountInfo=()=>toast('الاسم: '+(currentUserData?.name||'')+' | ID: '+(currentUserData?.nchatId||''));
 window.copyMyId=()=>{const id=currentUserData?.nchatId||'';navigator.clipboard?.writeText(id);toast('تم نسخ ID الخاص بك')};
 
+function renderFirebaseSettings(){
+ const u=currentUserData||{};
+ $('settingsProfileName')?.replaceChildren(document.createTextNode(u.name||'مستخدم'));
+ $('settingsProfileEmail')?.replaceChildren(document.createTextNode(u.email||''));
+ $('nchatProfileIdValue')?.replaceChildren(document.createTextNode(u.nchatId||'—'));
+ $('firebaseProfileInitial')?.replaceChildren(document.createTextNode(initial(u)));
+}
+async function saveUserSetting(key,value){
+ if(!currentUid)return;
+ try{
+  const patch={}; patch['settings.'+key]=value;
+  await setDoc(doc(db,'users',currentUid),patch,{merge:true});
+  currentUserData={...(currentUserData||{}),settings:{...((currentUserData||{}).settings||{}),[key]:value}};
+  if(key==='theme'){
+   $('chatApp')?.classList.toggle('nchat-dark',value==='dark');
+  }
+  toast('تم حفظ الإعدادات في Firebase');
+ }catch(e){toast(authError(e))}
+}
+window.saveUserSetting=saveUserSetting;
+window.openAccountSettings=()=>{
+ const u=currentUserData||{};
+ const name=prompt('الاسم الظاهر للآخرين:',u.name||'');
+ if(name===null)return;
+ const n=name.trim(); if(n.length<2)return toast('الاسم قصير جدًا');
+ window.updateFirebaseProfile({name:n}).then(()=>toast('تم حفظ الاسم في Firebase')).catch(e=>toast(authError(e)));
+};
+window.openPrivacySettings=()=>{
+ const u=currentUserData||{}, s=u.settings||{};
+ const searchable=s.searchable!==false;
+ const ok=confirm(searchable?'هل تريد إخفاء حسابك من نتائج البحث؟':'هل تريد إظهار حسابك في نتائج البحث؟');
+ if(!ok)return;
+ saveUserSetting('searchable',!searchable);
+};
+window.openNotificationSettings=async()=>{
+ const enabled=currentUserData?.settings?.notifications!==false;
+ const ok=confirm(enabled?'الإشعارات مفعلة حاليًا. هل تريد إيقافها؟':'الإشعارات متوقفة حاليًا. هل تريد تفعيلها؟');
+ if(ok)await saveUserSetting('notifications',!enabled);
+};
+window.openAppearanceSettings=async()=>{
+ const dark=$('chatApp')?.classList.contains('nchat-dark');
+ await saveUserSetting('theme',dark?'light':'dark');
+};
+window.openSettings=()=>{$('settingsPage')?.classList.add('active');renderFirebaseSettings()};
+window.closeSettings=()=>{$('settingsPage')?.classList.remove('active')};
+
 function bind(){
  $('loginButton')?.addEventListener('click',e=>{e.preventDefault();loginEmail()});
  $('createAccountButton')?.addEventListener('click',e=>{e.preventDefault();registerEmail()});
  document.querySelectorAll('.google-button').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();googleLogin()}));
- if(localStorage.getItem('nchatDarkMode')==='1')$('chatApp')?.classList.add('nchat-dark');
 }
 getRedirectResult(auth).catch(e=>{if(e?.code&&e.code!=='auth/no-current-user')toast(authError(e))});
 onAuthStateChanged(auth,async user=>{
@@ -5767,3 +5824,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 </body>
 </html>
+
+<style id="firebase-settings-fix">
+.nchat-profile-main{flex:1;min-width:0}.nchat-profile-id-line{display:flex;align-items:center;gap:7px;margin-top:8px}.nchat-profile-id-label{font-size:11px;color:#9996a3}.nchat-profile-id-value{direction:ltr;background:#f0edff;color:#6847e5;border-radius:9px;padding:5px 8px;font-size:11px;font-weight:800}.nchat-profile-id-copy{border:0;width:29px;height:29px;border-radius:9px;background:#f3f1fb;color:#6240df;display:flex;align-items:center;justify-content:center;cursor:pointer}.nchat-profile-id-copy svg{width:15px}.nchat-dark .nchat-profile-id-value{background:#292344}.nchat-dark .nchat-profile-id-copy{background:#242232}
+</style>
